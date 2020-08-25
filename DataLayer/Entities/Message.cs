@@ -18,11 +18,11 @@ namespace DataLayer.Entities
         public int ClientId { get; set; }
         public virtual Client Client { get; set; }
 
-        [ForeignKey("Client")]
+        [ForeignKey("Partner")]
         public int PartnerId { get; set; }
         public virtual Client Partner { get; set; }
 
         [Required]
-        public string Message { get; set; }
+        public string Sms { get; set; }
     }
 }

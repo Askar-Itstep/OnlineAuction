@@ -14,9 +14,9 @@ namespace DataLayer.Entities
         [Key]
         public int Id { get; set; }
 
-        [ForeignKey("Client")]
+        [ForeignKey("Actor")]
         public int ActorId { get; set; }
-        public virtual Client Client { get; set; }
+        public virtual Client Actor { get; set; }
 
         public DateTime BeginTime { get; set; }
 
@@ -26,9 +26,9 @@ namespace DataLayer.Entities
         public int OrderId { get; set; }
         public virtual Order Order { get; set; }
 
-        [ForeignKey("Client")]
+        [ForeignKey("Winner")]
         public int WinnerId { get; set; }
-        public virtual Client Winner { get; set; }
+        public Client Winner { get; set; }
 
         public Auction()
         {
@@ -36,18 +36,5 @@ namespace DataLayer.Entities
         }
 
     }
-
-    //public class OrderAuctionLinks
-    //{
-    //    [Key]
-    //    public int Id { get; set; }
-
-    //    [ForeignKey("Order")]
-    //    public int OrderId { get; set; }
-    //    public virtual Order Order { get; set; }
-
-    //    [ForeignKey("Auction")]
-    //    public int AuctionId { get; set; }
-    //    public virtual Auction Auction { get; set; }
-    //}
+    
 }

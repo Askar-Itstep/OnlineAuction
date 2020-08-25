@@ -67,6 +67,10 @@
     <Compile Include="Migrations\202008241611515_FirstMigration.Designer.cs">
       <DependentUpon>202008241611515_FirstMigration.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202008251656382_Add-Entities.cs" />
+    <Compile Include="Migrations\202008251656382_Add-Entities.designer.cs">
+      <DependentUpon>202008251656382_Add-Entities.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -74,6 +78,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\202008241611515_FirstMigration.resx">
       <DependentUpon>202008241611515_FirstMigration.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202008251656382_Add-Entities.resx">
+      <DependentUpon>202008251656382_Add-Entities.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
