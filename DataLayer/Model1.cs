@@ -4,6 +4,7 @@ namespace OnlineAuction.Entities
     using System.Data.Entity;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
+    using DataLayer.Entities;
 
     public partial class Model1 : DbContext
     {
@@ -20,6 +21,9 @@ namespace OnlineAuction.Entities
         public virtual DbSet<Item> Items { get; set; }
         public virtual DbSet<Product> Products { get; set; }
         public virtual DbSet<Order> Orders { get; set; }
+        public virtual DbSet<Message> Messages { get; set; }
+        public virtual DbSet<Auction> Auctions { get; set; }
+        public virtual DbSet<AuctionClientsLink> AuctionClientsLinks { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
