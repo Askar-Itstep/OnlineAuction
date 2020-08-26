@@ -1,7 +1,30 @@
-﻿@{
-    ViewBag.Title = "About";
+﻿@*@using DataLayer.Entities
+@model List<User>*@
+
+@{
+  ViewBag.Title = "About";
 }
-<h2>@ViewBag.Title.</h2>
+<h2>@ViewBag.Title</h2>
 <h3>@ViewBag.Message</h3>
 
 <p>Use this area to provide additional information.</p>
+
+
+@*<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Fullname</th>
+            <th>Email</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model) {
+            <tr>
+
+                <td>@user.FullName</td>
+                <td>@user.Email</td>
+
+            </tr>
+        }
+    </tbody>
+</table>*@

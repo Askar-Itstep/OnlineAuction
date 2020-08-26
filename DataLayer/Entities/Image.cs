@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
 
-namespace OnlineAuction.Entities
+namespace DataLayer.Entities
 {
     public class Image
     {

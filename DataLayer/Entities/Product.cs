@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace OnlineAuction.Entities
+namespace DataLayer.Entities
 {
     public class Product
     {

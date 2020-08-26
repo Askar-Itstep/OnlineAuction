@@ -1,5 +1,4 @@
-﻿using OnlineAuction.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -25,6 +24,8 @@ namespace DataLayer.Entities
         [ForeignKey("Order")]
         public int OrderId { get; set; }
         public virtual Order Order { get; set; }
+
+        public ICollection<BetAuction> BetAuctions { get; set; }
 
         [ForeignKey("Winner")]
         public int WinnerId { get; set; }

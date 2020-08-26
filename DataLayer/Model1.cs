@@ -13,7 +13,7 @@ namespace OnlineAuction.Entities
         {
         }
 
-        public virtual DbSet<User> Users { get; set; }
+        //public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<Role> Roles { get; set; }
         public virtual DbSet<Account> Account { get; set; }
         public virtual DbSet<Client> Clients { get; set; }
@@ -24,6 +24,8 @@ namespace OnlineAuction.Entities
         public virtual DbSet<Message> Messages { get; set; }
         public virtual DbSet<Auction> Auctions { get; set; }
         public virtual DbSet<AuctionClientsLink> AuctionClientsLinks { get; set; }
+
+        public virtual DbSet<BetAuction> BetAuction { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -44,17 +46,17 @@ namespace OnlineAuction.Entities
             context.Roles.Add(memberRole);
             context.Roles.Add(clientRole);
 
-            //2) Users
-            User userAdmin = new User
-            {
-                FullName = "admin",
-                Email = "admin@mail.ru",
-                Password = "admin"
-            };
-            context.Users.Add(userAdmin);
+            ////2) Users
+            //User userAdmin = new User
+            //{
+            //    FullName = 
+            //    Email = 
+            //    Password = 
+            //};
+            //context.Users.Add(userAdmin);
 
-            //3)Account
-            Account account = new Account(userAdmin);
+            ////3)Account
+            Account account = new Account("admin","admin@mail.ru","admin");
             context.Account.Add(account);
 
 

@@ -5,12 +5,25 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web;
 
-namespace OnlineAuction.Entities
+namespace DataLayer.Entities
 {
     public class Account
     {
         [Key]
         public int? Id { get; set; }
+
+        [Required, Display(Name = "Full Name")]
+        [StringLength(255)]
+        public string FullName { get; set; }
+
+        [Required, Display(Name = "Email")]
+        [StringLength(255)]
+        public string Email { get; set; }
+
+        [Required, Display(Name = "Password")]
+        [StringLength(255)]
+        public string Password { get; set; }
+
         private ICollection<Role> roles; //должна быть промеж. табл.
     
         protected Account()
@@ -18,18 +31,21 @@ namespace OnlineAuction.Entities
             roles = new List<Role>();
         }
 
-        public Account(User user) : this()
+        public Account(string Fullname, string Email, string Password) : this()
         {
-            User = user;
+            this.FullName = Fullname;
+            this.Email = Email;
+            this.Password = Password;
+
             IsActive = false;
 
             AddRole(new Role { RoleName = "member" });
         }
         public bool IsActive { get; set; }
 
-        [ForeignKey("User")]
-        public int UserId { get; protected set; }
-        public virtual User User { get; set; }
+        //[ForeignKey("User")]
+        //public int UserId { get; protected set; }
+        //public virtual User User { get; set; }
 
         public void AddRole(Role role)
         {

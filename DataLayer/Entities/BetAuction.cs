@@ -2,17 +2,16 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace DataLayer.Entities
 {
-    public class AuctionClientsLink
+    public class BetAuction
     {
         [Key]
         public int Id { get; set; }
-
 
         [ForeignKey("Auction")]
         public int AuctionId { get; set; }
@@ -21,5 +20,7 @@ namespace DataLayer.Entities
         [ForeignKey("Client")]
         public int ClientId { get; set; }
         public virtual Client Client { get; set; }
+
+        public decimal Bet { get; set; }
     }
 }

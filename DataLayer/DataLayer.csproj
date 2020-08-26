@@ -51,10 +51,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AzureConfiguration.cs" />
     <Compile Include="Class1.cs" />
     <Compile Include="Entities\Account.cs" />
     <Compile Include="Entities\Auction.cs" />
     <Compile Include="Entities\AuctionClientsLink.cs" />
+    <Compile Include="Entities\BetAuction.cs" />
     <Compile Include="Entities\Client.cs" />
     <Compile Include="Entities\Message.cs" />
     <Compile Include="Entities\Image.cs" />
@@ -71,9 +73,21 @@
     <Compile Include="Migrations\202008251656382_Add-Entities.designer.cs">
       <DependentUpon>202008251656382_Add-Entities.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202008260327281_Add-BetAuction.cs" />
+    <Compile Include="Migrations\202008260327281_Add-BetAuction.designer.cs">
+      <DependentUpon>202008260327281_Add-BetAuction.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202008261548216_RebuildAccount.cs" />
+    <Compile Include="Migrations\202008261548216_RebuildAccount.designer.cs">
+      <DependentUpon>202008261548216_RebuildAccount.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repository\BaseRepository.cs" />
+    <Compile Include="Repository\IRepository.cs" />
+    <Compile Include="Repository\IUnitOfWork.cs" />
+    <Compile Include="Repository\UnitOfWork.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Migrations\202008241611515_FirstMigration.resx">
@@ -81,6 +95,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202008251656382_Add-Entities.resx">
       <DependentUpon>202008251656382_Add-Entities.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202008260327281_Add-BetAuction.resx">
+      <DependentUpon>202008260327281_Add-BetAuction.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202008261548216_RebuildAccount.resx">
+      <DependentUpon>202008261548216_RebuildAccount.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

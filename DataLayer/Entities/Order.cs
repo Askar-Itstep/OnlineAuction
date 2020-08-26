@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
-namespace OnlineAuction.Entities
+namespace DataLayer.Entities
 {
     public class Order
     {
