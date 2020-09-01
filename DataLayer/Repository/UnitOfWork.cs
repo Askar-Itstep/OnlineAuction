@@ -23,8 +23,10 @@ namespace DataLayer.Repository
         private BaseRepository<Order> orders;
         private BaseRepository<Product> products;
         private BaseRepository<Role> roles;
-         //private BaseRepository<User> users;
+        private BaseRepository<RoleAccountLink> roleAccountLinks;
         private Model1 db;
+        
+
         public UnitOfWork()
         {
             db = new Model1();
@@ -58,6 +60,7 @@ namespace DataLayer.Repository
                 return auctionClientsLinks;
             }
         }
+
 
         public BaseRepository<BetAuction> BetAuctions
         {
@@ -138,15 +141,14 @@ namespace DataLayer.Repository
             }
         }
 
-        //public BaseRepository<User> Users
-        //{
-        //    get
-        //    {
-        //        if (users == null)
-        //            users = new BaseRepository<User>();
-        //        return users;
-        //    }
-        //}
-        
+        public BaseRepository<RoleAccountLink> RoleAccountLinks {
+            get
+            {
+                if (roleAccountLinks == null)
+                    roleAccountLinks = new BaseRepository<RoleAccountLink>();
+                return roleAccountLinks;
+            }
+        }
+
     }
 }

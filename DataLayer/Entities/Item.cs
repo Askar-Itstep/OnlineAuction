@@ -17,6 +17,8 @@ namespace DataLayer.Entities
         public int ProductId { get; set; }
         public virtual Product Product { get; set; }
 
+        public decimal EndPrice { get; set; }
+
         [Required]
         [ForeignKey(name: "Order")]
         public int? OrderId { get; set; }

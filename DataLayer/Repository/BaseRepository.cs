@@ -27,7 +27,7 @@ namespace DataLayer.Repository
             dbSet.Add(item);
         }
 
-        public void Delete(int item)
+        public void Delete(int? item)
         {
             var entity = dbSet.Find(item);
             dbSet.Remove(entity);
@@ -42,7 +42,10 @@ namespace DataLayer.Repository
         {
             return dbSet.Find(id);
         }
-
+        public T GetLast()
+        {
+            return dbSet.ToList().LastOrDefault();
+        }
         public IQueryable<T> Include(params string[] navigationProperty)
         {
             var query = GetAll();
@@ -66,5 +69,6 @@ namespace DataLayer.Repository
         {
             return dbSet.AsNoTracking();
         }
+        
     }
 }

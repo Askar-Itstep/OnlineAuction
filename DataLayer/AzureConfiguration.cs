@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace DataLayer
 {
+    //можно исп. если azure держит не устойчивую связь 
     public class AzureConfiguration: DbConfiguration
     {
         public AzureConfiguration()

@@ -1,0 +1,58 @@
+﻿@model DataLayer.Entities.Auction
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>Auction</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Actor.Id)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Actor.Id)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Order.Id)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Order.Id)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Winner.Id)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Winner.Id)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.BeginTime)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.BeginTime)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.EndTime)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.EndTime)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

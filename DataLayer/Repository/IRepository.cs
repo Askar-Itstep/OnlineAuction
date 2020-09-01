@@ -14,6 +14,6 @@ namespace DataLayer.Repository
         void Update(T item);
         void Save();
         IQueryable<T> Include(params string[] navigationProperty);
-        void Delete(int item);
+        void Delete(int? item);
     }
 }

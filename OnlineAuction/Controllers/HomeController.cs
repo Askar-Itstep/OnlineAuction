@@ -1,18 +1,17 @@
 ﻿using OnlineAuction.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+using System.Threading.Tasks;
 using System.Web.Mvc;
+using System.Data.Entity;
 
 namespace OnlineAuction.Controllers
 {
     public class HomeController : Controller
     {
-        public ActionResult Index()
+        private Model1 db = new Model1();
+        public async Task<ActionResult> Index()
         {
-
-            return View();
+            var auctions = db.Auctions.Include(a => a.Actor).Include(a => a.Order).Include(a => a.Winner);
+            return View(await auctions.ToListAsync());
 
         }
 

@@ -1,15 +1,25 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewBag.Title – приложение ASP.NET</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
 </head>
 <body>
-    <div class="navbar navbar-inverse navbar-fixed-top">
+    <script>
+        $(function (e) {
+            var userId = localStorage.getItem("userId");
+            $(".classUserIdMyAuctions").attr("href", "/Auctions/Index/?userId=" + userId); //закинуть в ссылку стр. 58 значение
+            $(".classEditAccounts").attr("href", "/Accounts/Edit/?userId=" + userId); 
+            $(".classDeleteAccounts").attr("href", "/Accounts/Delete/?userId=" + userId); 
+        })
+    </script>
+
+    <div class="navbar  navbar-fixed-top" style="background-color:azure">
         <div class="container">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -17,15 +27,63 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                @Html.ActionLink("Имя приложения", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+                @Html.ActionLink("Auction", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+
             </div>
-            <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-                    <li>@Html.ActionLink("Пользователи", "Index", "Accounts")</li>
-                    <li>@Html.ActionLink("Домашняя страница", "Index", "Home")</li>
-                    <li>@Html.ActionLink("О программе", "About", "Home")</li>
-                    <li>@Html.ActionLink("Контакт", "Contact", "Home")</li>
-                </ul>
+            <div class="navbar-collapse">
+                <div style="display:flex; justify-content:space-between">
+                    <ul class="nav navbar-nav">
+                        @{ 
+                            if (User.IsInRole("admin")) {
+                        <li>@Html.ActionLink("Пользователи", "Index", "Accounts")</li>
+                            }
+                        }
+                        
+                        <li>@Html.ActionLink("Домашняя страница", "Index", "Home")</li>
+                        <li>@Html.ActionLink("О программе", "About", "Home")</li>
+                        <li>@Html.ActionLink("Контакт", "Contact", "Home")</li>
+                    </ul>
+                    <ul class="nav navbar-nav">
+                        @{
+                            if (User.Identity.Name.Equals("")) {
+                                <li>@Html.ActionLink("Войти", "Login", "Accounts")</li>
+                                <li>@Html.ActionLink("Зарегистрироваться", "Registration", "Accounts")</li>
+                            }
+                        }
+
+                        @{ if (!User.Identity.Name.Equals("")) {
+                                if (!User.IsInRole("admin")) {
+                                    <li>@Html.ActionLink("Создать аукцион", "Create", "Auctions")</li>
+                                    <li class="dropdown">
+                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><div>Hello @User.Identity.Name!</div> <span class="caret"></span></a>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li>@Html.ActionLink("Мои аукционы", "Index", "Auctions", new { userId = 0 }, new { @class = "classMyAuctions" })</li>
+                                            <li>@Html.ActionLink("Мои заказы", "MyOrders", "Orders")</li>
+                                            <li>@Html.ActionLink("Редактировать аккаунт", "Edit", "Accounts", new { userId = 0 }, new { @class = "classEditAccounts" })</li>
+                                            <li class="divider"></li>
+                                            <li>@Html.ActionLink("Удалить аккаунт", "Delete", "Auctions", new { userId = 0 }, new { @class = "classDeleteAccounts" })</li>
+                                            <li class="divider"></li>
+                                            <li>@Html.ActionLink("Выйти", "Logoff", "Accounts")</li>
+                                        </ul>
+                                    </li>
+                                }
+                                else {
+                                    <li class="dropdown">
+                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><div>Hello @User.Identity.Name!</div> <span class="caret"></span></a>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li>@Html.ActionLink("Аукционы", "Index", "Auctions")</li>
+                                            <li>@Html.ActionLink("Заказы", "Index", "Orders")</li>
+                                            <li>@Html.ActionLink("Редактировать аккаунт", "Edit", "Accounts", new { userId = 0 }, new { @class = "classEditAccounts" })</li>
+                                            <li class="divider"></li>
+                                            <li>@Html.ActionLink("Выйти", "Logoff", "Accounts")</li>
+                                        </ul>
+                                    </li>
+                                }
+
+                            }
+                        }
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -37,7 +95,6 @@
         </footer>
     </div>
 
-    @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("scripts", required: false)
 </body>

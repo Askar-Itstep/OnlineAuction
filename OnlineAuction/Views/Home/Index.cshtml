@@ -1,6 +1,14 @@
 ﻿@{
     ViewBag.Title = "Home Page";
 }
+<script>
+    $(function (e) {
+        var userId = localStorage.getItem("userId");
+        if (userId != null && userId != undefined) {
+            //console.log(userId)
+        }        
+    })
+</script>
 
 <div class="jumbotron">
     <h1>ASP.NET</h1>

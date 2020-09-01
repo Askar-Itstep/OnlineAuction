@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineAuction", "OnlineAuct
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataLayer", "DataLayer\DataLayer.csproj", "{C8C500E1-CC12-45AC-A7EE-68B1F105EF49}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusinessLayer", "BusinessLayer\BusinessLayer.csproj", "{8D5210A2-B23F-4048-9CDE-73E6905F6764}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{C8C500E1-CC12-45AC-A7EE-68B1F105EF49}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C8C500E1-CC12-45AC-A7EE-68B1F105EF49}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C8C500E1-CC12-45AC-A7EE-68B1F105EF49}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D5210A2-B23F-4048-9CDE-73E6905F6764}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D5210A2-B23F-4048-9CDE-73E6905F6764}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D5210A2-B23F-4048-9CDE-73E6905F6764}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D5210A2-B23F-4048-9CDE-73E6905F6764}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

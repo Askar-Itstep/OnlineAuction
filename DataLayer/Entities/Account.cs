@@ -24,35 +24,16 @@ namespace DataLayer.Entities
         [StringLength(255)]
         public string Password { get; set; }
 
-        private ICollection<Role> roles; //должна быть промеж. табл.
-    
-        protected Account()
-        {
-            roles = new List<Role>();
-        }
-
-        public Account(string Fullname, string Email, string Password) : this()
-        {
-            this.FullName = Fullname;
-            this.Email = Email;
-            this.Password = Password;
-
-            IsActive = false;
-
-            AddRole(new Role { RoleName = "member" });
-        }
+        private ICollection<Role> Roles { get; set; }   //-> RoleAccountLinks
+        
         public bool IsActive { get; set; }
-
-        //[ForeignKey("User")]
-        //public int UserId { get; protected set; }
-        //public virtual User User { get; set; }
 
         public void AddRole(Role role)
         {
-            if (roles.Contains(role))
+            if (Roles.Contains(role))
                 return;
 
-            roles.Add(role);
+            Roles.Add(role);
         }
     }
 }

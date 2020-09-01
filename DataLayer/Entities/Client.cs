@@ -21,17 +21,17 @@ namespace DataLayer.Entities
         public  int AccountId { get; protected set; }
         public virtual Account Account { get; protected set; }
 
-        protected Client()
-        {
-            Orders = new List<Order>();
-        }
+        //protected Client()
+        //{
+        //    Orders = new List<Order>();
+        //}
 
-        public Client(Account account) : this()
-        {
-            Account = account ?? throw new ArgumentNullException("account");
-            Account.AddRole(new Role { RoleName = "Client" });
-            cash = 0;
-        }
+        //public Client(Account account) : this()
+        //{
+        //    Account = account ?? throw new ArgumentNullException("account");
+        //    Account.AddRole(new Role { RoleName = "Client" });
+        //    cash = 0;
+        //}
 
         //клиент может быть должником (услуги в кредит?)
         public bool IsDebitor()
