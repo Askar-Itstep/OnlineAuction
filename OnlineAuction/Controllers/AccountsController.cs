@@ -1,128 +1,158 @@
-﻿using System;
+﻿using AutoMapper;
+using BusinessLayer.BusinessObject;
+using DataLayer.Entities;
+using OnlineAuction.Entities;
+using OnlineAuction.ViewModels;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Net;
-using System.Web;
+using System.Threading.Tasks;
 using System.Web.Mvc;
-using DataLayer.Entities;
-using OnlineAuction.Entities;
-using OnlineAuction.ViewModels;
 using System.Web.Security;
-using BusinessLayer.BusinessObject;
 
 namespace OnlineAuction.Controllers
 {
     public class AccountsController : Controller
     {
         private Model1 db = new Model1();
-        
+        private IMapper mapper;
+        public AccountsController(IMapper mapper)
+        {
+            this.mapper = mapper;
+        }
+
         [Authorize(Roles = "admin")]
         public async Task<ActionResult> Index()
         {
             return View(await db.Account.ToListAsync());
         }
 
+
         //[Authorize(Roles = "admin")]  //конроль роли перенесен в представл.-юзер может смотреть свой аккаунт!
         public async Task<ActionResult> Details(int? id)
         {
-            if (id == null)
-            {
+            if (id == null) {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             Account account = await db.Account.FindAsync(id);
-            if (account == null)
-            {
+            if (account == null) {
                 return HttpNotFound();
             }
             return View(account);
         }
+
+
 
         //[Authorize(Roles = "admin")]  //конроль роли перенесен в представл.
         public ActionResult Create()
         {
             return View();
         }
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create
-            //(FormCollection form)
-            ([Bind(Include = "Id,FullName,Email,Password")] Account account) //,IsActive
+        public async Task<ActionResult> Create (Account account)
         {
-            if (ModelState.IsValid) { 
-                //if (ModelState.IsValidField("FullName") && ModelState.IsValidField("Email") && ModelState.IsValidField("Password")) {
-                //    string name = form.Get("FullName");
-                //    string email = form.Get("Email");
-                //    string password = form.Get("Password");
-                ////bool is_active =  Boolean.Parse(form.Get("IsActive")); //бизнес-логика!
-                //Account account = new Account(name, email, password);
+            if (ModelState.IsValid) {
                 db.Account.Add(account);
 
                 //получить данные по роли и юзеру
                 int accountId = (int)db.Account.AsEnumerable().Last().Id;
                 int roleId = db.Roles.FirstOrDefault(r => r.RoleName.Equals("member")).Id;  //11
-                db.RoleAccountLinks.Add(new RoleAccountLink { RoleId = roleId, AccountId = accountId}); //12- переприсваивается???!
+                db.RoleAccountLinks.Add(new RoleAccountLink { RoleId = roleId, AccountId = accountId }); //12- переприсваивается???!
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
-            else
+            else {
                 return View();
+            }
         }
 
-        //конроль роли перенесен в представл.
-        public async Task<ActionResult> Edit(int? userId)
-        {
-            if (userId == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Account account = await db.Account.FindAsync(userId);
-            if (account == null)
-            {
-                return HttpNotFound();
-            }
-            return View(account);
-        }
-             
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit
-        //(FormCollection form)
-        ([Bind(Include = "Id,FullName,Email,Password,IsActive")] Account account)   //
-        {
-            if (ModelState.IsValid) {
-            //if (ModelState.IsValidField("FullName") && ModelState.IsValidField("Email") && ModelState.IsValidField("Password") && ModelState.IsValidField("IsAcive")) { 
-                //string name = form.Get("FullName");
-                //string email = form.Get("Email");
-                //string password = form.Get("Password");
-                //bool is_active = Boolean.Parse(form.Get("IsActive")); //а здесь можно!            
-                //Account account = new Account(name, email, password); //конструкт. больше нет!
 
-                db.Entry(account).State = EntityState.Modified;
-                await db.SaveChangesAsync();
+        //конроль роли перенесен в представл.-_Layout
+        public async Task<ActionResult> Edit(int? id, int? flag) //int? accountId, 
+        {
+            if (id == null) { //для юзера
+                var accountId = Session["accountId"] ?? 0;
+
+                if ((int)accountId == 0) {
+                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                }
+                Account account = await db.Account.FindAsync((int)accountId);
+                if (account == null) {
+                    return HttpNotFound();
+                }
+
+                //flag - ключ из _Layout.html для выбора ред. акк. или пополн. баланс
+                if (flag == null) {
+                    return View(account);
+                }
+                else {
+                    return new JsonResult
+                    {
+                        Data = account,
+                        JsonRequestBehavior = JsonRequestBehavior.AllowGet
+                    };
+                }
+            }
+            else { //для админа
+                Account account = await db.Account.FindAsync(id);
+                if (account == null) {
+                    return HttpNotFound();
+                }
                 return View(account);
             }
-                return RedirectToAction("Index");
         }
 
-        //конроль роли перенесен в представл.
-        public async Task<ActionResult> Delete(int? userId)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Edit(Account account, decimal? balance)
         {
-            if (userId == null)
-            {
+            if (account.Id != null) { //при простом изм. аккаунта
+                if (ModelState.IsValid) {
+                    account.Address.Id = account.AddressId;
+                    var address = account.Address;
+                    db.Entry(address).State = EntityState.Modified;
+
+                    db.Entry(account).State = EntityState.Modified;
+                    await db.SaveChangesAsync();
+                    return View(account);
+                }
+            }
+            else if (balance != null) { //при изм. баланса - добав. роль <Moder>(созд. лота)
+                var accountId = (int)Session["accountId"];
+                account = await db.Account.FindAsync(accountId);
+                account.Balance = (decimal)balance;
+
+                var rolesAccountLinks = db.RoleAccountLinks.Where(r => r.AccountId == account.Id).ToList();
+                List<Role> roles = rolesAccountLinks.Select(r => r.Role).ToList();
+
+                //account.SetRoles(roles); //over code-no save!
+                var moderRole = db.Roles.Where(r => r.RoleName.Contains("moder")).FirstOrDefault();
+                db.RoleAccountLinks.Add(new RoleAccountLink { AccountId = (int)account.Id, RoleId = moderRole.Id });
+                
+                db.Entry(account).State = EntityState.Modified;
+                await db.SaveChangesAsync();
+            }
+            return RedirectToAction("Index");
+        }
+
+
+        //контроль роли перенесен в представл.
+        public async Task<ActionResult> Delete(int? id) //id del client, not user-admin
+        {
+            if (id == null) {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Account account = await db.Account.FindAsync(userId);
-            if (account == null)
-            {
+            Account account = await db.Account.FindAsync(id);
+            if (account == null) {
                 return HttpNotFound();
             }
             return View(account);
         }
-                
+
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> DeleteConfirmed(int id)
@@ -144,22 +174,49 @@ namespace OnlineAuction.Controllers
         {
             if (ModelState.IsValid) {
                 var accountBO = DependencyResolver.Current.GetService<AccountBO>();
+                var roleAccountBO = DependencyResolver.Current.GetService<RoleAccountLinkBO>();
+
                 var accountBOList = accountBO.LoadAll();
                 accountBO = accountBOList.FirstOrDefault(u => (u.Email.Contains(model.Login) || u.Email.Contains(model.Login)) && u.Password.Equals(model.Password));
+                if (accountBO == null)
+                    return RedirectToAction("Index", "Home");
+
+                var roleAccountBOList = roleAccountBO.LoadAll().Where(r => r.AccountId == accountBO.Id).ToList();
+                List<RoleBO> rolesBO = roleAccountBOList.Where(r => r.AccountId == accountBO.Id).Select(r => r.Role).ToList();
+                accountBO.RolesBO = rolesBO;
+
+                if (accountBO.Balance <= 0) { //удал. роль клиента
+                    //связь котор. надо удалить
+                    RoleAccountLinkBO linkRoleClientAccount = roleAccountBOList.Where(r => r.Role.RoleName.Contains("client")).FirstOrDefault();
+                    if (linkRoleClientAccount != null) {
+                        roleAccountBOList.Where(r => r.Role.RoleName.Contains("client")).FirstOrDefault().DeleteSave(linkRoleClientAccount);
+                    }
+                    #region overCode
+                    ////удал. роль в аккаунте //зачем????? - accountBO нигде не исп. и не сохр.
+                    //RoleBO roleClient = roleAccountBOList.Where(r => r.Role.RoleName.Contains("client")).Select(r => r.Role).FirstOrDefault();
+                    //accountBO.RemoveRole(roleClient); //удал. роль клиента
+                    #endregion
+                }
 
                 if (accountBO != null) {
                     FormsAuthentication.SetAuthCookie(model.Login, true);
-                    ////-----------после удаления azure - выгрузка отсутствует! ----------------
-                    //var arrImgBackground = BlobHelper.DowloadUriBackground();
+
+                    //КЛЮЧЕВОЙ МОМЕНТ: далее accountId, roles, isActive будут храниться в КЛИЕНТЕ
                     var accountId = accountBO.Id;
-                    return Json(new { success = true, message = "Wellcome!", userId = accountId});//, image = uri, arrImg = arrImgBackground });
+                    var isActive = accountBO.IsActive;
+                    roleAccountBOList = roleAccountBO.LoadAll().Where(r => r.AccountId == accountBO.Id).ToList();
+                    var roles = roleAccountBOList.Select(r => r.Role.RoleName).ToList();
+                    //2) сохр. в Sever-Session
+                    HttpContext.Session["accountId"] = accountId;
+                    return Json(new { success = true, message = "Wellcome!", accountId, isActive, roles }); //уйдет в предст. Login.html -> _Layout.html
                 }
-                else
+                else {
                     return Json(new { success = false, message = "Пользователя с таким логином и паролем нет" });
+                }
             }
             return Json(new { success = false, message = "Модель не валидна!" });
         }
-
+        //------------------------------------------Registration ---------------------------------------------------------------------
         public ActionResult Registration()
         {
             return View();
@@ -179,8 +236,9 @@ namespace OnlineAuction.Controllers
                         return RedirectToAction("Index", "Home");
                     }
                 }
-                else
+                else {
                     ModelState.AddModelError("", "Пользователь с таким логином или именем уже существует");
+                }
             }
             return View(model);
         }
@@ -192,21 +250,26 @@ namespace OnlineAuction.Controllers
             roleBO = roleBO.LoadAll().FirstOrDefault(r => r.RoleName.Contains("client"));
             roleBO = IsRole(roleBO, "client");    //проверка, если надо-установ.
 
-            //1)созд. account
+            //1-create Address
+            var address = new Address { Region = model.Region, City = model.City, Street = model.Street, House = model.House };
+            db.Addresses.Add(address);
+
+            //2)созд. account
             accountBO.FullName = model.FullName;
             accountBO.Email = model.Email;
             accountBO.Password = model.Password;
-            accountBO.Save(accountBO);    
+            accountBO.Address = mapper.Map<AddressBO>(address);
+            accountBO.Save(accountBO);
 
             int accountLastId = accountBO.GetLastId();
             accountBO = accountBO.Load(accountLastId);
 
-            //2)теперь сохр. client
+            //3)теперь сохр. client
             var clientBO = DependencyResolver.Current.GetService<ClientBO>();
             clientBO.AccountId = (int)accountBO.Id;  //accountLastId;
             clientBO.Save(clientBO);
 
-            //3)роль юзера добавл. -  внес. изм. в табл. связей
+            //4)роль юзера добавл. -  внес. изм. в табл. связей
             var roleAccountLinksBO = DependencyResolver.Current.GetService<RoleAccountLinkBO>();
             roleAccountLinksBO.RoleId = roleBO.Id;
             roleAccountLinksBO.AccountId = (int)accountBO.Id; //   
@@ -235,8 +298,7 @@ namespace OnlineAuction.Controllers
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
-            {
+            if (disposing) {
                 db.Dispose();
             }
             base.Dispose(disposing);

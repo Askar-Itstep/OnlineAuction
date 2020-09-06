@@ -24,6 +24,22 @@ namespace OnlineAuction.ViewModels
         [DataType(DataType.Password)]
         [Compare("Password", ErrorMessage = "Пароли не совпадают")]
         public string ConfirmPassword { get; set; }
-        //public string Token { get; set; }
+
+        [Required]
+        [StringLength(255)]
+        public string Region { get; set; }
+
+        [Required]
+        [StringLength(255)]
+        public string City { get; set; }
+
+        [Required]
+        [StringLength(255)]
+        public string Street { get; set; }
+
+
+        [Required]
+        [StringLength(255)]
+        public string House { get; set; }
     }
 }

@@ -11,24 +11,24 @@ namespace DataLayer.Entities
         [Key]
         public int? Id { get; set; }
         
-        public virtual ICollection<Item> Items { get; set; }
+        public  ICollection<Item> Items { get; set; }
 
-        protected Order()
-        {
-            Items = new List<Item>();
-        }
+        //protected Order()
+        //{
+        //    Items = new List<Item>();
+        //}
 
-        public Order(IEnumerable<Item> items, Client client) : this()
-        {
-            if (items == null)
-                throw new ArgumentNullException("items");
+        //public Order(IEnumerable<Item> items, Client client) : this()
+        //{
+        //    if (items == null)
+        //        throw new ArgumentNullException("items");
 
-            if (client == null)
-                throw new ArgumentNullException("client");
+        //    if (client == null)
+        //        throw new ArgumentNullException("client");
 
-            Client = client;
-            Items = items.ToList();
-        }
+        //    Client = client;
+        //    Items = items.ToList();
+        //}
 
         [ForeignKey("Client")]
         public int? ClientId { get; set; }

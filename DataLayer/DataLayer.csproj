@@ -59,6 +59,7 @@
     <Compile Include="AzureConfiguration.cs" />
     <Compile Include="Class1.cs" />
     <Compile Include="Entities\Account.cs" />
+    <Compile Include="Entities\Address.cs" />
     <Compile Include="Entities\Auction.cs" />
     <Compile Include="Entities\AuctionClientsLink.cs" />
     <Compile Include="Entities\BetAuction.cs" />
@@ -94,6 +95,30 @@
     <Compile Include="Migrations\202009010606595_AddColumn-Item-EndPrice.designer.cs">
       <DependentUpon>202009010606595_AddColumn-Item-EndPrice.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202009021457201_fix_Auction-Del_Field_Order.cs" />
+    <Compile Include="Migrations\202009021457201_fix_Auction-Del_Field_Order.designer.cs">
+      <DependentUpon>202009021457201_fix_Auction-Del_Field_Order.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202009021505346_fix_Auction-add_field_Product.cs" />
+    <Compile Include="Migrations\202009021505346_fix_Auction-add_field_Product.designer.cs">
+      <DependentUpon>202009021505346_fix_Auction-add_field_Product.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202009031134366_Add_Table_Address-Ref_Account.cs" />
+    <Compile Include="Migrations\202009031134366_Add_Table_Address-Ref_Account.designer.cs">
+      <DependentUpon>202009031134366_Add_Table_Address-Ref_Account.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202009031153081_fix_account-Add_field_balance.cs" />
+    <Compile Include="Migrations\202009031153081_fix_account-Add_field_balance.designer.cs">
+      <DependentUpon>202009031153081_fix_account-Add_field_balance.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202009051613101_Auction-Add_Field_Descript.cs" />
+    <Compile Include="Migrations\202009051613101_Auction-Add_Field_Descript.designer.cs">
+      <DependentUpon>202009051613101_Auction-Add_Field_Descript.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202009061406197_Auction_add_field_Step.cs" />
+    <Compile Include="Migrations\202009061406197_Auction_add_field_Step.designer.cs">
+      <DependentUpon>202009061406197_Auction_add_field_Step.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -121,6 +146,24 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202009010606595_AddColumn-Item-EndPrice.resx">
       <DependentUpon>202009010606595_AddColumn-Item-EndPrice.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202009021457201_fix_Auction-Del_Field_Order.resx">
+      <DependentUpon>202009021457201_fix_Auction-Del_Field_Order.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202009021505346_fix_Auction-add_field_Product.resx">
+      <DependentUpon>202009021505346_fix_Auction-add_field_Product.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202009031134366_Add_Table_Address-Ref_Account.resx">
+      <DependentUpon>202009031134366_Add_Table_Address-Ref_Account.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202009031153081_fix_account-Add_field_balance.resx">
+      <DependentUpon>202009031153081_fix_account-Add_field_balance.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202009051613101_Auction-Add_Field_Descript.resx">
+      <DependentUpon>202009051613101_Auction-Add_Field_Descript.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202009061406197_Auction_add_field_Step.resx">
+      <DependentUpon>202009061406197_Auction_add_field_Step.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

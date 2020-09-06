@@ -1,0 +1,90 @@
+﻿<script>
+    $(function () {
+        $("#daybegin").datepicker();
+        var userId = localStorage.getItem("userId");
+        console.log(userId)
+        $("#userId").val(userId);
+
+        //+ Upload Files
+        var myForm = document.forms[0];
+        $('input[type=submit').on('click', function (e) {
+            $(this).attr("disabled", "disabled");
+            $(myForm).triggerHandler('submit');
+        });
+        $(myForm).on('submit', function (e) {
+            var files = document.getElementById('file').files;
+            console.log(files)
+            if (window.FormData !== undefined) {
+                var data = new FormData(document.forms[0]);
+                console.log(data)
+                for (var x = 0; x < files.length; x++) {
+                    data.append("file" + x, files[x]);
+                }
+                $.ajax({
+                    type: "POST",
+                    url: "/Auctions/Create",
+                    contentType: false,
+                    processData: false,
+                    data: data,
+                    success: function (result) {
+                        alert(result); //"Данные записаны!"
+                        $(location).attr('href', '/Auctions/Index');
+                    },
+                    error: function (xhr, status) {
+                        alert("Ошибка редактирования: " + status);
+                        $('input[type=submit]').attr("disabled", "disabled");
+                    }
+                });
+            } else {
+                alert("Браузер не поддерживает загрузку файлов HTML5!");
+            }
+        });
+    });
+</script>
+<div>
+    <div style="margin-bottom:20px" class="col-md-4">
+
+        <form action="/create" method="post" enctype="multipart/form-data" class="form-inline">
+            <div class="form-group">
+                <label for="myInputText">Title product</label>
+                <input class="form-control" id="myInputText" type="text" name="title" placeholder="title" value="title">
+            </div>
+            <div class="form-group">
+                <label for="myInputText2">Description</label>
+                <input class="form-control" id="myInputText2" type="text" name="description" placeholder="description" value="description">
+            </div>
+            <div class="form-group">
+                <label for="myInputPrice">Price Begin</label>
+                <input class="form-control" id="myInputPrice" type="number" name="price" placeholder="100.0" value="100">
+            </div>
+            <div class="form-group">
+                <label for="daybegin">DayBegin</label>
+                <input class="form-control" type="datetime" id="daybegin" name="daybegin" placeholder="dd/mm/yy">
+            </div>
+            <div class="form-group">
+                <label for="timebegin">TimeBegin</label>
+                <input class="form-control" type="time" id="timebegin" name="timebegin" placeholder="hh:min">
+            </div>
+            <div class="form-group">
+                <label for="duration">Duration of the auction in hours</label>
+                <input class="form-control" type="number" name="duration" id="duration" placeholder="24">
+            </div>
+            <input type="hidden" value="${_csrf.token}" name="_csrf">
+            <input type="hidden" id="userId" name="userId">
+
+            <div class="form-group">
+                <label for="upload"></label>
+                <input type="file" name="upload" id="file" accept="image/jpeg" class="form-control" data-filename-placement="inside" title="Выбрать файл" />
+            </div>
+
+            <div class="form-group">
+                <input type="submit" style="" value="Create" class="btn btn-info  btn-block" />
+            </div>
+        </form>
+
+    </div>
+
+    <div class="col-md-8">
+        <img src="~/Files/podarok.png" alt="noImg" />
+    </div>
+</div>

@@ -15,6 +15,7 @@ namespace OnlineAuction.Entities
         
         public virtual DbSet<Role> Roles { get; set; }
         public virtual DbSet<Account> Account { get; set; }
+        public virtual DbSet<Address> Addresses { get; set; }
         public virtual DbSet<Client> Clients { get; set; }
         public virtual DbSet<Image> Images { get; set; }
         public virtual DbSet<Item> Items { get; set; }
@@ -49,7 +50,7 @@ namespace OnlineAuction.Entities
             context.Roles.Add(clientRole);
 
             //2)Account
-            Account account = new Account { FullName = "admin", Email = "admin@mail.ru", Password = "admin", IsActive = true};
+            Account account = new Account { FullName = "admin", Email = "admin@mail.ru", Password = "admin"};
             context.Account.Add(account);
 
 

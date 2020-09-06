@@ -43,7 +43,10 @@ namespace DataLayer.Entities
         public void AddCash(decimal sum) {
             cash += sum;
         }
-
+        public void SetAccountId(int accountId)
+        {
+            AccountId = accountId;
+        }
         
     }
 }

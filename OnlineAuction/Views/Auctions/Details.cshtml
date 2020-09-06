@@ -2,57 +2,97 @@
 
 @{
     ViewBag.Title = "Details";
+    ViewBag.CurrBet = 3000;
+    ViewBag.Step = 100;
+    ViewBag.NextBet = ViewBag.CurrBet + ViewBag.Step;
+    ViewBag.MaxPrice = 15000;
 }
-
+<script>
+    $(function () {
+        $('footer').css("clear", "both")
+    })
+</script>
 <h2>Details</h2>
+<h4>Auction</h4>
+<hr />
+<div style="display:flex">
 
-<div>
-    <h4>Auction</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.Actor.Id)
-        </dt>
+    <div class="col-md-6">
+        @Html.Raw("<img  style='width: 100%',  src=\"data:image/jpeg;base64," + Convert.ToBase64String(Model.Product.Image.ImageData) + "\" />")
 
-        <dd>
-            @Html.DisplayFor(model => model.Actor.Id)
-        </dd>
+        <form class="clearfix">
+            <input type="hidden" name="item_id" value="">
+            <div class="col-md-3">
+                <h5><b>Текущая цена</b></h5>
+                <div class="curr_bet">
+                    <span class="price">@ViewBag.CurrBet</span>
+                </div>
+            </div>
+            <div class="col-md-4" style="margin-top:7px">
+                <h5 class="title" style="cursor: pointer;" title="Делайте ставку дамы и господа!"><b>Ставка</b></h5>
+                <input type="text" name="bet" id="yourBet" placeholder=@ViewBag.NextBet class="form-control">
+            </div>
+            <div class="col-md-4" style="margin-top:41px">
+                <input type="button" value="Сделать ставку" data-id="" id="bid-btn" class="btn btn-info">
+            </div>
+        </form>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Order.Id)
-        </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.Order.Id)
-        </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Winner.Id)
-        </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.Winner.Id)
-        </dd>
+        <form class="clearfix" style="margin-top:10px">
+            <input type="hidden" name="item_id" value="">
+            <div class="col-md-4" style="margin-top:10px">
+                <h5><b>Цена “купить сейчас”</b></h5>
+                <div class="">@ViewBag.MaxPrice</div>
+            </div>
+            <div class="col-md-6" style="margin-top:35px">
+                <input type="button" value="Купить сейчас" id="buy-now-btn" class="btn btn-danger btn-lg">
+            </div>
+            <div class="col-md-2" style="margin-top:35px">
+                <input type="button" data-id="" title="Положить в корзину" id="add-to-cart-btn" class="btn btn-success btn-lg">
+            </div>
+        </form>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.BeginTime)
-        </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.BeginTime)
-        </dd>
+    </div>
+    <div class="col-md-6">
+        <dl style="margin-left:40px">
+            <dd>
+                @Html.HiddenFor(model => model.Actor.Id)
+            </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.EndTime)
-        </dt>
+            <dt>
+                @Html.HiddenFor(model => model.Product.Title)
+            </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.EndTime)
-        </dd>
+            <dt>
+                @Html.HiddenFor(model => model.Description)
+            </dt>
 
-    </dl>
+            <dd class="h4">
+                @Html.DisplayFor(model => model.Description)
+            </dd>
+            <dt>
+                @Html.DisplayName("Начало продаж")
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.BeginTime)
+            </dd>
+
+            <dt>
+                @Html.DisplayName("Завершение")
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.EndTime)
+            </dd>
+        </dl>
+    </div>
 </div>
-<p>
+
+<p style="clear:both; margin:20px">
     @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
     @Html.ActionLink("Back to List", "Index")
 </p>

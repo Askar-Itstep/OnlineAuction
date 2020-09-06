@@ -8,16 +8,73 @@
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
     @Scripts.Render("~/bundles/jquery")
+    <!--стили jquery ui-->
+    @Styles.Render("~/Content/themes/base/jquery.ui.datepicker.css")
+    @Styles.Render("~/Content/themes/base/jquery.ui.theme.css")
+    <!--сама библиотека jquey ui-->
+    @Scripts.Render("~/bundles/jqueryui")
+    @using DataLayer.Entities
+
+    @{
+        Account account = new Account();
+    }
+    <style>
+        /*.ui-datepicker-next, .ui-datepicker-prev {
+            display: none;
+        }*/
+        .ui-datepicker .ui-datepicker-prev span, .ui-datepicker .ui-datepicker-next span {
+            color: transparent;
+        }
+    </style>
 </head>
 <body>
     <script>
         $(function (e) {
-            var userId = localStorage.getItem("userId");
-            $(".classUserIdMyAuctions").attr("href", "/Auctions/Index/?userId=" + userId); //закинуть в ссылку стр. 58 значение
-            $(".classEditAccounts").attr("href", "/Accounts/Edit/?userId=" + userId); 
-            $(".classDeleteAccounts").attr("href", "/Accounts/Delete/?userId=" + userId); 
+            var accountId = localStorage.getItem("accountId");
+            var roles = sessionStorage.getItem("roles");
+            var isActive = sessionStorage.getItem("isActive");
+
+            $(".classDeleteAccounts").attr("href", "/Accounts/Delete/?id=" + accountId); //здесь удаление не из представл. админа "Все аккаунты", поэтому нет модели
+            $(".classMyAuctions").attr("href", "/Auctions/Index/?isActor=1");
+        })
+        //datepicker
+        $(function () {
+            if (!Modernizr.inputtypes.date) {
+                $(function () {
+                    $("input[type='date']")
+                        .datepicker({
+                            dateFormat: 'dd/mm/yy'
+                        })
+                        .get(0).setAttribute("type", "text");
+                })
+            }
+        });
+
+        //установ. поля баланса - отправка в част. представ. BeginForm...
+        $(function () {
+            $('.classAddBalance')
+                .on('click', function (e) {
+                    e.preventDefault();
+                    console.log(e.target)
+
+                    $.ajax({
+                        url: "/Accounts/Edit/?flag=1",
+                        type: "GET",
+                        //datatype: "json",
+                        success: function (data) {
+                            $('#modalEdit').modal('show');
+                            console.log(data.Balance)
+                            $('#input_balance').val(data.Balance)
+                        },
+                        error: function (e, msg) {
+                            alert(msg)
+                        }
+                    })
+                });
         })
     </script>
+
+
 
     <div class="navbar  navbar-fixed-top" style="background-color:azure">
         <div class="container">
@@ -33,12 +90,12 @@
             <div class="navbar-collapse">
                 <div style="display:flex; justify-content:space-between">
                     <ul class="nav navbar-nav">
-                        @{ 
+                        @{
                             if (User.IsInRole("admin")) {
-                        <li>@Html.ActionLink("Пользователи", "Index", "Accounts")</li>
+                                <li>@Html.ActionLink("Пользователи", "Index", "Accounts")</li>
                             }
                         }
-                        
+
                         <li>@Html.ActionLink("Домашняя страница", "Index", "Home")</li>
                         <li>@Html.ActionLink("О программе", "About", "Home")</li>
                         <li>@Html.ActionLink("Контакт", "Contact", "Home")</li>
@@ -53,15 +110,17 @@
 
                         @{ if (!User.Identity.Name.Equals("")) {
                                 if (!User.IsInRole("admin")) {
-                                    <li>@Html.ActionLink("Создать аукцион", "Create", "Auctions")</li>
+                                    <li>@Html.ActionLink("Создать аукцион", "Create", "Auctions", new { accountId = 0 }, new { @class = "classCreateAuction" })</li>
+                                    <li>@Html.ActionLink("Аукционы", "Index", "Auctions")</li>
                                     <li class="dropdown">
                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><div>Hello @User.Identity.Name!</div> <span class="caret"></span></a>
                                         <ul class="dropdown-menu" role="menu">
-                                            <li>@Html.ActionLink("Мои аукционы", "Index", "Auctions", new { userId = 0 }, new { @class = "classMyAuctions" })</li>
+                                            <li>@Html.ActionLink("Мои аукционы", "Index", "Auctions", new { accountId = 0 }, new { @class = "classMyAuctions" })</li>
                                             <li>@Html.ActionLink("Мои заказы", "MyOrders", "Orders")</li>
-                                            <li>@Html.ActionLink("Редактировать аккаунт", "Edit", "Accounts", new { userId = 0 }, new { @class = "classEditAccounts" })</li>
+                                            <li>@Html.ActionLink("Редактировать аккаунт", "Edit", "Accounts", new { accountId = 0 }, new { @class = "classEditAccounts" })</li>
+                                            <li>@Html.ActionLink("Пополнить баланс", "Edit", "Accounts", new { accountId = 0 }, new { @class = "classAddBalance" })</li>
                                             <li class="divider"></li>
-                                            <li>@Html.ActionLink("Удалить аккаунт", "Delete", "Auctions", new { userId = 0 }, new { @class = "classDeleteAccounts" })</li>
+                                            <li>@Html.ActionLink("Удалить аккаунт", "Delete", "Auctions", new { accountId = 0 }, new { @class = "classDeleteAccounts" })</li>
                                             <li class="divider"></li>
                                             <li>@Html.ActionLink("Выйти", "Logoff", "Accounts")</li>
                                         </ul>
@@ -70,16 +129,14 @@
                                 else {
                                     <li class="dropdown">
                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><div>Hello @User.Identity.Name!</div> <span class="caret"></span></a>
-                                        <ul class="dropdown-menu" role="menu">
-                                            <li>@Html.ActionLink("Аукционы", "Index", "Auctions")</li>
+                                        <ul class="dropdown-menu" id="person_menu" role="menu">
                                             <li>@Html.ActionLink("Заказы", "Index", "Orders")</li>
-                                            <li>@Html.ActionLink("Редактировать аккаунт", "Edit", "Accounts", new { userId = 0 }, new { @class = "classEditAccounts" })</li>
+                                            <li>@Html.ActionLink("Редактировать аккаунт", "Edit", "Accounts", new { accountId = 0 }, new { @class = "classEditAccounts" })</li>
                                             <li class="divider"></li>
                                             <li>@Html.ActionLink("Выйти", "Logoff", "Accounts")</li>
                                         </ul>
                                     </li>
                                 }
-
                             }
                         }
                     </ul>
@@ -87,8 +144,24 @@
             </div>
         </div>
     </div>
+
     <div class="container body-content">
         @RenderBody()
+        <div class="modal fade" id="modalEdit" tabindex="-1" role="dialog" aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalScrollableTitle">Create order</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="modal-body">
+                        @Html.Partial("Partial/_AddBalancePartialView", account)
+                    </div>
+                </div>
+            </div>
+        </div>
         <hr />
         <footer>
             <p>&copy; @DateTime.Now.Year – приложение ASP.NET</p>

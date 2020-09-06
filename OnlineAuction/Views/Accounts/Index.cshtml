@@ -1,8 +1,38 @@
-﻿@model IEnumerable<DataLayer.Entities.Account>
+﻿@using DataLayer.Entities
+@model IEnumerable<DataLayer.Entities.Account>
 
 @{
     ViewBag.Title = "Index";
+    Account account = new Account();
 }
+<script>
+            ////т.к. переход на "Пополнить баланс" может быть из любой точки-код здесь не имеет смысла
+            //$(function () {
+            //    $('.classAddBalance')
+            //        .on('click', function (e) {
+            //            e.preventDefault();
+            //            console.log(e.target)
+
+            //            //$.ajax({
+            //            //    url: "/Accounts/Edit/&flag=1",
+            //            //    type: "GET",
+            //            //    datatype: "json",
+            //            //    success: function (data) {
+            //            //        $('#modalEdit').modal('show');
+            //            //        console.log(data)
+
+            //            //        //$('#editAuthorId').val(data[0]["Id"])
+            //            //        //$('#editFirstName').val(data[0]["FirstName"])
+            //            //        //$('#editLastName').val(data[0]["LastName"])
+            //            //    },
+            //            //    error: function (e, msg) {
+            //            //        alert(msg[1])
+            //            //    }
+            //            //})
+            //        });
+            //})
+</script>
+
 
 <h2>Index</h2>
 
@@ -26,26 +56,27 @@
         <th></th>
     </tr>
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.FullName)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Email)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Password)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.IsActive)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
-            @Html.ActionLink("Details", "Details", new { id=item.Id }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.Id })
-        </td>
-    </tr>
-}
+    @foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.FullName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Email)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Password)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsActive)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+                @Html.ActionLink("Details", "Details", new { id = item.Id }) |
+                @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+            </td>
+        </tr>
+    }
 
 </table>
+

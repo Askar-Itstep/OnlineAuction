@@ -10,9 +10,9 @@ namespace OnlineAuction.Controllers
         private Model1 db = new Model1();
         public async Task<ActionResult> Index()
         {
-            var auctions = db.Auctions.Include(a => a.Actor).Include(a => a.Order).Include(a => a.Winner);
-            return View(await auctions.ToListAsync());
-
+            //var auctions = db.Auctions.Include(a => a.Actor).Include(a => a.Product).Include(a => a.Winner);
+            //return View(await auctions.ToListAsync());
+            return View();
         }
 
         public ActionResult About()

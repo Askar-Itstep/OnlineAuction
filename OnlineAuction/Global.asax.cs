@@ -22,5 +22,10 @@ namespace OnlineAuction
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
         }
+
+        protected void Application_EndRequest()
+        {
+            Exception[] exceptions = Context.AllErrors;
+        }
     }
 }

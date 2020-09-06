@@ -21,13 +21,14 @@ namespace BusinessLayer.BusinessObject
 
         public DateTime EndTime { get; set; }
         
-        public int OrderId { get; set; }
-        public OrderBO Order { get; set; }
+        public int ProductId { get; set; }
+        public virtual ProductBO Product { get; set; }
 
-        public ICollection<BetAuctionBO> BetAuctionsBO { get; set; }
+        public string Description { get; set; }
+        public ICollection<BetAuctionBO> BetAuctions { get; set; }
         
-        public int WinnerBOId { get; set; }
-        public ClientBO WinnerBO { get; set; }
+        public int WinnerId { get; set; }
+        public ClientBO Winner { get; set; }
 
         public AuctionBO()
         {
