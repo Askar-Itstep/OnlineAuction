@@ -155,10 +155,14 @@
     <Compile Include="App_Start\UnityMvcActivator.cs" />
     <Compile Include="Controllers\AccountsController.cs" />
     <Compile Include="Controllers\AuctionsController.cs" />
+    <Compile Include="Controllers\BetAuctionsController.cs" />
     <Compile Include="Controllers\ClientsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="ServiceClasses\BuilderModels.cs" />
+    <Compile Include="ViewModels\JsonRequestCreateBet.cs" />
     <Compile Include="ViewModels\AccountVM.cs" />
     <Compile Include="ViewModels\AddressVM.cs" />
+    <Compile Include="ViewModels\AuctionEditVM.cs" />
     <Compile Include="ViewModels\AuctionVM.cs" />
     <Compile Include="ViewModels\BetAuctionVM.cs" />
     <Compile Include="ViewModels\ClientVM.cs" />
@@ -175,6 +179,10 @@
     <Compile Include="ViewModels\RoleVM.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\font-awesome.css" />
+    <Content Include="Content\font-awesome.min.css" />
+    <Content Include="Files\create.png" />
+    <Content Include="Files\no_image.png" />
     <Content Include="Files\podarok.png" />
     <Content Include="Content\bootstrap-theme.css" />
     <Content Include="Content\bootstrap-theme.min.css" />
@@ -252,11 +260,17 @@
     <Content Include="Content\themes\base\minified\jquery.ui.theme.min.css" />
     <Content Include="Content\themes\base\minified\jquery.ui.tooltip.min.css" />
     <Content Include="favicon.ico" />
+    <Content Include="fonts\fontawesome-webfont.svg" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
+    <Content Include="fonts\FontAwesome.otf" />
+    <Content Include="fonts\fontawesome-webfont.woff2" />
+    <Content Include="fonts\fontawesome-webfont.woff" />
+    <Content Include="fonts\fontawesome-webfont.ttf" />
+    <Content Include="fonts\fontawesome-webfont.eot" />
     <None Include="Scripts\jquery-3.3.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.3.1.js" />
     <Content Include="Scripts\jquery-3.3.1.min.js" />
@@ -308,6 +322,11 @@
     <Content Include="Views\Clients\Edit.cshtml" />
     <Content Include="Views\Clients\Index.cshtml" />
     <Content Include="Views\Shared\Partial\_AddBalancePartialView.cshtml" />
+    <Content Include="Views\BetAuctions\Create.cshtml" />
+    <Content Include="Views\BetAuctions\Delete.cshtml" />
+    <Content Include="Views\BetAuctions\Details.cshtml" />
+    <Content Include="Views\BetAuctions\Edit.cshtml" />
+    <Content Include="Views\BetAuctions\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -32,11 +32,11 @@
     });
 
     //-------------------------------------------------
-    //AuctionsContr./Index -> SMS: not client
+    //AuctionsContr./Index -> Alert: not client
     $(function () {
-        if ($('.sms').html() !== "") {
-            var sms = $('.sms').html()
-            console.log($('.sms').html());
+        if ($('.my-alert').html() !== "") {
+            var sms = $('.my-alert').html()
+            console.log($('.my-alert').html());
             alert(sms)
         }
     })
@@ -46,11 +46,9 @@
         var auctionId = 0;
 
         $('.card').mousedown(function (e) {
-            //console.log(e.target)
             //console.log(e.currentTarget)
             $(e.currentTarget).children().each((i, item) => {
                 if ($(item).hasClass('auctionId')) {
-                    //console.log($(item).html());
                     auctionId = $(item).html();
                 }
             });
@@ -86,7 +84,7 @@
 
 </script>
 <h2>@ViewBag.Title</h2>
-<div class="hidden sms">@ViewBag.Sms</div>
+<div class="hidden my-alert">@ViewBag.Alert</div>
 @{
     if (Model.Count() != 0) {
 
@@ -95,7 +93,7 @@
             @foreach (var auction in Model.ToList()) {
                 var product = auction.Product;
                 <div class="card table-bordered col-md-4" style="height:300px; width: 200px; margin:10px; padding-left:0px">
-                    <div class=" auctionId">@auction.Id</div>
+                    <div class="hidden auctionId">@auction.Id</div>
                     @Html.Raw("<img  style='width: 200px; height: 130px',  src=\"data:image/jpeg;base64," + Convert.ToBase64String(product.Image.ImageData) + "\" />")
                     <table class="table table-hover">
                         <tr>

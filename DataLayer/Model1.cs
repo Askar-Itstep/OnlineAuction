@@ -33,6 +33,7 @@ namespace OnlineAuction.Entities
         {
         }
 
+        //public System.Data.Entity.DbSet<OnlineAuction.ViewModels.AuctionEditVM> AuctionEditVMs { get; set; }
     }
 
     public class MyContextInitializer : DropCreateDatabaseIfModelChanges<Model1>    //Always //

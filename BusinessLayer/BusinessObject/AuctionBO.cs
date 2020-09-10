@@ -24,6 +24,8 @@ namespace BusinessLayer.BusinessObject
         public int ProductId { get; set; }
         public virtual ProductBO Product { get; set; }
 
+        public decimal Step { get; set; }
+        public decimal RedeptionPrice { get; set; }
         public string Description { get; set; }
         public ICollection<BetAuctionBO> BetAuctions { get; set; }
         

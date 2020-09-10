@@ -44,7 +44,7 @@ namespace DataLayer.Providers
             if (username.Contains('@'))
                 username = username.Split('@')[0];
             using (Model1 db = new Model1()) {
-                var userRoles = db.RoleAccountLinks.Include("Role").Include("Account").Where(u => u.Account.FullName == username).
+                var userRoles = db.RoleAccountLinks.Include("Role").Include("Account").Where(u => u.Account.Email.Contains(username)).
                     Select(u=>u.Role.RoleName).ToList();
                 return userRoles.ToArray();
             }

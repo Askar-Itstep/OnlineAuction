@@ -73,7 +73,7 @@ namespace OnlineAuction
                .ConstructUsing(c => DependencyResolver.Current.GetService<Auction>());
 
                 mpr.CreateMap<AuctionBO, AuctionVM>()
-            .ConstructUsing(c => DependencyResolver.Current.GetService<AuctionVM>());
+                .ConstructUsing(c => DependencyResolver.Current.GetService<AuctionVM>());
 
                 mpr.CreateMap<AuctionVM, AuctionBO>()
                .ConstructUsing(c => DependencyResolver.Current.GetService<AuctionBO>());
@@ -109,7 +109,36 @@ namespace OnlineAuction
                .ConstructUsing(c => DependencyResolver.Current.GetService<AddressBO>());
 
                 mpr.CreateMap<AddressBO, AddressVM>()
-              .ConstructUsing(c => DependencyResolver.Current.GetService<AddressVM>());
+                 .ConstructUsing(c => DependencyResolver.Current.GetService<AddressVM>());
+                
+                //==========================AuctionEditVM=============================
+
+                mpr.CreateMap<AuctionBO, AuctionEditVM>()
+                .ConstructUsing(c => DependencyResolver.Current.GetService<AuctionEditVM>())
+                .ForMember(dest=>dest.Title, opt=>opt.MapFrom(src=>src.Product.Title))
+                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Product.Price))
+                .ForMember(dest => dest.DayBegin, opt => opt.MapFrom(src => src.BeginTime))
+                .ForMember(dest => dest.TimeBegin, opt => opt.MapFrom(src => new TimeSpan(src.BeginTime.Hour, src.BeginTime.Minute, src.BeginTime.Second)))
+                .ForMember(dest => dest.Duration, opt => opt.MapFrom(src => src.EndTime - src.BeginTime));
+
+                mpr.CreateMap<AuctionEditVM, AuctionBO>()
+                .ConstructUsing(c => DependencyResolver.Current.GetService<AuctionBO>())
+                .ForMember(dest => dest.BeginTime, opt => opt.MapFrom(src => src.DayBegin))
+                .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => src.DayBegin + src.TimeBegin + TimeSpan.FromHours(src.Duration)));
+                //.ForMember(dest => dest.Product.Title, opt => opt.MapFrom(src => src.Title));
+                //ActorId       //?
+                //ProductId     //?
+                //Product       //??
+                //----------------------
+                mpr.CreateMap<AuctionEditVM, ProductBO>()
+                .ConstructUsing(c => DependencyResolver.Current.GetService<ProductBO>())
+                .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
+                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price));
+                //ImageId       //?
+                //Image     //?
+                
+                //============================================
+
             });
          }
     }

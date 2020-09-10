@@ -119,6 +119,14 @@
     <Compile Include="Migrations\202009061406197_Auction_add_field_Step.designer.cs">
       <DependentUpon>202009061406197_Auction_add_field_Step.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202009061454312_Auction_add_field_RedemptionPrice.cs" />
+    <Compile Include="Migrations\202009061454312_Auction_add_field_RedemptionPrice.designer.cs">
+      <DependentUpon>202009061454312_Auction_add_field_RedemptionPrice.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202009080545438_Fix-FieldName-Redemption.cs" />
+    <Compile Include="Migrations\202009080545438_Fix-FieldName-Redemption.designer.cs">
+      <DependentUpon>202009080545438_Fix-FieldName-Redemption.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -164,6 +172,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202009061406197_Auction_add_field_Step.resx">
       <DependentUpon>202009061406197_Auction_add_field_Step.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202009061454312_Auction_add_field_RedemptionPrice.resx">
+      <DependentUpon>202009061454312_Auction_add_field_RedemptionPrice.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202009080545438_Fix-FieldName-Redemption.resx">
+      <DependentUpon>202009080545438_Fix-FieldName-Redemption.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

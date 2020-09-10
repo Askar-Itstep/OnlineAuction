@@ -1,28 +1,32 @@
-﻿@model DataLayer.Entities.Auction
+﻿@*@model DataLayer.Entities.Auction*@
 
 @{
     ViewBag.Title = "Create";
 }
 
 <h2>Create</h2>
-
+<script>
+    //очист. стиля
+    $(function () {
+        $('a#back_to_list').parent().css("clear", "both")
+    })
+</script>
 
 @using (Html.BeginForm()) {
     @Html.AntiForgeryToken()
 
-    <div class="form-horizontal">
-        <h4>Auction</h4>
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+<div class="form-horizontal">
+    <h4>Auction</h4>
+    <hr />
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
-        @Html.Partial("Partial/_FormAddProduct")
+    @Html.Partial("Partial/_FormAddProduct")
 
-        
-    </div>
+</div>
 }
 
 <div>
-    @Html.ActionLink("Back to List", "Index")
+    @Html.ActionLink("Back to List", "Index", null, htmlAttributes:new { @id="back_to_list"})
 </div>
 
 @section Scripts {

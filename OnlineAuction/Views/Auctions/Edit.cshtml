@@ -3,7 +3,6 @@
 @{
     ViewBag.Title = "Edit";
 }
-
 <h2>Edit</h2>
 
 
@@ -20,7 +19,8 @@
         <div class="form-group">
             @Html.LabelFor(model => model.ActorId, "ActorId", htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.DropDownList("ActorId", null, htmlAttributes: new { @class = "form-control" })
+                @*@Html.DropDownList("ActorId", null, htmlAttributes: new { @class = "form-control" })*@
+                @Html.DropDownListFor(m => m.ActorId, ViewBag.ActorId as SelectList)
                 @Html.ValidationMessageFor(model => model.ActorId, "", new { @class = "text-danger" })
             </div>
         </div>
@@ -44,7 +44,8 @@
         <div class="form-group">
             @Html.LabelFor(model => model.Product, "Product", htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.DropDownList("Product", null, htmlAttributes: new { @class = "form-control" })
+                @*@Html.DropDownList("Product", null, htmlAttributes: new { @class = "form-control" })*@
+                @Html.DropDownListFor(m=>m.Product.Title, ViewBag.ProductId as SelectList)
                 @Html.ValidationMessageFor(model => model.Product, "", new { @class = "text-danger" })
             </div>
         </div>

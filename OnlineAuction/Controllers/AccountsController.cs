@@ -71,7 +71,7 @@ namespace OnlineAuction.Controllers
         }
 
 
-        //конроль роли перенесен в представл.-_Layout
+        //контроль роли  в представл.-_Layout
         public async Task<ActionResult> Edit(int? id, int? flag) //int? accountId, 
         {
             if (id == null) { //для юзера

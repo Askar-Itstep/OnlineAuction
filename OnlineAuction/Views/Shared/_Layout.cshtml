@@ -38,17 +38,17 @@
             $(".classMyAuctions").attr("href", "/Auctions/Index/?isActor=1");
         })
         //datepicker
-        $(function () {
-            if (!Modernizr.inputtypes.date) {
-                $(function () {
-                    $("input[type='date']")
-                        .datepicker({
-                            dateFormat: 'dd/mm/yy'
-                        })
-                        .get(0).setAttribute("type", "text");
-                })
-            }
-        });
+        //$(function () {
+        //    if (!Modernizr.inputtypes.date) {
+        //        $(function () {
+        //            $("input[type='datetime']")
+        //                .datepicker({
+        //                    dateFormat: "yy-mm-dd" 
+        //                })
+        //                .get(0).setAttribute("type", "text");
+        //        })
+        //    }
+        //});
 
         //установ. поля баланса - отправка в част. представ. BeginForm...
         $(function () {

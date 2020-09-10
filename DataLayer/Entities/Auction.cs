@@ -26,6 +26,7 @@ namespace DataLayer.Entities
         public virtual Product Product { get; set; }
 
         public decimal Step { get; set; }
+        public decimal RedemptionPrice { get; set; }
 
         public string Description { get; set; }
 

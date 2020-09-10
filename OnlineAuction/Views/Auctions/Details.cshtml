@@ -2,55 +2,194 @@
 
 @{
     ViewBag.Title = "Details";
-    ViewBag.CurrBet = 3000;
-    ViewBag.Step = 100;
-    ViewBag.NextBet = ViewBag.CurrBet + ViewBag.Step;
-    ViewBag.MaxPrice = 15000;
+    ViewBag.OfferNextBet = ViewBag.TopBet.Bet + Model.Step;
 }
 <script>
+    //очист. стиля
     $(function () {
         $('footer').css("clear", "both")
     })
+
+    //-------Проверить ставку-------------
+
+    $(function () {
+        function checkBet(currBet, yourBet) {
+            if (yourBet == null || yourBet == undefined || yourBet == "") {
+                alert("Ставка не может быть null!");
+                return false;
+            }
+            if (currBet >= yourBet || currBet % (yourBet - currBet) != 0) {
+                alert("Ставка должна быть положительной с шагом кратным заданному!");
+                return false;
+            }
+            return true;
+        }
+
+        var myForm1 = document.form1;
+        $(myForm1).submit(function (e) {
+            e.preventDefault();
+            //1-провер. свой аукцион или нет (запрет автоучастия, кроме 1-ой ставки)
+
+            if (parseInt(@ViewBag.Client.Id) == parseInt(@Model.ActorId)) {
+                alert("Организатор аукциона не может быть его участником!")
+                return;
+            }
+             //2-ajax-----------------------------
+            var currBet = parseFloat($('div.curr_bet').html())
+            var yourBet = parseFloat($('input#bet').val())
+
+            if (checkBet(currBet, yourBet) == false) {
+                return;
+            }
+            var data = {
+                "auctionId": $('div.div-auction').html(),
+                "clientId": $('div.div-client').html(),
+                "bet": yourBet
+            }
+
+            $.ajax({
+                method: "Post",
+                url: '@Url.Action("Create", "BetAuctions")',
+                accept: 'application/json',
+                data: { data: data },
+                success: function (data) {
+                    alert(data.messageError)
+                    $(location).attr('href', "/Auctions/Index")
+                },
+                error: function (e, msg) {
+                    alert(msg)
+                }
+            })
+        })
+    });
+//---- редактирование аукциона --------------------
+    //доп.контроль по правам доступа к ред. аукц.(!)
+    $(function () {
+
+        function getDateTime(parametr) {
+            let day = parametr.split(' ')[0].split('.')[0];
+            let month = parametr.split(' ')[0].split('.')[1];
+            let year = parametr.split(' ')[0].split('.')[2];
+            let time = parametr.split(" ")[1];
+            time = checkHour(time)
+            //1, 2 - в контроллер, 3- для расчета длительн.
+            return [new Object(year + '-' + month + '-' + day + 'T' + time), time,
+                                                        new Date(year + '-' + month + '-' + day + 'T' + time)]
+        }
+        //в БД время может хран. в формате 1:15:00, от чего у JS запор
+        function checkHour(time) {
+            let hour = time.split(':')[0]
+            hour = hour.length == 1 ? "0" + hour : hour;
+            return hour + ':' + time.split(':')[1] + ':' + time.split(':')[2];
+        }
+
+        $('a#editLink').click(function (e) {
+            e.preventDefault();
+
+            if (parseInt(@ViewBag.Client.Id) != parseInt(@Model.ActorId)) {
+                alert("У вас нет прав для редактирования!")
+                return;
+            }
+
+            //надо не просто перейти, но еще и передать все знач. и имена значим. полей
+            var price = parseFloat($('.curr_bet').html())
+            var nextBet = parseFloat($('.bet').html())
+            var step = nextBet == 0 || isNaN(nextBet) ? (price / 10) : (nextBet - price)
+
+            var begin = $('.div-begin-time').html()
+            var dateBegin = getDateTime(begin)[0]
+            var timeBegin = getDateTime(begin)[1]
+
+            var end = $('.div-end-time').html()
+            var dateBeginFormatDatetimeJS = getDateTime(begin)[2]
+            var dateEndFormatDatetimeJS = getDateTime(end)[2]
+            var duration = (dateEndFormatDatetimeJS - dateBeginFormatDatetimeJS) / (1000*3600);    //- только часы
+
+            //пакет для редактир. (в методе Create!)
+            var data = {    //=>AuctionEditVM!
+                id: parseInt($('.div-auction').html()),
+                title : $('.div-title').html(),
+                description : $('#description').html(),
+                price : price,
+                step: step,
+                redemptionPrice: parseFloat($('.redemption').html()),
+                dayBegin: dateBegin,
+                timeBegin: timeBegin,
+                duration: duration,
+                imageId: parseInt($('.div-image-id').html())
+            }
+            console.log(data.duration)
+
+                $.ajax({
+                    method: "Get",
+                    url: '@Url.Action("Create", "Auctions")',
+                    accept: 'application/json',
+                    data: data,
+                    success: function (data) {
+                        console.log(data)
+                        alert(data)
+                        $(location).attr('href', "/Auctions/Create")
+                    },
+                    error: function (e, msg) {
+                        alert(msg)
+                    }
+                })
+
+        })
+
+
+    })
 </script>
+
 <h2>Details</h2>
 <h4>Auction</h4>
 <hr />
-<div style="display:flex">
+<div class="hidden div-client">@ViewBag.Client.Id</div>
+<div class="hidden div-account">@ViewBag.Client.AccountId</div>
+<div class="hidden div-auction">@Model.Id</div>
+<div class="hidden div-title">@Model.Product.Title</div>
+<div class="hidden div-image-id">@Model.Product.ImageId</div>
+<div class="hidden div-begin-time">@Model.BeginTime</div>
+<div class="hidden div-end-time">@Model.EndTime</div>
 
+<div class=" div-img">@ViewBag.editImg</div>
+
+<div style="display:flex">
     <div class="col-md-6">
         @Html.Raw("<img  style='width: 100%',  src=\"data:image/jpeg;base64," + Convert.ToBase64String(Model.Product.Image.ImageData) + "\" />")
 
-        <form class="clearfix">
-            <input type="hidden" name="item_id" value="">
+
+        <form class="clearfix" name="form1">
+            <input type="hidden" name="auctionId" value=@Model.Id>
             <div class="col-md-3">
-                <h5><b>Текущая цена</b></h5>
-                <div class="curr_bet">
-                    <span class="price">@ViewBag.CurrBet</span>
-                </div>
+                <h5><b>Текущая ставка</b></h5>
+                <div class="curr_bet">@ViewBag.TopBet.Bet</div>
             </div>
             <div class="col-md-4" style="margin-top:7px">
                 <h5 class="title" style="cursor: pointer;" title="Делайте ставку дамы и господа!"><b>Ставка</b></h5>
-                <input type="text" name="bet" id="yourBet" placeholder=@ViewBag.NextBet class="form-control">
+                <input type="text" name="bet" id="bet" placeholder=@ViewBag.OfferNextBet class="form-control">
             </div>
             <div class="col-md-4" style="margin-top:41px">
-                <input type="button" value="Сделать ставку" data-id="" id="bid-btn" class="btn btn-info">
+                <input type="submit" value="Сделать ставку" data-id="" id="bid-btn" class="btn btn-info">
             </div>
         </form>
 
 
 
 
-        <form class="clearfix" style="margin-top:10px">
+        <form class="clearfix" name="form2" style="margin-top:10px">
             <input type="hidden" name="item_id" value="">
             <div class="col-md-4" style="margin-top:10px">
                 <h5><b>Цена “купить сейчас”</b></h5>
-                <div class="">@ViewBag.MaxPrice</div>
+                <div class="redemption">@Model.RedemptionPrice</div>
             </div>
             <div class="col-md-6" style="margin-top:35px">
                 <input type="button" value="Купить сейчас" id="buy-now-btn" class="btn btn-danger btn-lg">
             </div>
             <div class="col-md-2" style="margin-top:35px">
-                <input type="button" data-id="" title="Положить в корзину" id="add-to-cart-btn" class="btn btn-success btn-lg">
+                <button class="btn btn-success" type="submit">
+                    <i class="fa fa-cart-plus fa-2x" aria-hidden="true"></i>
+                </button>
             </div>
         </form>
 
@@ -58,11 +197,11 @@
     </div>
     <div class="col-md-6">
         <dl style="margin-left:40px">
-            <dd>
+            <dd id="actor_id">
                 @Html.HiddenFor(model => model.Actor.Id)
             </dd>
 
-            <dt>
+            <dt id="product_title">
                 @Html.HiddenFor(model => model.Product.Title)
             </dt>
 
@@ -70,7 +209,7 @@
                 @Html.HiddenFor(model => model.Description)
             </dt>
 
-            <dd class="h4">
+            <dd class="h4" id="description">
                 @Html.DisplayFor(model => model.Description)
             </dd>
             <dt>
@@ -93,6 +232,6 @@
 </div>
 
 <p style="clear:both; margin:20px">
-    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }, new { @id = "editLink" }) |
     @Html.ActionLink("Back to List", "Index")
 </p>

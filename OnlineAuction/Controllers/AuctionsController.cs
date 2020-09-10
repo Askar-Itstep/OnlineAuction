@@ -2,6 +2,7 @@
 using BusinessLayer.BusinessObject;
 using DataLayer.Entities;
 using OnlineAuction.Entities;
+using OnlineAuction.ServiceClasses;
 using OnlineAuction.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -25,10 +26,10 @@ namespace OnlineAuction.Controllers
         }
 
         //параметр sms - из метода Create (проверка на роль)
-        public ActionResult Index(int? isActor, string sms = null) //isActor - только из _Layout.html (опред. по клику "мои аукц.")
-        {
+        public ActionResult Index(int? isActor, string alert = null) //isActor - только из _Layout.html (опред. по клику "мои аукц.")
+        {                                                               //alert - из метода Auction/Create()
             var accountId = Session["accountId"] ?? 0; //надо обязат. выйти
-           
+
             //-----------------------------------------------------------
             //фишка: отправить на титул "Лучшее предложение" (пока самый дорогой, а надо по соотн. рыноч (стат.) и предлож. продавц. цены
             var auctionBO = DependencyResolver.Current.GetService<AuctionBO>();
@@ -36,13 +37,14 @@ namespace OnlineAuction.Controllers
             var prodBO = DependencyResolver.Current.GetService<ProductBO>();
             List<ProductBO> productsBO = prodBO.LoadAll().ToList();
             decimal maxPrice = productsBO.Max(p => p.Price);
+            //на главн. разворот (~газеты)
             var bestAuctionBO = auctionsBO.Where(a => a.Product.Price >= maxPrice).FirstOrDefault();
             var bestAuctionVM = mapper.Map<AuctionVM>(bestAuctionBO);
             ViewBag.BestAuction = bestAuctionVM;
             //------могут быть 2 вида запроса: все аукционы; мои аукционы (актор), при этом попытка не-клиента должна пресек.---------
-            ViewBag.Sms = "";
-            if (sms != null && sms != "") {
-                ViewBag.Sms = sms;
+            ViewBag.Alert = "";
+            if (alert != null && alert != "") {
+                ViewBag.Alert = alert;
             }
             var auctionsVM = auctionsBO.Select(a => mapper.Map<AuctionVM>(a)).ToList();
             if (accountId != null && (int)accountId != 0 && isActor != null) {    //т.е. для "мои аукционы"
@@ -52,7 +54,7 @@ namespace OnlineAuction.Controllers
         }
 
         //1-передел. визуал
-        //2- при клике по "сделать ставку" - для хозяина лота будет блокировка!!!!!
+        //2- при клике по "сделать ставку" - для хозяина лота будет блокировка! (контроль в клиенте)
         public async Task<ActionResult> Details(int? auctionId)
         {
             if (auctionId == null) {
@@ -62,60 +64,89 @@ namespace OnlineAuction.Controllers
             if (auction == null) {
                 return HttpNotFound();
             }
+            BetAuction topBet = db.BetAuction.Where(b => b.AuctionId == auction.Id).ToList().Last();
+            ViewBag.TopBet = topBet;
+
+            var accountId = Session["accountId"] ?? 0;
+            if ((int)accountId == 0) {
+                return RedirectToAction("Index", new { alert = "Вы вошли незаконным способом. Выйдите и зайдите снова!" });
+            }
+            Client client = db.Clients.FirstOrDefault(c => c.AccountId == (int)accountId);
+            ViewBag.Client = client; //нужно для запроса с представл. Details.html  на созд. ставки -> BetAuction/Create()
             return View(auction);
         }
 
-        public ActionResult Create()  
+        //+Edit
+        public ActionResult Create(AuctionEditVM data, int? imageId) //data, imageId - возвр. JSON ajax-метод Detai.html->click("Edit")
         {
             var accountId = Session["accountId"] ?? 0;
+            if ((int)accountId == 0) {  //Create
+                return RedirectToAction("Index", new { alert = "Вы сейчас не можете создать лот. Залогинтесь!" });
+            }
             //сначала надо проверить явл. ли юзер moder'om?
             var roleAccountLinks = db.RoleAccountLinks.Where(r => r.AccountId == (int)accountId && r.Role.RoleName.Contains("moder")).ToList();
             if (roleAccountLinks == null || roleAccountLinks.Count() == 0) {
-                return RedirectToAction("Index", new { sms = "Вы пока не можете создать лот. Проверте ваш баланс!" });
+                return RedirectToAction("Index", new { alert = "Вы пока не можете создать лот. Проверте ваш баланс!" });
             }
-            else {
-                return View();
+            else {      //Edit
+                if (data != null && data.Id != 0) {
+                    var imageBO = DependencyResolver.Current.GetService<ImageBO>();
+                    ImageVM imageVM = null;
+                    if (imageId != null) {
+                        ImageBO image = imageBO.Load((int)imageId);
+                        imageVM = mapper.Map<ImageVM>(image);
+                    }
+                    //подготов. данных для 2го захода->потом из ajax снова  в этот контроллер, в котор. вызвать объект из сессии
+                    Session["editImg"] = imageVM;   
+                    Session["auctionEdit"] = data;
+                    return new JsonResult { Data = "Форма редактирования подготовлена!", JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                }
+                //данные для 2-го захода
+                var editVM = Session["auctionEdit"];
+                ViewBag.editImg = Session["editImg"];
+                return View(editVM);
             }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create(string title, string description, decimal price, DateTime daybegin, TimeSpan timebegin,
-                                                            float duration, HttpPostedFileBase upload)  {
-            Auction auction = new Auction();
-            if (ModelState.IsValid) //AuctionVM         
-            {
-                var userId = Session["accountId"]?? 0;
-                if ((int)userId != 0) {
-                    byte[] myBytes = new byte[upload.ContentLength];
-                    upload.InputStream.Read(myBytes, 0, upload.ContentLength);
-                    Image image = new Image { FileName = title, ImageData = myBytes };
-                    db.Images.Add(image);
+        public async Task<ActionResult> Create(AuctionEditVM editVM, int? id, HttpPostedFileBase upload)//
+        {
+            var userId = Session["accountId"] ?? 0;
+            string message = "";
 
-                    Product product = new Product { Image = image, Price = price, Title = title };
-                    db.Products.Add(product);
-                    var client = db.Clients.Where(c => c.AccountId == (int)userId).FirstOrDefault();
+            if (id == null) {
+                Auction auction = new Auction();
+                if (ModelState.IsValid) //AuctionVM         
+                {
+                    if ((int)userId != 0) {
+                        await BuilderModels.CreateEntity(editVM, auction, userId, upload);
+                        message = "Данные записаны!";
+                    }
+                    else {
+                        message = "Ошибка. Данные не записаны!";
+                    }
 
-                    auction.ActorId = (int)client.Id;
-                    auction.Product = product;
-                    auction.BeginTime = daybegin + timebegin;
-                    auction.EndTime = auction.BeginTime + TimeSpan.FromHours((int)duration);
-                    auction.WinnerId = (int)client.Id; // в начале! - потом перезапишется
-                    db.Auctions.Add(auction);
-                   
-                    BetAuction betAuction = new BetAuction { Auction = auction, Bet = price, Client = client };
-                    db.BetAuction.Add(betAuction);
-
-                    await db.SaveChangesAsync();
+                    return new JsonResult { Data = message, JsonRequestBehavior = JsonRequestBehavior.DenyGet };
                 }
-                return RedirectToAction("Index");
-            }
 
-            return View(auction);
+                return View(auction);
+            }
+            else {
+                Auction auction = await db.Auctions.FindAsync(id);
+                if (auction == null) {
+                    return HttpNotFound();
+                }
+                message = "Данные перезаписаны!";
+                await BuilderModels.EditEntity(editVM, auction, userId, upload);
+                return new JsonResult { Data = message, JsonRequestBehavior = JsonRequestBehavior.DenyGet };
+            }
         }
 
-        public async Task<ActionResult> Edit(int? id)
-        {
+
+        [Authorize(Roles = "moder")] //доп.контр. в предст.: аукц. может редакт. только его модер!
+        public async Task<ActionResult> Edit(int? id) //по ID-редактир. админ, а модер должен имет возм ред-ть продукт,
+        {                                                       //но не ред-ть организ. лота и победителя
             if (id == null) {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
@@ -123,24 +154,27 @@ namespace OnlineAuction.Controllers
             if (auction == null) {
                 return HttpNotFound();
             }
-            //ViewBag.ActorId = new SelectList(db.Clients, "Id", "Id", auction.ActorId);
-            //ViewBag.ProductId = new SelectList(db.Products, "Id", "Id", auction.ProductId);
-            //ViewBag.WinnerId = new SelectList(db.Clients, "Id", "Id", auction.WinnerId);
+            ViewBag.ActorId = new SelectList(db.Clients.Include(c => c.Account), "Id", "Account.FullName", auction.ActorId);
+            ViewBag.ProductId = new SelectList(db.Products, "Id", "Title", auction.ProductId);
+            ViewBag.WinnerId = new SelectList(db.Clients.Include(c => c.Account), "Id", "Account.FullName", auction.WinnerId);
             return View(auction);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit([Bind(Include = "Id,ActorId,BeginTime,EndTime,ProductId,WinnerId")] Auction auction)
+
+        public async Task<ActionResult> Edit(
+        //[Bind(Include = "Id,ActorId,BeginTime,EndTime,ProductId,WinnerId")]
+        Auction auction)
         {
             if (ModelState.IsValid) {
                 db.Entry(auction).State = EntityState.Modified;
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
-            //ViewBag.ActorId = new SelectList(db.Clients, "Id", "Id", auction.ActorId);
-            //ViewBag.ProductId = new SelectList(db.Products, "Id", "Id", auction.ProductId);
-            //ViewBag.WinnerId = new SelectList(db.Clients, "Id", "Id", auction.WinnerId);
+            ViewBag.ActorId = new SelectList(db.Clients.Include(c => c.Account), "Id", "Account.FullName", auction.ActorId);
+            ViewBag.ProductId = new SelectList(db.Products, "Id", "Title", auction.ProductId);
+            ViewBag.WinnerId = new SelectList(db.Clients.Include(c => c.Account), "Id", "Account.FullName", auction.WinnerId);
             return View(auction);
         }
 
