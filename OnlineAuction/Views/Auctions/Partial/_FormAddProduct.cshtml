@@ -7,9 +7,17 @@
     $(function () {
         $('footer').css("clear", "both")
     })
-    //при Edit - изм. названия кнопок
+    //при Edit     
     $(function () {
-
+    //a)-изм.названия кнопок
+        if ($('input#auctionId').val() != null) {
+            console.log("Edit begin (out _FormAddProduct)!")
+            $('input[type=submit').val("Edit");
+    //b)-изм. формат даты 12.09.2020 22:10:00 -> 12.09.2020
+            var oldValue = $('input#daybegin').val()
+            var newValue = oldValue.split(' ')[0]
+            $('input#daybegin').val(newValue)
+        }
     })
 
     //form + Upload Files-> Auction/Create
@@ -84,7 +92,7 @@
             <div class="form-group">
                 @Html.LabelFor(model => model.Price, htmlAttributes: new { @class = "control-label col-md-2" })
                 <div class="col-md-10">
-                    @Html.EditorFor(model => model.Price, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.EditorFor(model => model.Price, new { htmlAttributes = new { @class = "form-control", value = Model.Price+1000} })
                     @Html.ValidationMessageFor(model => model.Price, "", new { @class = "text-danger" })
                 </div>
             </div>
@@ -124,7 +132,7 @@
             <div class="form-group">
                 @Html.LabelFor(model => model.Duration, htmlAttributes: new { @class = "control-label col-md-2" })
                 <div class="col-md-10">
-                    @Html.EditorFor(model => model.Duration, new { htmlAttributes = new { @class = "form-control", type = "number", name = "duration", id = "duration", placeholder = "24" } })
+                    @Html.EditorFor(model => model.Duration, new { htmlAttributes = new { @class = "form-control", type = "number", name = "duration", id = "duration", placeholder = Model.Duration } })
                     @Html.ValidationMessageFor(model => model.Duration, "", new { @class = "text-danger" })
                 </div>
             </div>

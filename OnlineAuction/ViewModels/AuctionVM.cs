@@ -20,7 +20,7 @@ namespace OnlineAuction.ViewModels
         public virtual ProductVM Product { get; set; }
 
         public decimal Step { get; set; }
-        public decimal RedeptionPrice { get; set; }
+        public decimal RedemptionPrice { get; set; }
         public string Description { get; set; }
 
         public ICollection<BetAuctionVM> BetAuctions { get; set; }

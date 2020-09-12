@@ -1,10 +1,13 @@
 ﻿@*@model DataLayer.Entities.Auction*@
 
 @{
-    ViewBag.Title = "Create";
+    if(Model == null) {
+        ViewBag.Title = "Create";
+    }
+
 }
 
-<h2>Create</h2>
+<h2>@ViewBag.Title</h2>
 <script>
     //очист. стиля
     $(function () {

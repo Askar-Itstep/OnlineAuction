@@ -31,6 +31,12 @@ namespace BusinessLayer.BusinessObject
             var res = images.AsEnumerable().Select(a => mapper.Map<ImageBO>(a)).ToList();
             return res;
         }
+        public IEnumerable<ImageBO> LoadAsNoTraking()  //из DataObj в BusinessObj 
+        {
+            var images = unitOfWork.Images.GetAllNoTracking();
+            var res = images.AsEnumerable().Select(a => mapper.Map<ImageBO>(a)).ToList();
+            return res;
+        }
         public ImageBO Load(int id)
         {
             var image = unitOfWork.Images.GetById(id);

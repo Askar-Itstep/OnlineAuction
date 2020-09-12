@@ -46,24 +46,24 @@
         @Html.ValidationSummary(true)
 
         <div class="form-group">
-            @Html.LabelFor(model => model.Login, new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Login, new { htmlAttributes = new { @placeholder = "e-mail" } })
+            @Html.LabelFor(model => model.Login, new { @class = "control-label col-md-4"  })
+            <div class="col-md-8">
+                @Html.EditorFor(model => model.Login, new { htmlAttributes = new { @placeholder = "e-mail", @class = "input input-lg" } })
                 @Html.ValidationMessageFor(model => model.Login)
             </div>
         </div>
 
         <div class="form-group">
-            @Html.LabelFor(model => model.Password, new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Password, new { htmlAttributes = new { @placeholder = "password" } })
+            @Html.LabelFor(model => model.Password, new { @class = "control-label col-md-4" })
+            <div class="col-md-8">
+                @Html.EditorFor(model => model.Password, new { htmlAttributes = new { @placeholder = "password", @class = "input input-lg" } })
                 @Html.ValidationMessageFor(model => model.Password)
             </div>
         </div>
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Вход" class="btn btn-default" />
+                <input type="submit" value="Вход" class="btn btn-primary btn-lg" />
             </div>
         </div>
     </div>

@@ -9,10 +9,9 @@
     $(function () {
         $('footer').css("clear", "both")
     })
-
-    //-------Проверить ставку-------------
-
+    //===================<Сделать ставку>==========================================
     $(function () {
+    //1) Проверить ставку-----------------------
         function checkBet(currBet, yourBet) {
             if (yourBet == null || yourBet == undefined || yourBet == "") {
                 alert("Ставка не может быть null!");
@@ -25,23 +24,24 @@
             return true;
         }
 
+    //2) Event Click-------------------
         var myForm1 = document.form1;
         $(myForm1).submit(function (e) {
             e.preventDefault();
-            //1-провер. свой аукцион или нет (запрет автоучастия, кроме 1-ой ставки)
-
+            //провер. свой аукцион или нет (запрет автоучастия, кроме 1-ой ставки)
             if (parseInt(@ViewBag.Client.Id) == parseInt(@Model.ActorId)) {
                 alert("Организатор аукциона не может быть его участником!")
                 return;
             }
-             //2-ajax-----------------------------
+
+             //ajax-----------------------------
             var currBet = parseFloat($('div.curr_bet').html())
             var yourBet = parseFloat($('input#bet').val())
 
             if (checkBet(currBet, yourBet) == false) {
                 return;
             }
-            var data = {
+            var data = {                //view model JsonRequetCreateBet
                 "auctionId": $('div.div-auction').html(),
                 "clientId": $('div.div-client').html(),
                 "bet": yourBet
@@ -62,10 +62,11 @@
             })
         })
     });
-//---- редактирование аукциона --------------------
+
+//------------------------ редактирование аукциона -------------------------------------------------------------------------------------
     //доп.контроль по правам доступа к ред. аукц.(!)
     $(function () {
-
+        //12.09.2020 14:25:00 -> 2020-09-12T14:25:00
         function getDateTime(parametr) {
             let day = parametr.split(' ')[0].split('.')[0];
             let month = parametr.split(' ')[0].split('.')[1];
@@ -76,68 +77,82 @@
             return [new Object(year + '-' + month + '-' + day + 'T' + time), time,
                                                         new Date(year + '-' + month + '-' + day + 'T' + time)]
         }
+
         //в БД время может хран. в формате 1:15:00, от чего у JS запор
         function checkHour(time) {
             let hour = time.split(':')[0]
             hour = hour.length == 1 ? "0" + hour : hour;
             return hour + ':' + time.split(':')[1] + ':' + time.split(':')[2];
         }
-
+//-------------------------------------
         $('a#editLink').click(function (e) {
             e.preventDefault();
-
+            //1)проверка: право на редактир.
             if (parseInt(@ViewBag.Client.Id) != parseInt(@Model.ActorId)) {
                 alert("У вас нет прав для редактирования!")
                 return;
             }
+            //2) проверка: нельзя изм. аукц. если время провед. наступило
+            var date = new Date();
+            var begin = $('.div-begin-time').html()
+            var dateBeginFormatDatetimeJS = getDateTime(begin)[2]
 
-            //надо не просто перейти, но еще и передать все знач. и имена значим. полей
-            var price = parseFloat($('.curr_bet').html())
+            if (date > dateBeginFormatDatetimeJS) {
+                var delPermiss = confirm("Время для редактирования истекло. Желаете отменить аукцион?");
+                console.log(delPermiss)
+                if (delPermiss == true) {
+                    $('#deleteLink').removeClass("hidden")
+                }
+                return;
+            }
+            //3) надо не просто перейти, но еще и передать все знач. и имена значим. полей
+            var price = parseFloat($('.div-price').html())
             var nextBet = parseFloat($('.bet').html())
             var step = nextBet == 0 || isNaN(nextBet) ? (price / 10) : (nextBet - price)
 
-            var begin = $('.div-begin-time').html()
-            var dateBegin = getDateTime(begin)[0]
-            var timeBegin = getDateTime(begin)[1]
+            var dateBegin = getDateTime(begin)[0]   // v.1 +
+            var timeBegin = getDateTime(begin)[1]   // v.2 => DateTime.ASP
 
             var end = $('.div-end-time').html()
-            var dateBeginFormatDatetimeJS = getDateTime(begin)[2]
             var dateEndFormatDatetimeJS = getDateTime(end)[2]
-            var duration = (dateEndFormatDatetimeJS - dateBeginFormatDatetimeJS) / (1000*3600);    //- только часы
+            var duration = (dateEndFormatDatetimeJS - dateBeginFormatDatetimeJS) / (1000 * 3600);    //- только часы
 
-            //пакет для редактир. (в методе Create!)
-            var data = {    //=>AuctionEditVM!
+            //пакет для редактир. (в методе Create!)=>AuctionEditVM!
+            var data = {
                 id: parseInt($('.div-auction').html()),
-                title : $('.div-title').html(),
-                description : $('#description').html(),
-                price : price,
+                title: $('.div-title').html(),
+                description: $('#description').html(),
+                price: price,
                 step: step,
                 redemptionPrice: parseFloat($('.redemption').html()),
-                dayBegin: dateBegin,
+                dayBegin: dateBegin, //2020-09-12T14:25:00 -> C# DateTime
                 timeBegin: timeBegin,
                 duration: duration,
                 imageId: parseInt($('.div-image-id').html())
             }
             console.log(data.duration)
+            $.ajax({
+                method: "Get",
+                url: '@Url.Action("Create", "Auctions")',
+                accept: 'application/json',
+                data: data,
+                beforeSend: console.log("Poehaly!"),
+                success: function (data) {
+                    console.log(data)
+                    alert(data)
+                    $(location).attr('href', "/Auctions/Create")
+                },
+                error: function (e, msg) {
+                    alert(msg)
+                }
+            })
+        });
 
-                $.ajax({
-                    method: "Get",
-                    url: '@Url.Action("Create", "Auctions")',
-                    accept: 'application/json',
-                    data: data,
-                    success: function (data) {
-                        console.log(data)
-                        alert(data)
-                        $(location).attr('href', "/Auctions/Create")
-                    },
-                    error: function (e, msg) {
-                        alert(msg)
-                    }
-                })
+        //================Обработ. начала заказа =====================
+        //а) Купить сразу (цена = RedemptionPrice, аукцион - закрыв., опред. Победитель, победителю отправл. письмо со ссылкой на стр. оформ. Заказа)
+        $('#buy-now-btn').click(function (e) {
 
         })
-
-
     })
 </script>
 
@@ -147,6 +162,7 @@
 <div class="hidden div-client">@ViewBag.Client.Id</div>
 <div class="hidden div-account">@ViewBag.Client.AccountId</div>
 <div class="hidden div-auction">@Model.Id</div>
+<div class="hidden div-price">@Model.Product.Price</div>
 <div class="hidden div-title">@Model.Product.Title</div>
 <div class="hidden div-image-id">@Model.Product.ImageId</div>
 <div class="hidden div-begin-time">@Model.BeginTime</div>
@@ -169,7 +185,7 @@
                 <h5 class="title" style="cursor: pointer;" title="Делайте ставку дамы и господа!"><b>Ставка</b></h5>
                 <input type="text" name="bet" id="bet" placeholder=@ViewBag.OfferNextBet class="form-control">
             </div>
-            <div class="col-md-4" style="margin-top:41px">
+            <div class="col-md-5" style="margin-top:41px">
                 <input type="submit" value="Сделать ставку" data-id="" id="bid-btn" class="btn btn-info">
             </div>
         </form>
@@ -201,9 +217,9 @@
                 @Html.HiddenFor(model => model.Actor.Id)
             </dd>
 
-            <dt id="product_title">
-                @Html.HiddenFor(model => model.Product.Title)
-            </dt>
+            @*@*<dt id="product_title">
+                    @Html.HiddenFor(model => model.Product.Title)
+                </dt>*@
 
             <dt>
                 @Html.HiddenFor(model => model.Description)
@@ -233,5 +249,7 @@
 
 <p style="clear:both; margin:20px">
     @Html.ActionLink("Edit", "Edit", new { id = Model.Id }, new { @id = "editLink" }) |
-    @Html.ActionLink("Back to List", "Index")
+    @Html.ActionLink("Back to List", "Index") |
+
+    @Html.ActionLink("Delete", "Delete", new { id = Model.Id }, new { @id = "deleteLink", @class = "hidden" })
 </p>

@@ -11,29 +11,29 @@
     <h4>Auction</h4>
     <hr />
     <dl class="dl-horizontal">
-        <dt>
+        @*<dt>
             @Html.DisplayNameFor(model => model.Actor.Id)
         </dt>
 
         <dd>
             @Html.DisplayFor(model => model.Actor.Id)
-        </dd>
+        </dd>*@
 
         <dt>
-            @Html.DisplayNameFor(model => model.Order.Id)
+            @Html.DisplayNameFor(model => model.Product.Title)
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.Order.Id)
+            @Html.DisplayFor(model => model.Product.Title)
         </dd>
 
-        <dt>
+        @*<dt>
             @Html.DisplayNameFor(model => model.Winner.Id)
         </dt>
 
         <dd>
             @Html.DisplayFor(model => model.Winner.Id)
-        </dd>
+        </dd>*@
 
         <dt>
             @Html.DisplayNameFor(model => model.BeginTime)

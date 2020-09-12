@@ -38,6 +38,11 @@ namespace BusinessLayer.BusinessObject
             var product = unitOfWork.Products.GetById(id);
             return mapper.Map(product, this);
         }
+        public ProductBO LoadAsNoTracking(int id)
+        {
+            var product = unitOfWork.Products.GetAllNoTracking().FirstOrDefault(p => p.Id == id);
+            return mapper.Map(product, this);
+        }
         public void Save(ProductBO productBO)
         {
             var product = mapper.Map<Product>(productBO);

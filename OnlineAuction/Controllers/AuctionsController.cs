@@ -69,7 +69,7 @@ namespace OnlineAuction.Controllers
 
             var accountId = Session["accountId"] ?? 0;
             if ((int)accountId == 0) {
-                return RedirectToAction("Index", new { alert = "Вы вошли незаконным способом. Выйдите и зайдите снова!" });
+                return RedirectToAction("Index", new { alert = "Время сессии истекло. Выйдите и зайдите снова!" });
             }
             Client client = db.Clients.FirstOrDefault(c => c.AccountId == (int)accountId);
             ViewBag.Client = client; //нужно для запроса с представл. Details.html  на созд. ставки -> BetAuction/Create()
@@ -104,6 +104,7 @@ namespace OnlineAuction.Controllers
                 //данные для 2-го захода
                 var editVM = Session["auctionEdit"];
                 ViewBag.editImg = Session["editImg"];
+                ViewBag.Title = "Edit";
                 return View(editVM);
             }
         }
@@ -133,12 +134,15 @@ namespace OnlineAuction.Controllers
                 return View(auction);
             }
             else {
-                Auction auction = await db.Auctions.FindAsync(id);
-                if (auction == null) {
+                //Auction auction = await db.Auctions.FindAsync(id);
+                AuctionBO auctionBO = DependencyResolver.Current.GetService<AuctionBO>();
+                auctionBO = auctionBO.LoadAsNoTracking((int)id);//.Load((int)id);
+                if (auctionBO == null) {
                     return HttpNotFound();
                 }
                 message = "Данные перезаписаны!";
-                await BuilderModels.EditEntity(editVM, auction, userId, upload);
+                BuilderModels.mapper = mapper;
+                await BuilderModels.EditEntityAsync(editVM, auctionBO, userId, upload);    //
                 return new JsonResult { Data = message, JsonRequestBehavior = JsonRequestBehavior.DenyGet };
             }
         }

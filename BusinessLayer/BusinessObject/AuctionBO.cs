@@ -25,7 +25,7 @@ namespace BusinessLayer.BusinessObject
         public virtual ProductBO Product { get; set; }
 
         public decimal Step { get; set; }
-        public decimal RedeptionPrice { get; set; }
+        public decimal RedemptionPrice { get; set; }
         public string Description { get; set; }
         public ICollection<BetAuctionBO> BetAuctions { get; set; }
         
@@ -53,6 +53,12 @@ namespace BusinessLayer.BusinessObject
         public AuctionBO Load(int id)
         {
             var auction = unitOfWork.Auctions.GetById(id);
+            return mapper.Map(auction, this);
+        }
+        //---------------------------------------------
+        public AuctionBO LoadAsNoTracking(int id)
+        {
+            var auction = unitOfWork.Auctions.GetAllNoTracking().FirstOrDefault(a=>a.Id == id);
             return mapper.Map(auction, this);
         }
         public void Save(AuctionBO auctionBO)

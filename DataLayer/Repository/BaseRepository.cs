@@ -40,6 +40,8 @@ namespace DataLayer.Repository
 
         public T GetById(int? id)
         {
+            if (id == null)
+                return null;
             return dbSet.Find(id);
         }
         public T GetLast()
