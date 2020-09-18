@@ -1,14 +1,11 @@
 ﻿using OnlineAuction.Entities;
-using System;
-using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.Entity.Validation;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataLayer.Repository
 {
-    public class BaseRepository<T>: IRepository<T> where T: class
+    public class BaseRepository<T> : IRepository<T> where T : class
     {
         private Model1 db;
         private DbSet<T> dbSet;
@@ -40,8 +37,10 @@ namespace DataLayer.Repository
 
         public T GetById(int? id)
         {
-            if (id == null)
+            if (id == null) {
                 return null;
+            }
+
             return dbSet.Find(id);
         }
         public T GetLast()
@@ -51,14 +50,27 @@ namespace DataLayer.Repository
         public IQueryable<T> Include(params string[] navigationProperty)
         {
             var query = GetAll();
-            foreach (var item in navigationProperty)
+            foreach (var item in navigationProperty) {
                 query.Include(item);
+            }
+
             return query;
         }
 
         public void Save()
         {
-            db.SaveChanges();
+            try {
+                db.SaveChanges();
+            }
+            catch (DbEntityValidationException ex) {
+                foreach (DbEntityValidationResult validationError in ex.EntityValidationErrors) {
+                    System.Diagnostics.Debug.WriteLine("Object: " + validationError.Entry.Entity.ToString());
+
+                    foreach (DbValidationError err in validationError.ValidationErrors) {
+                        System.Diagnostics.Debug.WriteLine(err.ErrorMessage + "");
+                    }
+                }
+            }
         }
 
         public void Update(T item)
@@ -71,6 +83,6 @@ namespace DataLayer.Repository
         {
             return dbSet.AsNoTracking();
         }
-        
+
     }
 }

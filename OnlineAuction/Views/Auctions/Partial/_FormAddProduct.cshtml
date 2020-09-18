@@ -55,6 +55,10 @@
                 alert("Браузер не поддерживает загрузку файлов HTML5!");
             }
         });
+        ////--------correct Html.Editor(Price)-------больше не нужно (надо передать пуст. ViewModel)
+        //if (parseFloat($('.div-price').val()) != 0) {
+        //    $('#id_price').val(parseFloat($('.div-price').val()+1000)
+        //}
     })
 </script>
 
@@ -68,6 +72,7 @@
             @{
                 if (Model != null) {
                     <input type="hidden" Id="auctionId" name="Id" value=@Model.Id>
+                    <div class="hidden div-price">@Model.Price</div>
                 }
             }
 
@@ -92,7 +97,7 @@
             <div class="form-group">
                 @Html.LabelFor(model => model.Price, htmlAttributes: new { @class = "control-label col-md-2" })
                 <div class="col-md-10">
-                    @Html.EditorFor(model => model.Price, new { htmlAttributes = new { @class = "form-control", value = Model.Price+1000} })
+                    @Html.EditorFor(model => model.Price, new { htmlAttributes = new { @class = "form-control", @id="id_price"} })
                     @Html.ValidationMessageFor(model => model.Price, "", new { @class = "text-danger" })
                 </div>
             </div>

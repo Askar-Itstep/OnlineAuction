@@ -37,19 +37,8 @@
 
             $(".classDeleteAccounts").attr("href", "/Accounts/Delete/?id=" + accountId); //здесь удаление не из представл. админа "Все аккаунты", поэтому нет модели
             $(".classMyAuctions").attr("href", "/Auctions/Index/?isActor=1");
+            $(".classMyOrders").attr("href", "/Orders/Index/?accountId=" + accountId);
         })
-        //datepicker
-        //$(function () {
-        //    if (!Modernizr.inputtypes.date) {
-        //        $(function () {
-        //            $("input[type='datetime']")
-        //                .datepicker({
-        //                    dateFormat: "yy-mm-dd" 
-        //                })
-        //                .get(0).setAttribute("type", "text");
-        //        })
-        //    }
-        //});
 
         //установ. поля баланса - отправка в част. представ. BeginForm...
         $(function () {
@@ -74,8 +63,6 @@
                 });
         })
     </script>
-
-
 
     <div class="navbar  navbar-fixed-top" style="background-color:azure">
         <div class="container">
@@ -111,13 +98,13 @@
 
                         @{ if (!User.Identity.Name.Equals("")) {
                                 if (!User.IsInRole("admin")) {
-                                    <li>@Html.ActionLink("Создать аукцион", "Create", "Auctions", new { accountId = 0 }, new { @class = "classCreateAuction" })</li>
+                                    <li>@Html.ActionLink("Создать аукцион", "Create", "Auctions", new { flagCreate = 1 }, new { @class = "classCreateAuction" })</li>
                                     <li>@Html.ActionLink("Аукционы", "Index", "Auctions")</li>
                                     <li class="dropdown">
                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><div>Hello @User.Identity.Name!</div> <span class="caret"></span></a>
                                         <ul class="dropdown-menu" role="menu">
                                             <li>@Html.ActionLink("Мои аукционы", "Index", "Auctions", new { accountId = 0 }, new { @class = "classMyAuctions" })</li>
-                                            <li>@Html.ActionLink("Мои заказы", "MyOrders", "Orders")</li>
+                                            <li>@Html.ActionLink("Мои заказы", "Index", "Orders", new { accountId = 0 }, new { @class = "classMyOrders" })</li>
                                             <li>@Html.ActionLink("Редактировать аккаунт", "Edit", "Accounts", new { accountId = 0 }, new { @class = "classEditAccounts" })</li>
                                             <li>@Html.ActionLink("Пополнить баланс", "Edit", "Accounts", new { accountId = 0 }, new { @class = "classAddBalance" })</li>
                                             <li class="divider"></li>

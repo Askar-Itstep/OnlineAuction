@@ -26,5 +26,11 @@ namespace OnlineAuction.ViewModels
         [Required]
         [StringLength(255)]
         public string House { get; set; }
+
+
+        public override string ToString()
+        {
+            return $"region: {Region}, city: {City}, street: {Street}, house: {House}";
+        }
     }
 }

@@ -32,5 +32,7 @@ namespace OnlineAuction.ViewModels
         {
             BeginTime = DateTime.Now;
         }
+
+        public bool IsActive { get; set; }
     }
 }

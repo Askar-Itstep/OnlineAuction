@@ -9,7 +9,7 @@
     $(function () {
         $('footer').css("clear", "both")
     })
-    //===================<Сделать ставку>==========================================
+    //===================================================<Сделать ставку>========================================================
     $(function () {
     //1) Проверить ставку-----------------------
         function checkBet(currBet, yourBet) {
@@ -24,7 +24,7 @@
             return true;
         }
 
-    //2) Event Click-------------------
+    //2)------Ajax------------
         var myForm1 = document.form1;
         $(myForm1).submit(function (e) {
             e.preventDefault();
@@ -62,8 +62,13 @@
             })
         })
     });
-
-//------------------------ редактирование аукциона -------------------------------------------------------------------------------------
+    //---------коррекц. знач. выкупн цены если в БД установ. 0
+    $(function () {
+        if (parseFloat($('div.redemption').html()) == 0) {
+            $('.redemption').html(parseFloat($('.curr_bet').html()) * 3.0)
+        }
+    })
+//---------------------------------------------------------- редактирование аукциона -------------------------------------------------------------------------------------
     //доп.контроль по правам доступа к ред. аукц.(!)
     $(function () {
         //12.09.2020 14:25:00 -> 2020-09-12T14:25:00
@@ -75,7 +80,7 @@
             time = checkHour(time)
             //1, 2 - в контроллер, 3- для расчета длительн.
             return [new Object(year + '-' + month + '-' + day + 'T' + time), time,
-                                                        new Date(year + '-' + month + '-' + day + 'T' + time)]
+            new Date(year + '-' + month + '-' + day + 'T' + time)]
         }
 
         //в БД время может хран. в формате 1:15:00, от чего у JS запор
@@ -84,7 +89,7 @@
             hour = hour.length == 1 ? "0" + hour : hour;
             return hour + ':' + time.split(':')[1] + ':' + time.split(':')[2];
         }
-//-------------------------------------
+        //-------------------------------------
         $('a#editLink').click(function (e) {
             e.preventDefault();
             //1)проверка: право на редактир.
@@ -100,7 +105,7 @@
             if (date > dateBeginFormatDatetimeJS) {
                 var delPermiss = confirm("Время для редактирования истекло. Желаете отменить аукцион?");
                 console.log(delPermiss)
-                if (delPermiss == true) {
+                if (delPermiss == true) { //сейчас не нужно
                     $('#deleteLink').removeClass("hidden")
                 }
                 return;
@@ -136,7 +141,6 @@
                 url: '@Url.Action("Create", "Auctions")',
                 accept: 'application/json',
                 data: data,
-                beforeSend: console.log("Poehaly!"),
                 success: function (data) {
                     console.log(data)
                     alert(data)
@@ -146,14 +150,62 @@
                     alert(msg)
                 }
             })
-        });
-
-        //================Обработ. начала заказа =====================
-        //а) Купить сразу (цена = RedemptionPrice, аукцион - закрыв., опред. Победитель, победителю отправл. письмо со ссылкой на стр. оформ. Заказа)
-        $('#buy-now-btn').click(function (e) {
-
         })
-    })
+    });
+
+  //============================================== Покупки ==================================================
+    $(function () {
+        //а)  Обработ. <Купить сейчас> - т.е. перейти к оплате немедленно
+        //(цена = RedemptionPrice, аукцион - закрыв., опред.Победитель, победителю отправл.письмо со ссылкой на стр.оформ.Заказа)
+        $('#buy-now-btn').click(function (e) {
+            AddToCart(true);
+        });
+        //б) положить в Корзину т.е. начать оформление Заказа, но не ставить отметку <isAproved>---------------------------------
+        //сохр. его в сессии и добавл. в Корзмнц нов. продукты
+        $('#btn_add_to_cart').click(function (e) {
+            AddToCart(false);
+        })
+    });
+
+    function AddToCart(flagBuyNow) {
+        var item = {
+            Id: 0,
+            ProdId: parseInt($('.div-prod-id').html()),
+            EndPrice: parseFloat($('.redemption').html()),
+            OrderId: 0
+        }
+        var orderVM = {
+            Id: 0,
+            Items: new Array(item),
+            ClientId: parseInt($('.div-client').html()),
+            ProdId: parseInt($('.div-prod-id').html()),
+            EndPrice: parseFloat($('.redemption').html()),
+            AuctionId: parseInt($('.div-auction').html()),
+            flagBuyNow: flagBuyNow
+        }
+
+        $.ajax({
+            method: "GET",
+            url: "/Orders/Create/",
+            accept: 'application/json',
+            data: orderVM,
+            success: function (data) {
+                alert(data.message)
+                console.log(flagBuyNow)
+                //if (data.flagBuyNow == true) {
+                if (flagBuyNow == true) {
+                    $(location).attr('href', "/Orders/Confirm/?orderId=" + data.orderId)
+                }
+                else {
+                    console.log("Stay here")
+                }
+
+            },
+            error: function (e, msg) {
+                alert(msg)
+            }
+        })
+    }
 </script>
 
 <h2>Details</h2>
@@ -162,12 +214,12 @@
 <div class="hidden div-client">@ViewBag.Client.Id</div>
 <div class="hidden div-account">@ViewBag.Client.AccountId</div>
 <div class="hidden div-auction">@Model.Id</div>
+<div class="hidden div-prod-id">@Model.Product.Id</div>
 <div class="hidden div-price">@Model.Product.Price</div>
 <div class="hidden div-title">@Model.Product.Title</div>
 <div class="hidden div-image-id">@Model.Product.ImageId</div>
 <div class="hidden div-begin-time">@Model.BeginTime</div>
 <div class="hidden div-end-time">@Model.EndTime</div>
-
 <div class=" div-img">@ViewBag.editImg</div>
 
 <div style="display:flex">
@@ -194,7 +246,8 @@
 
 
         <form class="clearfix" name="form2" style="margin-top:10px">
-            <input type="hidden" name="item_id" value="">
+            <input type="hidden" name="auctionId" value=@Model.Id>
+            @*<input type="hidden" name="item_id" value="">*@
             <div class="col-md-4" style="margin-top:10px">
                 <h5><b>Цена “купить сейчас”</b></h5>
                 <div class="redemption">@Model.RedemptionPrice</div>
@@ -203,7 +256,7 @@
                 <input type="button" value="Купить сейчас" id="buy-now-btn" class="btn btn-danger btn-lg">
             </div>
             <div class="col-md-2" style="margin-top:35px">
-                <button class="btn btn-success" type="submit">
+                <button class="btn btn-success" type="submit" id="btn_add_to_cart">
                     <i class="fa fa-cart-plus fa-2x" aria-hidden="true"></i>
                 </button>
             </div>
@@ -216,10 +269,6 @@
             <dd id="actor_id">
                 @Html.HiddenFor(model => model.Actor.Id)
             </dd>
-
-            @*@*<dt id="product_title">
-                    @Html.HiddenFor(model => model.Product.Title)
-                </dt>*@
 
             <dt>
                 @Html.HiddenFor(model => model.Description)

@@ -4,7 +4,6 @@ using DataLayer.Entities;
 using OnlineAuction.Entities;
 using OnlineAuction.ServiceClasses;
 using OnlineAuction.ViewModels;
-using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
@@ -27,20 +26,20 @@ namespace OnlineAuction.Controllers
 
         //параметр sms - из метода Create (проверка на роль)
         public ActionResult Index(int? isActor, string alert = null) //isActor - только из _Layout.html (опред. по клику "мои аукц.")
-        {                                                               //alert - из метода Auction/Create()
+        {                                                               //alert - из методов Auctions/Create, Orders/Confirm
             var accountId = Session["accountId"] ?? 0; //надо обязат. выйти
-
-            //-----------------------------------------------------------
-            //фишка: отправить на титул "Лучшее предложение" (пока самый дорогой, а надо по соотн. рыноч (стат.) и предлож. продавц. цены
+            
             var auctionBO = DependencyResolver.Current.GetService<AuctionBO>();
-            List<AuctionBO> auctionsBO = auctionBO.LoadAll().ToList();
+            List<AuctionBO> auctionsBO = auctionBO.LoadAll().Where(a=>a.IsActive).ToList();
             var prodBO = DependencyResolver.Current.GetService<ProductBO>();
             List<ProductBO> productsBO = prodBO.LoadAll().ToList();
             decimal maxPrice = productsBO.Max(p => p.Price);
-            //на главн. разворот (~газеты)
+
+            //на главн. разворот (~газеты)-------------------------
             var bestAuctionBO = auctionsBO.Where(a => a.Product.Price >= maxPrice).FirstOrDefault();
             var bestAuctionVM = mapper.Map<AuctionVM>(bestAuctionBO);
             ViewBag.BestAuction = bestAuctionVM;
+
             //------могут быть 2 вида запроса: все аукционы; мои аукционы (актор), при этом попытка не-клиента должна пресек.---------
             ViewBag.Alert = "";
             if (alert != null && alert != "") {
@@ -77,7 +76,7 @@ namespace OnlineAuction.Controllers
         }
 
         //+Edit
-        public ActionResult Create(AuctionEditVM data, int? imageId) //data, imageId - возвр. JSON ajax-метод Detai.html->click("Edit")
+        public ActionResult Create(int? flagCreate, AuctionEditVM data, int? imageId) //data, imageId - возвр. JSON ajax-метод Detai.html->click("Edit")
         {
             var accountId = Session["accountId"] ?? 0;
             if ((int)accountId == 0) {  //Create
@@ -88,25 +87,27 @@ namespace OnlineAuction.Controllers
             if (roleAccountLinks == null || roleAccountLinks.Count() == 0) {
                 return RedirectToAction("Index", new { alert = "Вы пока не можете создать лот. Проверте ваш баланс!" });
             }
-            else {      //Edit
-                if (data != null && data.Id != 0) {
-                    var imageBO = DependencyResolver.Current.GetService<ImageBO>();
-                    ImageVM imageVM = null;
-                    if (imageId != null) {
-                        ImageBO image = imageBO.Load((int)imageId);
-                        imageVM = mapper.Map<ImageVM>(image);
-                    }
-                    //подготов. данных для 2го захода->потом из ajax снова  в этот контроллер, в котор. вызвать объект из сессии
-                    Session["editImg"] = imageVM;   
-                    Session["auctionEdit"] = data;
-                    return new JsonResult { Data = "Форма редактирования подготовлена!", JsonRequestBehavior = JsonRequestBehavior.AllowGet };
-                }
-                //данные для 2-го захода
-                var editVM = Session["auctionEdit"];
-                ViewBag.editImg = Session["editImg"];
-                ViewBag.Title = "Edit";
-                return View(editVM);
+            if (flagCreate != null) {
+                return View(new AuctionEditVM());
             }
+            else if(data != null && data.Id != 0) {      //Edit
+                var imageBO = DependencyResolver.Current.GetService<ImageBO>();
+                ImageVM imageVM = null;
+                if (imageId != null) {
+                    ImageBO image = imageBO.Load((int)imageId);
+                    imageVM = mapper.Map<ImageVM>(image);
+                }
+                //подготов. данных для 2го захода->потом из ajax снова  в этот контроллер, в котор. вызвать объект из сессии
+                Session["editImg"] = imageVM;
+                Session["auctionEdit"] = data;
+                return new JsonResult { Data = "Форма редактирования подготовлена!", JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+            }
+            //данные для 2-го захода (Edit)
+            var editVM = Session["auctionEdit"];
+            ViewBag.editImg = Session["editImg"];
+            ViewBag.Title = "Edit";
+            return View(editVM);
+
         }
 
         [HttpPost]

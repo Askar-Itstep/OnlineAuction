@@ -155,6 +155,33 @@ namespace OnlineAuction
                 .ForMember(dest => dest.Bet, opt => opt.MapFrom(src => src.Price));
                 //============================================
 
+
+                //--------------------------------------Orders ---------------------------------------
+                mpr.CreateMap<Order, OrderBO>()
+                                .ConstructUsing(c => DependencyResolver.Current.GetService<OrderBO>());
+
+                mpr.CreateMap<OrderBO, Order>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<Order>());
+
+                mpr.CreateMap<OrderVM, OrderBO>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<OrderBO>());
+
+                mpr.CreateMap<OrderBO, OrderVM>()
+                 .ConstructUsing(c => DependencyResolver.Current.GetService<OrderVM>());
+
+                //--------------------------------------Items ---------------------------------------
+                mpr.CreateMap<Item, ItemBO>()
+                                .ConstructUsing(c => DependencyResolver.Current.GetService<ItemBO>());
+
+                mpr.CreateMap<ItemBO, Item>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<Item>());
+
+                mpr.CreateMap<ItemVM, ItemBO>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<ItemBO>());
+
+                mpr.CreateMap<ItemBO, ItemVM>()
+                 .ConstructUsing(c => DependencyResolver.Current.GetService<ItemVM>());
+
             });
          }
     }

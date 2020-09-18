@@ -37,6 +37,7 @@ namespace BusinessLayer.BusinessObject
             BeginTime = DateTime.Now;
         }
 
+        public bool IsActive { get; set; }
         //------------------------------
         readonly IUnityContainer unityContainer;
         public AuctionBO(IMapper mapper, UnitOfWork unitOfWork, IUnityContainer container)
@@ -47,6 +48,12 @@ namespace BusinessLayer.BusinessObject
         public IEnumerable<AuctionBO> LoadAll()  //из DataObj в BusinessObj 
         {
             var auctions = unitOfWork.Auctions.GetAll();
+            var res = auctions.AsEnumerable().Select(a => mapper.Map<AuctionBO>(a)).ToList();
+            return res;
+        }
+        public IEnumerable<AuctionBO> LoadWithInclude(params string[] param)  //из DataObj в BusinessObj 
+        {
+            var auctions = unitOfWork.Auctions.Include(param);
             var res = auctions.AsEnumerable().Select(a => mapper.Map<AuctionBO>(a)).ToList();
             return res;
         }

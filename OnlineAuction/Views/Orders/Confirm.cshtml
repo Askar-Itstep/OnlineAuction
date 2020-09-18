@@ -1,0 +1,89 @@
+﻿@model OnlineAuction.ViewModels.OrderVM
+
+@{
+    ViewBag.Title = "Create";
+}
+<script>
+    $(function () {
+        $('button').click(function () {
+            $.ajax({
+                method: "Post",
+                url: '/Orders/Confirm',
+
+                success: function (data) {
+                    console.log(data.orderId)
+                    alert(data.message)
+                    $(location).attr('href', '/Orders/BuyBye?orderId=' + data.orderId)
+                }
+            })
+        })
+    })
+</script>
+<h2>Confirmation</h2>
+<br>
+
+@Html.AntiForgeryToken()
+<div class="border">
+    <h3><b>Customer information</b></h3>
+    <br />
+
+    <table>
+        <tr>
+            <th>Name</th>
+            <td>@Model.Client.Account.FullName</td>
+        </tr>
+        <tr>
+            <th>Email</th>
+            <td>@Model.Client.Account.Email</td>
+        </tr>
+        <tr>
+            <th>Address</th>
+            <td>@Model.Client.Account.Address.ToString()</td>
+        </tr>
+    </table>
+    <h3><b>Order summary</b></h3>
+    <table>
+        <tr>
+            <th>Quantity: </th>
+            <td> @Model.Items.Count()</td>
+            <th>Total cost</th>
+            <td>@Model.GetTotalPrice()</td>
+            <td> kzt</td>
+        </tr>
+    </table>
+</div>
+<div class="d-flex flex-wrap bd-highlight mb-3 jumbotron jumbotron-fluid">
+    @foreach (var item in Model.Items) {
+        <div class="card my-3" style="width: 200px">
+            @Html.Raw("<img  style='width: 200px; height: 130px',  src=\"data:image/jpeg;base64,"
+                                                             + Convert.ToBase64String(item.Product.Image.ImageData) + "\" />")
+            <table class="table table-hover table-sm">
+                <tr>
+                    <th>ID</th>
+                    <td>@item.Id</td>
+                </tr>
+                <tr>
+                    <th>Title</th>
+                    <td>@item.Product.Title</td>
+                </tr>
+                <tr>
+                    <th>EndPrice</th>
+                    <td>@item.EndPrice</td>
+                </tr>
+            </table>
+        </div>
+    }
+    <div style="width: 10px"></div>
+    <button class="btn btn-success btn-lg">Оплатить</button>
+</div>
+
+@if (User.IsInRole("admin")) {
+    <div>
+        @Html.ActionLink("Back to List", "Index")
+    </div>
+}
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

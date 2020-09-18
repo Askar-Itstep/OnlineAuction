@@ -158,6 +158,7 @@
     <Compile Include="Controllers\BetAuctionsController.cs" />
     <Compile Include="Controllers\ClientsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\OrdersController.cs" />
     <Compile Include="ServiceClasses\BuilderModels.cs" />
     <Compile Include="ViewModels\JsonRequestCreateBet.cs" />
     <Compile Include="ViewModels\AccountVM.cs" />
@@ -168,6 +169,8 @@
     <Compile Include="ViewModels\ClientVM.cs" />
     <Compile Include="ViewModels\ImageVM.cs" />
     <Compile Include="ViewModels\ItemVM.cs" />
+    <Compile Include="ViewModels\OrderAuctionsVM.cs" />
+    <Compile Include="ViewModels\OrderFullMapVM.cs" />
     <Compile Include="ViewModels\OrderVM.cs" />
     <Compile Include="ViewModels\ProductVM.cs" />
     <Compile Include="ViewModels\RegisterModel.cs" />
@@ -327,6 +330,12 @@
     <Content Include="Views\BetAuctions\Details.cshtml" />
     <Content Include="Views\BetAuctions\Edit.cshtml" />
     <Content Include="Views\BetAuctions\Index.cshtml" />
+    <Content Include="Views\Orders\Confirm.cshtml" />
+    <Content Include="Views\Orders\Delete.cshtml" />
+    <Content Include="Views\Orders\Details.cshtml" />
+    <Content Include="Views\Orders\Edit.cshtml" />
+    <Content Include="Views\Orders\Index.cshtml" />
+    <Content Include="Views\Orders\BuyBye.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
