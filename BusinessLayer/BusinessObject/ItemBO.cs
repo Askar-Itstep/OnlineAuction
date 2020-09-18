@@ -12,9 +12,9 @@ namespace BusinessLayer.BusinessObject
 {
     public class ItemBO: BaseBusinessObject
     {
-
         public int Id { get; set; }
 
+        //в кажд. аукц. продукты униальны (даже с идентич. характерист.)
         public int ProductId { get; set; }
         public  ProductBO Product { get; set; }
         public decimal EndPrice { get; set; }

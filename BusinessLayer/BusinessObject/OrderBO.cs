@@ -20,9 +20,9 @@ namespace BusinessLayer.BusinessObject
         public virtual ClientBO Client { get; protected set; }
 
 
-        public bool IsApproved { get; protected set; }
+        public bool IsApproved { get;  set; }
 
-        public void AddProduct(ItemBO itemBO)
+        public void AddItem(ItemBO itemBO)
         {
             itemBO.Order = this;
             Items.Add(itemBO);
@@ -39,6 +39,12 @@ namespace BusinessLayer.BusinessObject
         public IEnumerable<OrderBO> LoadAll()  //из DataObj в BusinessObj
         {
             var orders = unitOfWork.Orders.GetAll();
+            var res = orders.AsEnumerable().Select(a => mapper.Map<OrderBO>(a)).ToList();
+            return res;
+        }
+        public IEnumerable<OrderBO> LoadAllWithInclude(params string[] navigationProperty)  //из DataObj в BusinessObj
+        {
+            var orders = unitOfWork.Orders.Include(navigationProperty);
             var res = orders.AsEnumerable().Select(a => mapper.Map<OrderBO>(a)).ToList();
             return res;
         }

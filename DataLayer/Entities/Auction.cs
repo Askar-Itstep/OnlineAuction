@@ -41,6 +41,7 @@ namespace DataLayer.Entities
             BeginTime = DateTime.Now;
         }
 
+        public bool IsActive { get; set; }
     }
     
 }

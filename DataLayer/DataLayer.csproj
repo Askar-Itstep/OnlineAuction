@@ -127,6 +127,10 @@
     <Compile Include="Migrations\202009080545438_Fix-FieldName-Redemption.designer.cs">
       <DependentUpon>202009080545438_Fix-FieldName-Redemption.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202009121711190_Auctions_add_field_IsActive.cs" />
+    <Compile Include="Migrations\202009121711190_Auctions_add_field_IsActive.designer.cs">
+      <DependentUpon>202009121711190_Auctions_add_field_IsActive.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -178,6 +182,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202009080545438_Fix-FieldName-Redemption.resx">
       <DependentUpon>202009080545438_Fix-FieldName-Redemption.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202009121711190_Auctions_add_field_IsActive.resx">
+      <DependentUpon>202009121711190_Auctions_add_field_IsActive.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

@@ -11,25 +11,8 @@ namespace DataLayer.Entities
         [Key]
         public int? Id { get; set; }
         
-        public  ICollection<Item> Items { get; set; }
-
-        //protected Order()
-        //{
-        //    Items = new List<Item>();
-        //}
-
-        //public Order(IEnumerable<Item> items, Client client) : this()
-        //{
-        //    if (items == null)
-        //        throw new ArgumentNullException("items");
-
-        //    if (client == null)
-        //        throw new ArgumentNullException("client");
-
-        //    Client = client;
-        //    Items = items.ToList();
-        //}
-
+        public  virtual ICollection<Item> Items { get; set; }
+       
         [ForeignKey("Client")]
         public int? ClientId { get; set; }
         public virtual Client Client { get; protected set; }
@@ -37,7 +20,7 @@ namespace DataLayer.Entities
 
         public bool IsApproved { get; protected set; }
 
-        public void AddProduct(Item item)
+        public void AddItem(Item item)
         {
             item.Order = this;
             Items.Add(item);

@@ -1,0 +1,16 @@
+﻿@model OnlineAuction.ViewModels.OrderVM
+@{
+    ViewBag.Title = "BuyBye";
+}
+
+<h3>Finalize</h3>
+<blockquote class="blockquote text-center">
+    <h2><p class="mb-0">Thank you for Order!</p></h2>
+    <footer class="blockquote-footer">
+        Your order number
+        @*@if (Model != null) {
+            <cite title=@Model.Id> </cite>
+        }*@
+        <cite >@ViewBag.OrderId </cite>
+    </footer>
+</blockquote>

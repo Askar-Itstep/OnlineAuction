@@ -17,10 +17,15 @@ namespace OnlineAuction.ViewModels
 
         public bool IsApproved { get; protected set; }
 
-        public void AddProduct(ItemVM item)
+        public void AddItem(ItemVM item)
         {
             item.Order = this;
             Items.Add(item);
+        }
+
+        public decimal GetTotalPrice()
+        {
+            return Items.Sum(i => i.Product.Price);
         }
     }
 }
