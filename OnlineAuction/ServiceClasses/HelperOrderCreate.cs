@@ -1,0 +1,154 @@
+﻿using AutoMapper;
+using BusinessLayer.BusinessObject;
+using OnlineAuction.Entities;
+using OnlineAuction.ViewModels;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web.Mvc;
+using System.Net;
+
+namespace OnlineAuction.ServiceClasses
+{
+    public class HelperOrderCreate
+    {
+        private static Model1 db = new Model1();
+        public static IMapper mapper;
+
+        public HelperOrderCreate(IMapper mapper)
+        {
+        }
+
+        public static IEnumerable<OrderFullMapVM> GetSynteticVM(List<OrderBO> orders)
+        {
+            var itemBO = DependencyResolver.Current.GetService<ItemBO>();
+            IEnumerable<ItemBO> items = itemBO.LoadAll();
+
+            var auctionBO = DependencyResolver.Current.GetService<AuctionBO>();
+            IEnumerable<AuctionBO> auctions = auctionBO.LoadWithInclude("Product");
+            var query = auctions.Join(items,
+                a => a.Product.Id,
+                i => i.Product.Id,
+                (a, i) => new { a.Id, a.EndTime, a.Product, i.Order });
+
+            #region example query
+            //foreach (var q in query) {
+            //    System.Diagnostics.Debug.WriteLine($"FullName: {q.Order.Client.Account.FullName}");
+            //    foreach (var item in q.Order.Items) {
+            //        System.Diagnostics.Debug.WriteLine($"Product: {item.Product.Title}");
+            //    }
+            //}
+            #endregion
+
+            var res = orders.GroupJoin(
+                query,
+                o => o.Id,
+                q => q.Order.Id,
+                (os, qs) => new
+                {
+                    os.Id,
+                    os.Client,
+                    os.IsApproved,
+                    OrderAuctions = qs.Select(q => new
+                    {
+                        AuctionId = q.Id,
+                        q.EndTime,
+                        q.Product,
+                        q.Order
+                    })
+                });
+
+            #region example res
+            //foreach (var r in res) {
+            //    System.Diagnostics.Debug.WriteLine($"OrderID: {r.Id}");
+            //    System.Diagnostics.Debug.WriteLine($"Client: {r.Client.Account.FullName}");
+            //    foreach (var auct in r.OrderAuctions) {
+            //        System.Diagnostics.Debug.WriteLine($"AuctionID: {auct.AuctionId}");
+            //        foreach (var item in auct.Order.Items) {
+            //            System.Diagnostics.Debug.WriteLine($"Product: {item.Product.Title}");
+            //        }
+            //    }
+            //}
+            #endregion
+
+            //----------теперь получить синтетик ----------
+            IEnumerable<OrderFullMapVM> syntetic = res.Select(r => new OrderFullMapVM
+            {
+                Id = (int)r.Id,
+                Client = mapper.Map<ClientVM>(r.Client),
+                IsApproved = r.IsApproved,
+                AuctionIds = r.OrderAuctions.Select(oa => oa.AuctionId).ToList(),//.ToArray(),
+                EndTimes = r.OrderAuctions.Select(oa => oa.EndTime),
+                Products = r.OrderAuctions.Select(oa => mapper.Map<ProductVM>(oa.Product))
+            });
+
+            #region find Null Syntetic 
+            //IEnumerable<OrderFullMapVM> syntetic2 = new List<OrderFullMapVM>();
+            //foreach (var order in res) {
+            //    var orderMap = new OrderFullMapVM();
+            //    orderMap.OrderId = (int)order.Id;
+            //    orderMap.Client = mapper.Map<ClientVM>(order.Client);
+            //    orderMap.IsApproved = order.IsApproved;
+            //    foreach (var auct in order.OrderAuctions) {
+            //        orderMap.AuctionIds.ToList().Add(auct.AuctionId);
+            //        orderMap.EndTimes.ToList().Add(auct.EndTime);
+            //        orderMap.Products.ToList().Add(mapper.Map<ProductVM>(auct.Product));
+            //    }
+            //}
+            #endregion
+
+            return syntetic;
+        }
+
+        public static int AddToCart(int? prodId, decimal? endPrice, OrderBO lastOrder)
+        {
+            int orderId;
+            var itemVM = new ItemVM { ProductId = (int)prodId, EndPrice = (int)endPrice };
+            ItemBO itemMapBO = mapper.Map<ItemBO>(itemVM);
+            itemMapBO.OrderId = lastOrder.Id;
+            orderId = (int)lastOrder.Id;
+            //itemMapBO.Save(itemMapBO);
+            return orderId;
+        }
+
+        public static void CloseAuction(decimal? endPrice, int? auctionId, AuctionBO auctionBO, OrderBO orderBO)
+        {
+            auctionBO.EndTime = DateTime.Now;
+            auctionBO.Winner = orderBO.Client;
+            auctionBO.IsActive = false; //деактивир.
+            //auctionBO.Save(auctionBO);
+
+            //вн. изм. в BetAuction
+            BetAuctionBO betAuctionBO = DependencyResolver.Current.GetService<BetAuctionBO>();
+            betAuctionBO.AuctionId = (int)auctionId;
+            betAuctionBO.ClientId = (int)orderBO.ClientId;
+            betAuctionBO.Bet = (decimal)endPrice;
+            //betAuctionBO.Save(betAuctionBO);
+        }
+
+        public static T Cast<T>(T typeHolder, Object x)
+        {
+            return (T)x;
+        }
+
+        public static void GetOrderWithClient(int? orderId, out OrderBO orderBO, out ClientBO clientBO)
+        {
+            orderBO = DependencyResolver.Current.GetService<OrderBO>();
+            orderBO = orderBO.LoadAllWithInclude("Items").FirstOrDefault(o => o.Id == orderId);
+            clientBO = DependencyResolver.Current.GetService<ClientBO>();
+            clientBO = clientBO.Load((int)orderBO.ClientId);
+        }
+
+        public static void GetClientWithAuction(OrderVM orderVM, int? auctionId, out ClientBO clientBO, out AuctionBO auctionBO)
+        {
+            clientBO = DependencyResolver.Current.GetService<ClientBO>();
+            clientBO = clientBO.Load((int)orderVM.ClientId);
+            auctionBO = DependencyResolver.Current.GetService<AuctionBO>();
+            auctionBO = auctionBO.LoadAsNoTracking((int)auctionId);
+        }
+       
+      
+
+
+    }
+}

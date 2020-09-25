@@ -4,6 +4,7 @@
     ViewBag.Title = "Details";
     ViewBag.OfferNextBet = ViewBag.TopBet.Bet + Model.Step;
 }
+<script src="~/Scripts/MyShareScripts/ShareScripts.js" type="text/javascript"></script>
 <script>
     //очист. стиля
     $(function () {
@@ -68,28 +69,8 @@
             $('.redemption').html(parseFloat($('.curr_bet').html()) * 3.0)
         }
     })
-//---------------------------------------------------------- редактирование аукциона -------------------------------------------------------------------------------------
-    //доп.контроль по правам доступа к ред. аукц.(!)
+//------------------------------------ редактирование аукциона ------------------------------------------------------------------------------------
     $(function () {
-        //12.09.2020 14:25:00 -> 2020-09-12T14:25:00
-        function getDateTime(parametr) {
-            let day = parametr.split(' ')[0].split('.')[0];
-            let month = parametr.split(' ')[0].split('.')[1];
-            let year = parametr.split(' ')[0].split('.')[2];
-            let time = parametr.split(" ")[1];
-            time = checkHour(time)
-            //1, 2 - в контроллер, 3- для расчета длительн.
-            return [new Object(year + '-' + month + '-' + day + 'T' + time), time,
-            new Date(year + '-' + month + '-' + day + 'T' + time)]
-        }
-
-        //в БД время может хран. в формате 1:15:00, от чего у JS запор
-        function checkHour(time) {
-            let hour = time.split(':')[0]
-            hour = hour.length == 1 ? "0" + hour : hour;
-            return hour + ':' + time.split(':')[1] + ':' + time.split(':')[2];
-        }
-        //-------------------------------------
         $('a#editLink').click(function (e) {
             e.preventDefault();
             //1)проверка: право на редактир.
@@ -101,14 +82,20 @@
             var date = new Date();
             var begin = $('.div-begin-time').html()
             var dateBeginFormatDatetimeJS = getDateTime(begin)[2]
+            var end = $('.div-end-time').html()
+            var dateEndFormatDatetimeJS = getDateTime(end)[2]
 
-            if (date > dateBeginFormatDatetimeJS) {
+            //console.log(dateEndFormatDatetimeJS)
+            if (date > dateBeginFormatDatetimeJS && date < dateEndFormatDatetimeJS) {
                 var delPermiss = confirm("Время для редактирования истекло. Желаете отменить аукцион?");
-                console.log(delPermiss)
                 if (delPermiss == true) { //сейчас не нужно
                     $('#deleteLink').removeClass("hidden")
                 }
                 return;
+            }
+            if (date > dateEndFormatDatetimeJS) {
+                 alert("Аукцион уже завершен. Изменение не возможно!")
+                 return;
             }
             //3) надо не просто перейти, но еще и передать все знач. и имена значим. полей
             var price = parseFloat($('.div-price').html())
@@ -118,8 +105,7 @@
             var dateBegin = getDateTime(begin)[0]   // v.1 +
             var timeBegin = getDateTime(begin)[1]   // v.2 => DateTime.ASP
 
-            var end = $('.div-end-time').html()
-            var dateEndFormatDatetimeJS = getDateTime(end)[2]
+            
             var duration = (dateEndFormatDatetimeJS - dateBeginFormatDatetimeJS) / (1000 * 3600);    //- только часы
 
             //пакет для редактир. (в методе Create!)=>AuctionEditVM!
@@ -135,7 +121,7 @@
                 duration: duration,
                 imageId: parseInt($('.div-image-id').html())
             }
-            console.log(data.duration)
+            console.log(data)
             $.ajax({
                 method: "Get",
                 url: '@Url.Action("Create", "Auctions")',

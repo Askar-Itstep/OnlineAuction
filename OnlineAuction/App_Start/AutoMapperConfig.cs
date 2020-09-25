@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Web.Mvc;
 using AutoMapper;
 using BusinessLayer.BusinessObject;
@@ -182,6 +184,55 @@ namespace OnlineAuction
                 mpr.CreateMap<ItemBO, ItemVM>()
                  .ConstructUsing(c => DependencyResolver.Current.GetService<ItemVM>());
 
+
+                //==========================OrderFullMapVM==================================================
+
+                mpr.CreateMap<OrderVM, OrderFullMapVM>()
+                .ConstructUsing(c => DependencyResolver.Current.GetService<OrderFullMapVM>())
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+                //.ForMember(dest => dest.ClientId, opt => opt.MapFrom(src => src.ClientId))    //зачем?
+                //.ForMember(dest => dest.Client, opt => opt.MapFrom(src => src.Client)) 
+                //.ForMember(dest => dest.IsApproved, opt => opt.MapFrom(src => src.IsApproved))
+                .ForMember(dest => dest.AuctionIds, opt => opt.MapFrom(src => new List<int>()))
+                .ForMember(dest => dest.ProductIds, opt => opt.MapFrom(src => new List<int>()))
+                .ForMember(dest => dest.Products, opt => opt.MapFrom(src => src.Items.Select(s=>s.Product)))
+                .ForMember(dest => dest.EndTimes, opt => opt.MapFrom(src => new List<DateTime> ()));
+
+                mpr.CreateMap<OrderFullMapVM, OrderVM>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<OrderVM>())
+               .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+               .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.GetItems()))
+               //.ForMember(dest => dest.ClientId, opt => opt.MapFrom(src => src.ClientId))    //зачем?
+               //.ForMember(dest => dest.Client, opt => opt.MapFrom(src => src.Client)) 
+               //.ForMember(dest => dest.IsApproved, opt => opt.MapFrom(src => src.IsApproved))
+               ;
+                //-------------
+                mpr.CreateMap<AuctionVM, OrderFullMapVM>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<OrderFullMapVM>())
+               .ForMember(dest => dest.Id, opt => opt.MapFrom(src => 0))
+               .ForMember(dest => dest.ClientId, opt => opt.MapFrom(src => src.WinnerId))
+               .ForMember(dest => dest.Client, opt => opt.MapFrom(src => src.Winner))
+               .ForMember(dest => dest.IsApproved, opt => opt.MapFrom(src => false))
+               .ForMember(dest => dest.AuctionIds, opt => opt.MapFrom(src => new List<AuctionVM>() { new AuctionVM { Id=src.Id } }))
+               .ForMember(dest => dest.EndTimes, opt => opt.MapFrom(src => new List<DateTime>() { src.EndTime}))
+               .ForMember(dest => dest.ProductIds, opt => opt.MapFrom(src => new List<int>() { src.ProductId }))
+               .ForMember(dest => dest.Products, opt => opt.MapFrom(src => new List<ProductVM>() { src.Product }));
+
+                mpr.CreateMap<OrderFullMapVM, AuctionVM>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<AuctionVM>())
+               .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.AuctionIds[0]))
+               .ForMember(dest => dest.ActorId, opt => opt.MapFrom(src => 0))
+               .ForMember(dest => dest.Actor, opt => opt.MapFrom(src => new ClientVM()))
+               .ForMember(dest => dest.BeginTime, opt => opt.MapFrom(src => new DateTime()))
+               .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => src.EndTimes.ToList()[0]))
+               .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.ProductIds[0]))
+               .ForMember(dest => dest.Product, opt => opt.MapFrom(src => src.Products.ToList()[0]))
+               .ForMember(dest => dest.Step, opt => opt.MapFrom(src => 0))
+               .ForMember(dest => dest.RedemptionPrice, opt => opt.MapFrom(src => 0))
+               .ForMember(dest => dest.Description, opt => opt.MapFrom(src => "")) //src.Products.ToList()[0].Title
+               .ForMember(dest => dest.BetAuctions, opt => opt.MapFrom(src => new List<BetAuctionVM>() { new BetAuctionVM() }))
+               .ForMember(dest => dest.WinnerId, opt => opt.MapFrom(src => src.ClientId))
+               .ForMember(dest => dest.Winner, opt => opt.MapFrom(src => src.Client));
             });
          }
     }

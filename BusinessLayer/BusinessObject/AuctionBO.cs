@@ -93,5 +93,6 @@ namespace BusinessLayer.BusinessObject
             unitOfWork.Auctions.Delete(auction.Id);
             unitOfWork.Auctions.Save();
         }
+        
     }
 }

@@ -1,19 +1,19 @@
 ﻿<script>
     //datepicker
     $(function () {
-        $("input#daybegin").datepicker({ dateFormat: "yy-mm-dd"}) 
+        $("input#daybegin").datepicker({ dateFormat: "yy-mm-dd" })
     });
     //очист. стиля
     $(function () {
         $('footer').css("clear", "both")
     })
-    //при Edit     
+    //------------------- при Edit ----------------------------------
     $(function () {
-    //a)-изм.названия кнопок
-        if ($('input#auctionId').val() != null) {
+        //a)-изм.названия кнопок
+        if ($('input#auctionId').val() != 0) {
             console.log("Edit begin (out _FormAddProduct)!")
             $('input[type=submit').val("Edit");
-    //b)-изм. формат даты 12.09.2020 22:10:00 -> 12.09.2020
+            //b)-изм. формат даты 12.09.2020 22:10:00 -> 12.09.2020
             var oldValue = $('input#daybegin').val()
             var newValue = oldValue.split(' ')[0]
             $('input#daybegin').val(newValue)
@@ -66,7 +66,7 @@
 @model OnlineAuction.ViewModels.AuctionEditVM
 
 @using (Html.BeginForm()) {
-    @*@Html.AntiForgeryToken()*@
+    @*@Html.AntiForgeryToken() *@
     <div style="margin-bottom:20px; max-width:inherit" class="col-md-5">
         <div class="form-horizontal">
             @{
@@ -97,7 +97,7 @@
             <div class="form-group">
                 @Html.LabelFor(model => model.Price, htmlAttributes: new { @class = "control-label col-md-2" })
                 <div class="col-md-10">
-                    @Html.EditorFor(model => model.Price, new { htmlAttributes = new { @class = "form-control", @id="id_price"} })
+                    @Html.EditorFor(model => model.Price, new { htmlAttributes = new { @class = "form-control", @id = "id_price" } })
                     @Html.ValidationMessageFor(model => model.Price, "", new { @class = "text-danger" })
                 </div>
             </div>
@@ -156,12 +156,12 @@
 }
 
 
-    <div class="col-md-6">
-        @if (ViewBag.editImg == null) {
-            <img src="~/Files/create.png" alt="noImg" />
-        }
-        else {
-            @Html.Raw("<img  style='width: 100%',  src=\"data:image/jpeg;base64," + Convert.ToBase64String(ViewBag.editImg.ImageData) + "\" />")
-        }
-        
-    </div>
+<div class="col-md-6">
+    @if (ViewBag.editImg == null) {
+        <img src="~/Files/create.png" alt="noImg" />
+    }
+    else {
+        @Html.Raw("<img  style='width: 100%',  src=\"data:image/jpeg;base64," + Convert.ToBase64String(ViewBag.editImg.ImageData) + "\" />")
+    }
+
+</div>

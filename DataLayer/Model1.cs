@@ -33,6 +33,10 @@ namespace OnlineAuction.Entities
         {
         }
 
+        //public System.Data.Entity.DbSet<OnlineAuction.ViewModels.OrderVM> OrderVMs { get; set; }
+
+        //public System.Data.Entity.DbSet<OnlineAuction.ViewModels.ClientVM> ClientVMs { get; set; }
+
         //public System.Data.Entity.DbSet<OnlineAuction.ViewModels.AuctionEditVM> AuctionEditVMs { get; set; }
     }
 

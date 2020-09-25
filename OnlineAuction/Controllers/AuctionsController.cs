@@ -2,11 +2,11 @@
 using BusinessLayer.BusinessObject;
 using DataLayer.Entities;
 using OnlineAuction.Entities;
+using OnlineAuction.Schedulers;
 using OnlineAuction.ServiceClasses;
 using OnlineAuction.ViewModels;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.Entity;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -28,9 +28,9 @@ namespace OnlineAuction.Controllers
         public ActionResult Index(int? isActor, string alert = null) //isActor - только из _Layout.html (опред. по клику "мои аукц.")
         {                                                               //alert - из методов Auctions/Create, Orders/Confirm
             var accountId = Session["accountId"] ?? 0; //надо обязат. выйти
-            
+
             var auctionBO = DependencyResolver.Current.GetService<AuctionBO>();
-            List<AuctionBO> auctionsBO = auctionBO.LoadAll().Where(a=>a.IsActive).ToList();
+            List<AuctionBO> auctionsBO = auctionBO.LoadAll().Where(a => a.IsActive).ToList();
             var prodBO = DependencyResolver.Current.GetService<ProductBO>();
             List<ProductBO> productsBO = prodBO.LoadAll().ToList();
             decimal maxPrice = productsBO.Max(p => p.Price);
@@ -76,7 +76,7 @@ namespace OnlineAuction.Controllers
         }
 
         //+Edit
-        public ActionResult Create(int? flagCreate, AuctionEditVM data, int? imageId) //data, imageId - возвр. JSON ajax-метод Detai.html->click("Edit")
+        public ActionResult Create(AuctionEditVM data, int? flagCreate, int? imageId) //data, imageId - возвр. JSON ajax-метод Detai.html->click("Edit")
         {
             var accountId = Session["accountId"] ?? 0;
             if ((int)accountId == 0) {  //Create
@@ -90,7 +90,7 @@ namespace OnlineAuction.Controllers
             if (flagCreate != null) {
                 return View(new AuctionEditVM());
             }
-            else if(data != null && data.Id != 0) {      //Edit
+            else if (data != null && data.Id != 0) {      //Edit
                 var imageBO = DependencyResolver.Current.GetService<ImageBO>();
                 ImageVM imageVM = null;
                 if (imageId != null) {
@@ -116,72 +116,83 @@ namespace OnlineAuction.Controllers
         {
             var userId = Session["accountId"] ?? 0;
             string message = "";
-
-            if (id == null) {
-                Auction auction = new Auction();
+            if (id == 0) {   //Create
+                //Auction auction = new Auction();
+                AuctionBO auction = DependencyResolver.Current.GetService<AuctionBO>();
                 if (ModelState.IsValid) //AuctionVM         
                 {
                     if ((int)userId != 0) {
-                        await BuilderModels.CreateEntity(editVM, auction, userId, upload);
+                        BuilderSynteticModels.mapper = mapper;
+                        auction = await BuilderSynteticModels.CreateEntity(editVM, auction, userId, upload);
                         message = "Данные записаны!";
+                        //планировщик должен сработать при истечении врмени аукциона
+                        //а)триггер-время окончания аукциона
+                        //б)вызыв. работа-выбор победителя, прекращ. аукциона, ставок, отправка писем
+                        BetAuctionScheduler.DateBegin = auction.BeginTime;
+                        BetAuctionScheduler.DateEnd = auction.EndTime;
+                        BetAuctionScheduler.Start();
                     }
                     else {
                         message = "Ошибка. Данные не записаны!";
                     }
-
                     return new JsonResult { Data = message, JsonRequestBehavior = JsonRequestBehavior.DenyGet };
                 }
-
                 return View(auction);
             }
-            else {
-                //Auction auction = await db.Auctions.FindAsync(id);
+            else if (id == null) {      //Edit
                 AuctionBO auctionBO = DependencyResolver.Current.GetService<AuctionBO>();
-                auctionBO = auctionBO.LoadAsNoTracking((int)id);//.Load((int)id);
+                auctionBO = auctionBO.LoadAsNoTracking((int)id);
                 if (auctionBO == null) {
-                    return HttpNotFound();
+                    //return HttpNotFound();
+                    message = "Неизвестн. Обратитесь позднее";
+                    return new JsonResult { Data = message, JsonRequestBehavior = JsonRequestBehavior.DenyGet };
                 }
                 message = "Данные перезаписаны!";
-                BuilderModels.mapper = mapper;
-                await BuilderModels.EditEntityAsync(editVM, auctionBO, userId, upload);    //
+                BuilderSynteticModels.mapper = mapper;
+                await BuilderSynteticModels.EditEntityAsync(editVM, auctionBO, upload);
                 return new JsonResult { Data = message, JsonRequestBehavior = JsonRequestBehavior.DenyGet };
             }
+            else {
+                message = "Неизвестная ошибка. Обратитесь позднее";
+                return new JsonResult { Data = message, JsonRequestBehavior = JsonRequestBehavior.DenyGet };
+            }
+
         }
 
 
-        [Authorize(Roles = "moder")] //доп.контр. в предст.: аукц. может редакт. только его модер!
-        public async Task<ActionResult> Edit(int? id) //по ID-редактир. админ, а модер должен имет возм ред-ть продукт,
-        {                                                       //но не ред-ть организ. лота и победителя
-            if (id == null) {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Auction auction = await db.Auctions.FindAsync(id);
-            if (auction == null) {
-                return HttpNotFound();
-            }
-            ViewBag.ActorId = new SelectList(db.Clients.Include(c => c.Account), "Id", "Account.FullName", auction.ActorId);
-            ViewBag.ProductId = new SelectList(db.Products, "Id", "Title", auction.ProductId);
-            ViewBag.WinnerId = new SelectList(db.Clients.Include(c => c.Account), "Id", "Account.FullName", auction.WinnerId);
-            return View(auction);
-        }
+        //[Authorize(Roles = "moder")]
+        //public async Task<ActionResult> Edit(int? id) //по ID-редактир. админ, а модер должен имет возм ред-ть продукт,
+        //{                                                       //но не ред-ть организ. лота и победителя
+        //    if (id == null) {
+        //        return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+        //    }
+        //    Auction auction = await db.Auctions.FindAsync(id);
+        //    if (auction == null) {
+        //        return HttpNotFound();
+        //    }
+        //    ViewBag.ActorId = new SelectList(db.Clients.Include(c => c.Account), "Id", "Account.FullName", auction.ActorId);
+        //    ViewBag.ProductId = new SelectList(db.Products, "Id", "Title", auction.ProductId);
+        //    ViewBag.WinnerId = new SelectList(db.Clients.Include(c => c.Account), "Id", "Account.FullName", auction.WinnerId);
+        //    return View(auction);
+        //}
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
 
-        public async Task<ActionResult> Edit(
-        //[Bind(Include = "Id,ActorId,BeginTime,EndTime,ProductId,WinnerId")]
-        Auction auction)
-        {
-            if (ModelState.IsValid) {
-                db.Entry(auction).State = EntityState.Modified;
-                await db.SaveChangesAsync();
-                return RedirectToAction("Index");
-            }
-            ViewBag.ActorId = new SelectList(db.Clients.Include(c => c.Account), "Id", "Account.FullName", auction.ActorId);
-            ViewBag.ProductId = new SelectList(db.Products, "Id", "Title", auction.ProductId);
-            ViewBag.WinnerId = new SelectList(db.Clients.Include(c => c.Account), "Id", "Account.FullName", auction.WinnerId);
-            return View(auction);
-        }
+        //public async Task<ActionResult> Edit(
+        ////[Bind(Include = "Id,ActorId,BeginTime,EndTime,ProductId,WinnerId")]
+        //Auction auction)
+        //{
+        //    if (ModelState.IsValid) {
+        //        db.Entry(auction).State = EntityState.Modified;
+        //        await db.SaveChangesAsync();
+        //        return RedirectToAction("Index");
+        //    }
+        //    ViewBag.ActorId = new SelectList(db.Clients.Include(c => c.Account), "Id", "Account.FullName", auction.ActorId);
+        //    ViewBag.ProductId = new SelectList(db.Products, "Id", "Title", auction.ProductId);
+        //    ViewBag.WinnerId = new SelectList(db.Clients.Include(c => c.Account), "Id", "Account.FullName", auction.WinnerId);
+        //    return View(auction);
+        //}
 
         public async Task<ActionResult> Delete(int? id)
         {

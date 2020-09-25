@@ -27,7 +27,7 @@ namespace BusinessLayer.BusinessObject
             itemBO.Order = this;
             Items.Add(itemBO);
         }
-
+        
 
         //---------------------------
         readonly IUnityContainer unityContainer;
@@ -51,6 +51,11 @@ namespace BusinessLayer.BusinessObject
         public OrderBO Load(int id)
         {
             var order = unitOfWork.Orders.GetById(id);
+            return mapper.Map(order, this);
+        }
+        public OrderBO LoadAsNoTracking(int id)
+        {
+            var order = unitOfWork.Orders.GetAllNoTracking().FirstOrDefault(o => o.Id == id);
             return mapper.Map(order, this);
         }
         public void Save(OrderBO orderBO)
