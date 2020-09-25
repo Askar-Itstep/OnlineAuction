@@ -1,36 +1,103 @@
-﻿@model DataLayer.Entities.Order
+﻿@*@model OnlineAuction.ViewModels.OrderVM*@
+@model OnlineAuction.ViewModels.OrderFullMapVM
+@using OnlineAuction.ServiceClasses;
 
 @{
     ViewBag.Title = "Edit";
+    ViewBag.PlaceHolderId = 0;
+    if (Model != null) {
+        ViewBag.PlaceHolderId = Model.Id;
+    }
 }
+<script>
 
+    $(function () {
+        var myForm = document.forms[0];
+
+        $(myForm).submit(function (e) {
+            var data = new FormData(myForm);
+            $.ajax({
+                method: "POST",
+                url: '@Url.Action("EditAsync", "Orders")',
+                data: data,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    alert(data.message)
+                    if (data.success == true) {
+                        $(location).attr('href', '/Orders/Index')
+                    }
+                    //else
+                        //$(location).attr('href', '/Orders/Edit/?')
+                },
+                error: function (e, msg) {
+                    console.log("Error")
+                    alert(msg)
+                }
+            })
+        })
+    });
+
+
+</script>
 <h2>Edit</h2>
 
+@using (Html.BeginForm("EditAsync", "Orders", FormMethod.Post)) {
+@*@using (Ajax.BeginForm("Edit", new AjaxOptions { OnSuccess = "OnSuccess" })) {*@ 
+    @*@Html.AntiForgeryToken()*@
 
-@using (Html.BeginForm())
-{
-    @Html.AntiForgeryToken()
-    
-    <div class="form-horizontal">
-        <h4>Order</h4>
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        @Html.HiddenFor(model => model.Id)
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.ClientId, "ClientId", htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.DropDownList("ClientId", null, htmlAttributes: new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.ClientId, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Save" class="btn btn-default" />
-            </div>
+<div class="form-horizontal">
+    <h4>OrderFullMapVM</h4>
+    <hr />
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    <div class="form-group">
+        @Html.LabelFor(model => model.Id, "OrderId", htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Id, new { htmlAttributes = new { @readonly = "readonly" } })
+            @Html.ValidationMessageFor(model => model.Id, "", new { @class = "text-danger" })
         </div>
     </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.ClientId, "ClientId", htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(m => m.ClientId, ViewBag.Clients as SelectList)
+            @Html.ValidationMessageFor(model => model.ClientId, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.IsApproved, "IsApproved", htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.CheckBoxFor(m => m.IsApproved, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.IsApproved, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.AuctionIds, "AuctionIds", htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(m => m.AuctionIds, new { htmlAttributes = new { @readonly = "readonly" } })
+            @Html.ValidationMessageFor(model => model.AuctionIds, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.EndTimes, "EndTimes", htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.EndTimes, new { htmlAttributes = new { @class = "form-control", id = "end-time", type = "text", name = "EndTime", @readonly = "readonly" } })
+            @Html.ValidationMessageFor(model => model.EndTimes, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.ProductIds, "Product", htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(m => m.ProductIds, new { htmlAttributes = new { @class = "form-control", id = "product", type = "text", name = "product", @readonly = "readonly" } })
+            @Html.ValidationMessageFor(model => model.ProductIds, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" value="Save" class="btn btn-primary btn-lg" />
+        </div>
+    </div>
+</div>
 }
 
 <div>

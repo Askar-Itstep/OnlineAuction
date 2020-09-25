@@ -53,7 +53,7 @@ namespace OnlineAuction.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create (Account account)
+        public async Task<ActionResult> Create(Account account)
         {
             if (ModelState.IsValid) {
                 db.Account.Add(account);
@@ -132,7 +132,7 @@ namespace OnlineAuction.Controllers
                 //account.SetRoles(roles); //over code-no save!
                 var moderRole = db.Roles.Where(r => r.RoleName.Contains("moder")).FirstOrDefault();
                 db.RoleAccountLinks.Add(new RoleAccountLink { AccountId = (int)account.Id, RoleId = moderRole.Id });
-                
+
                 db.Entry(account).State = EntityState.Modified;
                 await db.SaveChangesAsync();
             }
@@ -178,24 +178,29 @@ namespace OnlineAuction.Controllers
 
                 var accountBOList = accountBO.LoadAll();
                 accountBO = accountBOList.FirstOrDefault(u => (u.Email.Contains(model.Login) || u.Email.Contains(model.Login)) && u.Password.Equals(model.Password));
-                if (accountBO == null)
+                if (accountBO == null) {
                     return RedirectToAction("Index", "Home");
+                }
 
                 var roleAccountBOList = roleAccountBO.LoadAll().Where(r => r.AccountId == accountBO.Id).ToList();
                 List<RoleBO> rolesBO = roleAccountBOList.Where(r => r.AccountId == accountBO.Id).Select(r => r.Role).ToList();
                 accountBO.RolesBO = rolesBO;
 
+                //связь котор. надо удалить или добавить
+                RoleAccountLinkBO linkRoleClientAccount = roleAccountBOList.Where(r => r.Role.RoleName.Contains("moder")).FirstOrDefault();    //client
                 if (accountBO.Balance <= 0) { //удал. роль клиента
-                    //связь котор. надо удалить
-                    RoleAccountLinkBO linkRoleClientAccount = roleAccountBOList.Where(r => r.Role.RoleName.Contains("client")).FirstOrDefault();
+
                     if (linkRoleClientAccount != null) {
-                        roleAccountBOList.Where(r => r.Role.RoleName.Contains("client")).FirstOrDefault().DeleteSave(linkRoleClientAccount);
+                        roleAccountBOList.Where(r => r.Role.RoleName.Contains("moder")).FirstOrDefault().DeleteSave(linkRoleClientAccount);
                     }
-                    #region overCode
-                    ////удал. роль в аккаунте //зачем????? - accountBO нигде не исп. и не сохр.
-                    //RoleBO roleClient = roleAccountBOList.Where(r => r.Role.RoleName.Contains("client")).Select(r => r.Role).FirstOrDefault();
-                    //accountBO.RemoveRole(roleClient); //удал. роль клиента
-                    #endregion
+                }
+                else {
+                    if (linkRoleClientAccount == null) {
+                        RoleBO roleModer = DependencyResolver.Current.GetService<RoleBO>().LoadAll().FirstOrDefault(r => r.RoleName.Contains("moder"));
+                        roleAccountBO.Role = roleModer;
+                        roleAccountBO.Account = accountBO;
+                        roleAccountBO.Save(roleAccountBO);
+                    }
                 }
 
                 if (accountBO != null) {

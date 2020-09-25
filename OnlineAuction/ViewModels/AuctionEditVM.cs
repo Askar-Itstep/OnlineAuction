@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using OnlineAuction.ServiceClasses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +7,7 @@ using System.Web;
 
 namespace OnlineAuction.ViewModels
 {
-    public class AuctionEditVM
+    public class AuctionEditVM: ISyntetic
     {
         public int Id { get; set; }
         public string Title { get; set; }

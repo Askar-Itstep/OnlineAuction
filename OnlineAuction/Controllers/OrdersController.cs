@@ -2,6 +2,8 @@
 using BusinessLayer.BusinessObject;
 using DataLayer.Entities;
 using OnlineAuction.Entities;
+using OnlineAuction.Schedulers;
+using OnlineAuction.ServiceClasses;
 using OnlineAuction.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -22,9 +24,8 @@ namespace OnlineAuction.Controllers
             this.mapper = mapper;
         }
 
-        public ActionResult Index(int? accountId)
+        public ActionResult Index(int? accountId, string alert)
         {
-            //var orders = db.Orders.Include(o => o.Client);
             OrderBO orderBO = DependencyResolver.Current.GetService<OrderBO>();
             List<OrderBO> orders = orderBO.LoadAllWithInclude("Client").ToList();
             if (accountId != null) {
@@ -33,81 +34,39 @@ namespace OnlineAuction.Controllers
             List<OrderVM> ordersVM = orders.Select(o => mapper.Map<OrderVM>(o)).ToList();
             //2)
             //получить заказы с датами (только по связям с item, Product, Auction)
-            var itemBO = DependencyResolver.Current.GetService<ItemBO>();
-            IEnumerable<ItemBO> items = itemBO.LoadAll();
+            HelperOrderCreate.mapper = mapper;
+            IEnumerable<OrderFullMapVM> syntetic = HelperOrderCreate.GetSynteticVM(orders);
 
-            var auctionBO = DependencyResolver.Current.GetService<AuctionBO>();
-            IEnumerable<AuctionBO> auctions = auctionBO.LoadWithInclude("Product");
-            var query = auctions.Join(items,
-                a => a.Product.Id,
-                i => i.Product.Id,
-                (a, i) => new { a.Id, a.EndTime, a.Product,  i.Order });
-
-            #region example query
-            //foreach(var q in query) {
-            //    System.Diagnostics.Debug.WriteLine($"FullName: {q.Order.Client.Account.FullName}");
-            //    foreach(var item in q.Order.Items) {
-            //        System.Diagnostics.Debug.WriteLine($"Product: {item.Product.Title}");
-            //    }
-            //}
-            #endregion
-
-            var res = orders.GroupJoin(
-                query,
-                o => o.Id,
-                q => q.Order.Id,
-                (os, qs) => new
-                {
-                    os.Id,
-                    os.Client,
-                    os.IsApproved,
-                    OrderAuctions = qs.Select(q=>new
-                    {
-                        AuctionId = q.Id, 
-                        q.Product,
-                        q.Order
-                    })
-                });
-
-            #region example res
-            //foreach (var r in res) {
-            //    System.Diagnostics.Debug.WriteLine($"OrderID: {r.Id}");
-            //    System.Diagnostics.Debug.WriteLine($"Client: {r.Client.Account.FullName}");
-            //    foreach (var auct in r.OrderAuctions) {
-            //        System.Diagnostics.Debug.WriteLine($"AuctionID: {auct.AuctionId}");
-            //        foreach (var item in auct.Order.Items) {
-            //            System.Diagnostics.Debug.WriteLine($"Product: {item.Product.Title}");
-            //        }
-            //    }
-            //}
-            #endregion
-
-            //----------теперь из синтетика выгнать OrderBO и View.Bag_----------
-            List<OrderBO> selectOrders = new List<OrderBO>();
-            IEnumerable<OrderFullMapVM> sintetic = res.Select(r => new OrderFullMapVM
-            {
-                 OrderId = (int)r.Id, Client = mapper.Map<ClientVM>(r.Client), IsApproved = r.IsApproved,
-                AuctionIds = r.OrderAuctions.Select(oa=>oa.AuctionId),   Products = r.OrderAuctions.Select(oa=>mapper.Map<ProductVM>(oa.Product))
-            });
-            return View(ordersVM);
+            return View(syntetic);
         }
 
-        public async Task<ActionResult> Details(int? id)
+
+        //+Edit
+        public ActionResult Details(OrderFullMapVM orderFullMap, int? flagDetail)    //int? id
         {
-            if (id == null) {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            if (flagDetail is null) { //для Edit
+                if (orderFullMap == null) {
+                    return new JsonResult { Data = new { success = false, message = "Error. Object is Null!" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                    //return RedirectToAction("Index", new { alert= "Error.Object is Null!" });
+                }
+                OrderVM order = mapper.Map<OrderVM>(orderFullMap); //await db.Orders.FindAsync(id);
+                if (order == null) {
+                    return new JsonResult { Data = new { success = false, message = "Error. Order is Null!" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                    //return RedirectToAction("Index", new { alert = "Error. Order is Null!" });
+                }
+                Session["orderFullMap"] = orderFullMap;
+                return new JsonResult { Data = new { success = true, message = "It's good!" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                //return View(orderFullMap);
             }
-            Order order = await db.Orders.FindAsync(id);
-            if (order == null) {
-                return HttpNotFound();
+            else {
+                if (orderFullMap is null || orderFullMap.Id == 0) {
+                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                }
+                return View(orderFullMap);
             }
-            return View(order);
         }
 
-
-
-
-        //после нажат. <Купить сейчас> или <положить в Корзину>
+        //--------Detals.html ->  <Купить сейчас> или <положить в Корзину>------
         public ActionResult Create(OrderVM orderVM, int? prodId, decimal? endPrice, int? auctionId, bool flagBuyNow)//ItemVM itemVM
         {
             //проверка на налич. прод.
@@ -115,36 +74,34 @@ namespace OnlineAuction.Controllers
                 return new JsonResult { Data = "Ошибка. Продукт не выбран!", JsonRequestBehavior = JsonRequestBehavior.AllowGet };
             }
             //проверка: актор лота не может быть его клиентом!
-            ClientBO clientBO = DependencyResolver.Current.GetService<ClientBO>();
-            clientBO = clientBO.Load((int)orderVM.ClientId);
-            AuctionBO auctionBO = DependencyResolver.Current.GetService<AuctionBO>();
-            auctionBO = auctionBO.LoadAsNoTracking((int)auctionId);
+            HelperOrderCreate.GetClientWithAuction(orderVM, auctionId, out ClientBO clientBO, out AuctionBO auctionBO);
             if (auctionBO.IsActive == false) {
                 return new JsonResult { Data = new { message = "К сожалению, в этом аукционе уже есть победитель" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
             }
-
-            if (clientBO.Id == auctionBO.ActorId) { //далее из Detales.html -> Auctions/Confirm(orderId=null)
+            if (clientBO.Id == auctionBO.ActorId) { //оформл. заказа -> Auctions/Confirm(orderId=null)
                 return new JsonResult { Data = new { message = "Ошибка. Вы не можете участвовать в аукционе!" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
             }
-
             string message = "Данные записаны!";
             int orderId = 0;
             OrderBO orderBO = null;
             try {
-
-                orderBO = (OrderBO)Session["orderBO"] ?? mapper.Map<OrderBO>(orderVM);
-                orderBO.Items = null;
-                //orderBO.Save(orderBO);
-                OrderBO lastClientOrder = orderBO.LoadAll().Where(o => o.ClientId == clientBO.Id).Last();
+                GetLastClientOrder(orderVM, clientBO, out orderBO, out OrderBO lastClientOrder);
                 if (flagBuyNow == true) {
-                    CloseAuction(endPrice, auctionId, auctionBO, orderBO);
+
+                    //-------------закрыть аукцион!-----------------------------------------
+                    HelperOrderCreate.CloseAuction(endPrice, auctionId, auctionBO, orderBO);
+
+                    //------------отправить письма участникам о заверш. аукц.-----------------
+                    EmailScheduler.AuctionId = auctionBO.Id;
+                    EmailScheduler.WinnerId = auctionBO.WinnerId;
+                    EmailScheduler.Start();
                 }
                 else {
                     var prodBO = DependencyResolver.Current.GetService<ProductBO>();
                     prodBO = prodBO.Load((int)prodId);
                     endPrice = prodBO.Price;
                 }
-                orderId = AddToCart(prodId, endPrice, lastClientOrder);
+                orderId = HelperOrderCreate.AddToCart(prodId, endPrice, lastClientOrder);
                 message = "Данные записаны!";
             }
             catch (Exception e) {
@@ -157,31 +114,14 @@ namespace OnlineAuction.Controllers
             return new JsonResult { Data = data, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
         }
 
-        private int AddToCart(int? prodId, decimal? endPrice, OrderBO lastOrder)
+        private void GetLastClientOrder(OrderVM orderVM, ClientBO clientBO, out OrderBO orderBO, out OrderBO lastClientOrder)
         {
-            int orderId;
-            var itemVM = new ItemVM { ProductId = (int)prodId, EndPrice = (int)endPrice };
-            ItemBO itemMapBO = mapper.Map<ItemBO>(itemVM);
-            itemMapBO.OrderId = lastOrder.Id;
-            orderId = (int)lastOrder.Id;
-            //itemMapBO.Save(itemMapBO);
-            return orderId;
+            orderBO = (OrderBO)Session["orderBO"] ?? mapper.Map<OrderBO>(orderVM);
+            orderBO.Items = null;
+            //orderBO.Save(orderBO);
+            lastClientOrder = orderBO.LoadAll().Where(o => o.ClientId == clientBO.Id).Last();
         }
 
-        private static void CloseAuction(decimal? endPrice, int? auctionId, AuctionBO auctionBO, OrderBO orderBO)
-        {
-            auctionBO.EndTime = DateTime.Now;
-            auctionBO.Winner = orderBO.Client;
-            auctionBO.IsActive = false; //деактивир.
-            //auctionBO.Save(auctionBO);
-
-            //вн. изм. в BetAuction
-            BetAuctionBO betAuctionBO = DependencyResolver.Current.GetService<BetAuctionBO>();
-            betAuctionBO.AuctionId = (int)auctionId;
-            betAuctionBO.ClientId = (int)orderBO.ClientId;
-            betAuctionBO.Bet = (decimal)endPrice;
-            //betAuctionBO.Save(betAuctionBO);
-        }
 
         public ActionResult Confirm(int? orderId)
         {
@@ -191,29 +131,21 @@ namespace OnlineAuction.Controllers
             if (Session["accountId"] == null) {
                 return RedirectToAction("Index", "Auctions", new { alert = "Время сессии истекло выйдите и залогинтесь снова!" });
             }
-
             //проверка- можно смотреть только свой заказ (на случ. прямого перехода из адр. строки)
-            OrderBO orderBO = DependencyResolver.Current.GetService<OrderBO>();
-            orderBO = orderBO.LoadAllWithInclude("Items").FirstOrDefault(o => o.Id == orderId);
-            ClientBO clientBO = DependencyResolver.Current.GetService<ClientBO>();
-            clientBO = clientBO.Load((int)orderBO.ClientId);
+            HelperOrderCreate.GetOrderWithClient(orderId, out OrderBO orderBO, out ClientBO clientBO);
             if ((int)Session["accountId"] != clientBO.AccountId) {
                 return RedirectToAction("Index", "Auctions", new { alert = "У вас нет прав просмотра данной страницы!" });
             }
             //просмотр деталей заказа + <Оплатить>
             OrderVM orderVM = mapper.Map<OrderVM>(orderBO);
-            //-------надо разделить случаи "Купить сразу" и "Ленивая Корзина"-------------------------------------
+            //------- "Купить сразу" и "Ленивая Корзина"--------------
             var data = new { message = "", orderId = 0, flagBuyNow = false };
-            data = Cast(data, Session["data"]);
-            if (data.flagBuyNow == true) {
-
-            }
+            data = HelperOrderCreate.Cast(data, Session["data"]);
+            //if (data.flagBuyNow == true) {}
             return View(orderVM);
         }
-        private static T Cast<T>(T typeHolder, Object x)
-        {
-            return (T)x;
-        }
+
+
 
         [HttpPost]      //+ IsApproved = true
         public ActionResult Confirm() //после нажат. <Оплатить>
@@ -225,10 +157,12 @@ namespace OnlineAuction.Controllers
         }
         public ActionResult BuyBye(int? orderId)
         {
-            //отправить SMS клиенту и в DHL?
+            //отправить SMS клиенту?
             ViewBag.OrderId = orderId == null ? 0 : orderId;
             return View();
         }
+
+        #region old code
         //[HttpPost]        //представление OrderCreate не нужно
         //[ValidateAntiForgeryToken]
         //public async Task<ActionResult> Create([Bind(Include = "Id,ClientId,IsApproved")] Order order)
@@ -243,32 +177,56 @@ namespace OnlineAuction.Controllers
         //    return View(order);
         //}
 
+        #endregion
 
-        //public async Task<ActionResult> Edit(int? id)
-        //{
-        //    if (id == null) {
-        //        return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-        //    }
-        //    Order order = await db.Orders.FindAsync(id);
-        //    if (order == null) {
-        //        return HttpNotFound();
-        //    }
-        //    ViewBag.ClientId = new SelectList(db.Clients, "Id", "Id", order.ClientId);
-        //    return View(order);
-        //}
 
-        //[HttpPost]
+        //2-ой заход после Details (Index.html->ajax->Details)
+        [Authorize(Roles = "admin")]
+        public ActionResult Edit(int? id)
+        {
+            var orderFullMap = (OrderFullMapVM)Session["orderFullMap"];
+            if (orderFullMap == null) {
+                return new JsonResult { Data = new { success = false, message = "Error. Object is Null!" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
+            }
+            if (orderFullMap.Id == 0) {
+                new JsonResult { Data = new { success = false, message = "Error. OrderId Not Found!" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+            }
+            //не используются!
+            #region for DropDownList
+            //OrderVM orderVM = mapper.Map<OrderVM>(orderFullMap);
+            //OrderBO order = mapper.Map<OrderBO>(orderVM);
+            //ClientBO clientBO = DependencyResolver.Current.GetService<ClientBO>();
+            //List<ClientBO> clients = clientBO.LoadAll().ToList();
+          
+            //AuctionVM auctionVM = mapper.Map<AuctionVM>(orderFullMap);
+            //List<AuctionBO> auctions =DependencyResolver.Current.GetService<AuctionBO>().LoadAll().ToList();
+            //ViewBag.OrderIds = new SelectList(db.Orders, "Id", "Id");
+            //ViewBag.Auctions = new SelectList(auctions.Select(a => mapper.Map<AuctionVM>(a)), "Id", "Description");
+            //ViewBag.ClientId = new SelectList(db.Clients, "Id", "Account.FullName");
+            //ViewBag.EndTimes = new SelectList(db.Auctions.Select(a=>a.EndTime), "EndTime");
+            //ViewBag.ProductIds = new SelectList(db.Products, "Id", "Title");
+            #endregion
+            return View(orderFullMap);
+        }
+
+
+        [HttpPost]
         //[ValidateAntiForgeryToken]
-        //public async Task<ActionResult> Edit([Bind(Include = "Id,ClientId,IsApproved")] Order order)
-        //{
-        //    if (ModelState.IsValid) {
-        //        db.Entry(order).State = EntityState.Modified;
-        //        await db.SaveChangesAsync();
-        //        return RedirectToAction("Index");
-        //    }
-        //    ViewBag.ClientId = new SelectList(db.Clients, "Id", "Id", order.ClientId);
-        //    return View(order);
-        //}
+        public async Task<ActionResult> EditAsync(OrderFullMapVM orderFullMap)
+        {
+            if (ModelState.IsValid) {
+                OrderBO orderBO = DependencyResolver.Current.GetService<OrderBO>().LoadAsNoTracking(orderFullMap.Id);
+                BuilderSynteticModels.mapper = mapper;
+                await BuilderSynteticModels.EditEntityAsync(orderFullMap, orderBO);
+                //orderBO.Save(orderBO);
+
+                //return RedirectToAction("Index");
+                return new JsonResult { Data = new { success = true, message = "Данные перезаписаны!" }, JsonRequestBehavior = JsonRequestBehavior.DenyGet};
+            }
+            //return View();
+            return new JsonResult { Data = new { success = false, message = "Извините. Что-то пошло не так!(" }, JsonRequestBehavior = JsonRequestBehavior.DenyGet };
+
+        }
 
         public async Task<ActionResult> Delete(int? id)
         {
