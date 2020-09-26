@@ -8,7 +8,7 @@
 <script>
     //внеш. вид: тень при наведении
     $(function () {
-        $('.card')
+        $('.card:not(.main-card)')
             .mousemove(function (e) {
                 e.preventDefault()
                 e.stopPropagation()
@@ -18,7 +18,7 @@
                     'width': '+=2px',
                     'height': '+=2px',
                     'box-shadow': '10px 4px 10px 3px #888'
-                });
+                })
             })
             .mouseout(function (e) {
                 $(this).css({
@@ -28,7 +28,22 @@
                     'height': '-=2px',
                     'box-shadow': '0px 0px 0px 0px '
                 })
+            });
+
+        $('.main-card')
+            .mousemove(function (e) {
+                e.preventDefault()
+                e.stopPropagation()
+                $(this).css({
+                    'box-shadow': '10px 4px 10px 3px #888'
+                })
             })
+            .mouseout(function (e) {
+                $(this).css({
+                    'box-shadow': '0px 0px 0px 0px '
+                })
+            });
+        $('img', 'div.main-card').css({ 'float': 'left' })
     });
 
     //-------- сообщ. после Create (если нет прав)---------------
@@ -41,10 +56,9 @@
         }
     })
 
-    //клик по карточке лота -> AuctionsContr./Detail
+    //клик по карточке лота -> css + ->AuctionsContr./Detail
     $(function () {
         var auctionId = 0;
-
         $('.card').mousedown(function (e) {
             //console.log(e.currentTarget)
             $(e.currentTarget).children().each((i, item) => {
@@ -52,7 +66,6 @@
                     auctionId = $(item).html();
                 }
             });
-
             $(e.currentTarget).css({
                 'min-width': '190px',
                 'min-height': '290px',
@@ -60,42 +73,63 @@
                 'height': '-=5px',
                 'box-shadow': '4px 14px 4px 3px #888'
             });
-
             $('.card *').css({
                 'width': '-=5px'
             });
-
         })
+
         $('.card').mouseup(function (e) {
             $(e.currentTarget).css({
                 'width': '+=5px',
                 'height': '+=5px',
                 'box-shadow': '0px 0px 0px 0px'
             })
-
             $('.card *').css({
                 'width': '+=5px'
             })
             $(location).attr('href', '/Auctions/Details/?auctionId=' + auctionId);
         })
 
-
+        $('.main-card').click(function (e) {
+            $(location).attr('href', '/Auctions/Details/?auctionId=' + @ViewBag.BestAuction.Id);
+        })
     });
-
 </script>
+
 <h2>@ViewBag.Title</h2>
 <div class="hidden my-alert">@ViewBag.Alert</div>
 @{
-    if (Model.Count() != 0) {
+    <div class="jumbotron  alert-info  container-fluid main-card">
+        <h3>Главный экспонат</h3>
+        <div class="col-md-5">
+            @Html.Raw("<img  style='width: 300px',  src=\"data:image/jpeg;base64," + Convert.ToBase64String(ViewBag.BestAuction.Product.Image.ImageData) + "\" />")
+        </div>
+        <div class="hidden auctionId">
+            ViewBag.BestAuction.Id
+        </div>
+        <div class="col-md-5">
+            <table class="table">
+                <tr>
+                    <th><h4>Title</h4></th>
+                    <td><h4>@ViewBag.BestAuction.Product.Title</h4></td>
+                </tr>
+                <tr>
+                    <th><h4>Price</h4></th>
+                    <td><h4>@ViewBag.BestAuction.Product.Price</h4></td>
+                </tr>
+            </table>
+        </div>
+    </div>
 
-        <div class="jumbotron  alert-success container">
+    if (Model.Count() != 0) {
+        <div class="jumbotron  alert-success container-fluid">
 
             @foreach (var auction in Model.ToList()) {
                 var product = auction.Product;
                 <div class="card table-bordered col-md-4" style="height:300px; width: 200px; margin:10px; padding-left:0px">
                     <div class="hidden auctionId">@auction.Id</div>
-                    @Html.Raw("<img  style='width: 200px; height: 130px',  src=\"data:image/jpeg;base64," + Convert.ToBase64String(product.Image.ImageData) + "\" />")
-                    <table class="table table-hover">
+                    @Html.Raw("<img  style='width: 90%; height: 130px',  src=\"data:image/jpeg;base64," + Convert.ToBase64String(product.Image.ImageData) + "\" />")
+                    <table class="table">
                         <tr>
                             <th>Title</th>
                             <td>@product.Title</td>

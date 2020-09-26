@@ -203,6 +203,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\OrdersController.cs" />
     <Compile Include="Jobs\EmailSender.cs" />
+    <Compile Include="Jobs\WinnerFinder.cs" />
     <Compile Include="Schedulers\BetAuctionScheduler.cs" />
     <Compile Include="Schedulers\EmailScheduler.cs" />
     <Compile Include="ServiceClasses\BuilderSynteticModels.cs" />

@@ -24,10 +24,11 @@ namespace OnlineAuction.Controllers
             this.mapper = mapper;
         }
 
-        //параметр sms - из метода Create (проверка на роль)
-        public ActionResult Index(int? isActor, string alert = null) //isActor - только из _Layout.html (опред. по клику "мои аукц.")
-        {                                                               //alert - из методов Auctions/Create, Orders/Confirm
-            var accountId = Session["accountId"] ?? 0; //надо обязат. выйти
+        //alert - из методов Auctions/Create(), Orders/Confirm()
+        //isActor - только из _Layout.html (опред. по клику "мои аукц.")
+        public ActionResult Index(int? isActor, string alert = null)
+        {
+            var accountId = Session["accountId"] ?? 0; //надо обязат. выйти из аккаунта
 
             var auctionBO = DependencyResolver.Current.GetService<AuctionBO>();
             List<AuctionBO> auctionsBO = auctionBO.LoadAll().Where(a => a.IsActive).ToList();
@@ -35,12 +36,8 @@ namespace OnlineAuction.Controllers
             List<ProductBO> productsBO = prodBO.LoadAll().ToList();
             decimal maxPrice = productsBO.Max(p => p.Price);
 
-            //на главн. разворот (~газеты)-------------------------
-            var bestAuctionBO = auctionsBO.Where(a => a.Product.Price >= maxPrice).FirstOrDefault();
-            var bestAuctionVM = mapper.Map<AuctionVM>(bestAuctionBO);
-            ViewBag.BestAuction = bestAuctionVM;
 
-            //------могут быть 2 вида запроса: все аукционы; мои аукционы (актор), при этом попытка не-клиента должна пресек.---------
+            //------могут быть 2 вида запроса: все аукционы; мои аукционы (актор)- при этом попытка не-клиента должна пресек---------
             ViewBag.Alert = "";
             if (alert != null && alert != "") {
                 ViewBag.Alert = alert;
@@ -49,11 +46,18 @@ namespace OnlineAuction.Controllers
             if (accountId != null && (int)accountId != 0 && isActor != null) {    //т.е. для "мои аукционы"
                 auctionsVM = auctionsVM.Where(a => a.Actor.AccountId == (int)accountId).ToList();
             }
+            //--------на главн. разворот -------------------------
+            var bestAuctionBO = auctionsBO.Where(a => a.Product.Price >= maxPrice).FirstOrDefault();
+            var bestAuctionVM = mapper.Map<AuctionVM>(bestAuctionBO);
+            ViewBag.BestAuction = bestAuctionVM;
+            //auctionsVM.Remove(bestAuctionVM); //no work?
+            var selectBest = auctionsVM.FirstOrDefault(a => a.Id == bestAuctionVM.Id);
+            auctionsVM.Remove(selectBest);
             return View(auctionsVM);
         }
 
         //1-передел. визуал
-        //2- при клике по "сделать ставку" - для хозяина лота будет блокировка! (контроль в клиенте)
+        //2- при клике  "сделать ставку" - для хозяина лота будет блокировка! (контроль в клиенте)
         public async Task<ActionResult> Details(int? auctionId)
         {
             if (auctionId == null) {
@@ -71,7 +75,7 @@ namespace OnlineAuction.Controllers
                 return RedirectToAction("Index", new { alert = "Время сессии истекло. Выйдите и зайдите снова!" });
             }
             Client client = db.Clients.FirstOrDefault(c => c.AccountId == (int)accountId);
-            ViewBag.Client = client; //нужно для запроса с представл. Details.html  на созд. ставки -> BetAuction/Create()
+            ViewBag.Client = client; //нужно для запроса в представл. Details.html  на созд. ставки, ajax->BetAuction/Create()
             return View(auction);
         }
 
@@ -82,7 +86,7 @@ namespace OnlineAuction.Controllers
             if ((int)accountId == 0) {  //Create
                 return RedirectToAction("Index", new { alert = "Вы сейчас не можете создать лот. Залогинтесь!" });
             }
-            //сначала надо проверить явл. ли юзер moder'om?
+            //сначала надо проверить явл. ли юзер moder'ом?
             var roleAccountLinks = db.RoleAccountLinks.Where(r => r.AccountId == (int)accountId && r.Role.RoleName.Contains("moder")).ToList();
             if (roleAccountLinks == null || roleAccountLinks.Count() == 0) {
                 return RedirectToAction("Index", new { alert = "Вы пока не можете создать лот. Проверте ваш баланс!" });
@@ -112,12 +116,12 @@ namespace OnlineAuction.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create(AuctionEditVM editVM, int? id, HttpPostedFileBase upload)//
+        public async Task<ActionResult> Create(AuctionEditVM editVM, int? id, HttpPostedFileBase upload)
         {
             var userId = Session["accountId"] ?? 0;
             string message = "";
-            if (id == 0) {   //Create
-                //Auction auction = new Auction();
+            //------------------------Create---------------------------------------
+            if (id == 0) { //editVM.Id?
                 AuctionBO auction = DependencyResolver.Current.GetService<AuctionBO>();
                 if (ModelState.IsValid) //AuctionVM         
                 {
@@ -125,11 +129,10 @@ namespace OnlineAuction.Controllers
                         BuilderSynteticModels.mapper = mapper;
                         auction = await BuilderSynteticModels.CreateEntity(editVM, auction, userId, upload);
                         message = "Данные записаны!";
-                        //планировщик должен сработать при истечении врмени аукциона
-                        //а)триггер-время окончания аукциона
-                        //б)вызыв. работа-выбор победителя, прекращ. аукциона, ставок, отправка писем
-                        BetAuctionScheduler.DateBegin = auction.BeginTime;
+                        //установ. планировщика, триггер должен сработать по истеч. врмени аукциона
+                        //работа: выбор победителя, прекращ. аукциона, ставок, отправка писем
                         BetAuctionScheduler.DateEnd = auction.EndTime;
+                        BetAuctionScheduler.AuctionId = auction.Id;
                         BetAuctionScheduler.Start();
                     }
                     else {
@@ -139,7 +142,8 @@ namespace OnlineAuction.Controllers
                 }
                 return View(auction);
             }
-            else if (id == null) {      //Edit
+            //------------------------Edit-------------------------------
+            else if (id == null) {
                 AuctionBO auctionBO = DependencyResolver.Current.GetService<AuctionBO>();
                 auctionBO = auctionBO.LoadAsNoTracking((int)id);
                 if (auctionBO == null) {

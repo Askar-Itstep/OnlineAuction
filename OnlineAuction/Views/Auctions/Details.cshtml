@@ -85,14 +85,14 @@
             var end = $('.div-end-time').html()
             var dateEndFormatDatetimeJS = getDateTime(end)[2]
 
-            //console.log(dateEndFormatDatetimeJS)
-            if (date > dateBeginFormatDatetimeJS && date < dateEndFormatDatetimeJS) {
-                var delPermiss = confirm("Время для редактирования истекло. Желаете отменить аукцион?");
-                if (delPermiss == true) { //сейчас не нужно
-                    $('#deleteLink').removeClass("hidden")
-                }
-                return;
-            }
+            ////console.log(dateEndFormatDatetimeJS)
+            //if (date > dateBeginFormatDatetimeJS && date < dateEndFormatDatetimeJS) {
+            //    var delPermiss = confirm("Время для редактирования истекло. Желаете отменить аукцион?");
+            //    if (delPermiss == true) { //сейчас не нужно
+            //        $('#deleteLink').removeClass("hidden")
+            //    }
+            //    return;
+            //}
             if (date > dateEndFormatDatetimeJS) {
                  alert("Аукцион уже завершен. Изменение не возможно!")
                  return;
@@ -133,6 +133,7 @@
                     $(location).attr('href', "/Auctions/Create")
                 },
                 error: function (e, msg) {
+                    console.log(msg)
                     alert(msg)
                 }
             })

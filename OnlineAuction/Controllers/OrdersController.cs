@@ -67,7 +67,7 @@ namespace OnlineAuction.Controllers
         }
 
         //--------Detals.html ->  <Купить сейчас> или <положить в Корзину>------
-        public ActionResult Create(OrderVM orderVM, int? prodId, decimal? endPrice, int? auctionId, bool flagBuyNow)//ItemVM itemVM
+        public ActionResult Create(OrderVM orderVM, int? prodId, decimal endPrice, int? auctionId, bool flagBuyNow)//ItemVM itemVM
         {
             //проверка на налич. прод.
             if (prodId == null) {
@@ -89,7 +89,7 @@ namespace OnlineAuction.Controllers
                 if (flagBuyNow == true) {
 
                     //-------------закрыть аукцион!-----------------------------------------
-                    HelperOrderCreate.CloseAuction(endPrice, auctionId, auctionBO, orderBO);
+                    HelperOrderCreate.CloseAuction(auctionBO, endPrice, orderBO);    //auctionId, 
 
                     //------------отправить письма участникам о заверш. аукц.-----------------
                     EmailScheduler.AuctionId = auctionBO.Id;
