@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
-using System.Net;
 
 namespace OnlineAuction.ServiceClasses
 {
@@ -18,7 +17,7 @@ namespace OnlineAuction.ServiceClasses
         public HelperOrderCreate(IMapper mapper)
         {
         }
-
+        //sql: select..auction join items on productId..join orders on itemId..group bu orderId
         public static IEnumerable<OrderFullMapVM> GetSynteticVM(List<OrderBO> orders)
         {
             var itemBO = DependencyResolver.Current.GetService<ItemBO>();
@@ -107,25 +106,32 @@ namespace OnlineAuction.ServiceClasses
             ItemBO itemMapBO = mapper.Map<ItemBO>(itemVM);
             itemMapBO.OrderId = lastOrder.Id;
             orderId = (int)lastOrder.Id;
-            //itemMapBO.Save(itemMapBO);
+            itemMapBO.Save(itemMapBO);
             return orderId;
         }
 
-        public static void CloseAuction(decimal? endPrice, int? auctionId, AuctionBO auctionBO, OrderBO orderBO)
+        public static void CloseAuction(AuctionBO auctionBO, decimal endPrice = 0, OrderBO orderBO = null, List<BetAuctionBO> bets = null)   //int? auctionId,
         {
             auctionBO.EndTime = DateTime.Now;
-            auctionBO.Winner = orderBO.Client;
+            auctionBO.Winner = orderBO.Client;  //только при созд. аукц.
             auctionBO.IsActive = false; //деактивир.
-            //auctionBO.Save(auctionBO);
 
-            //вн. изм. в BetAuction
-            BetAuctionBO betAuctionBO = DependencyResolver.Current.GetService<BetAuctionBO>();
-            betAuctionBO.AuctionId = (int)auctionId;
-            betAuctionBO.ClientId = (int)orderBO.ClientId;
-            betAuctionBO.Bet = (decimal)endPrice;
-            //betAuctionBO.Save(betAuctionBO);
+            if (bets == null) {//вн. изм. в BetAuction (для <Купить> и <Положить в корз>)                
+                BetAuctionBO betAuctionBO = DependencyResolver.Current.GetService<BetAuctionBO>();
+                betAuctionBO.AuctionId = auctionBO.Id;
+                betAuctionBO.ClientId = (int)orderBO.ClientId;
+                betAuctionBO.Bet = endPrice;
+                betAuctionBO.Save(betAuctionBO);
+            }
+            else { //выюор победителя по заверш. аукц.
+                decimal topBet = bets.Max(b => b.Bet);
+                BetAuctionBO topBetAuction = bets.FirstOrDefault(b => b.Bet == topBet);
+                ClientBO winner = topBetAuction.Client;
+                auctionBO.Winner = winner;
+            }
+            auctionBO.Save(auctionBO);
         }
-
+        //для получ. аноним. объекта из сессии в OrderController/Confirm()
         public static T Cast<T>(T typeHolder, Object x)
         {
             return (T)x;
@@ -146,8 +152,8 @@ namespace OnlineAuction.ServiceClasses
             auctionBO = DependencyResolver.Current.GetService<AuctionBO>();
             auctionBO = auctionBO.LoadAsNoTracking((int)auctionId);
         }
-       
-      
+
+
 
 
     }

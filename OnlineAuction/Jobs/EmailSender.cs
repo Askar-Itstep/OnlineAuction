@@ -14,7 +14,6 @@ namespace OnlineAuction.Jobs
 {
     public class EmailSender : IJob
     {
-
         public async Task Execute(IJobExecutionContext context)
         {
             JobDataMap data = context.JobDetail.JobDataMap;

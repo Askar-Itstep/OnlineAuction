@@ -15,10 +15,8 @@ namespace OnlineAuction.ServiceClasses
 {
     public class BuilderSynteticModels
     {
-
         private static Model1 db = new Model1();
-        public static IMapper mapper;
-        
+        public static IMapper mapper;        
 
         public BuilderSynteticModels(IMapper mapper)
         {
@@ -38,7 +36,6 @@ namespace OnlineAuction.ServiceClasses
 
         private static void CreateAuctionEntity(AuctionEditVM editVM, ref AuctionBO auction, ProductBO product, ClientBO client)
         {
-
             auction = mapper.Map<AuctionBO>(editVM);
             if (editVM.Step != null || editVM.Step == 0) {
                 auction.Step = (decimal)editVM.Step;
@@ -84,10 +81,6 @@ namespace OnlineAuction.ServiceClasses
         //Create->flag:false, Edit->flag:true
         private static ImageBO CreateImageEntity(AuctionEditVM editVM, HttpPostedFileBase upload, bool flag = false)
         {
-            //byte[] myBytes = new byte[editVM.Upload.ContentLength];
-            //editVM.Upload.InputStream.Read(myBytes, 0, editVM.Upload.ContentLength);
-            //Image image = new Image { FileName = editVM.Title, ImageData = myBytes };
-
             byte[] myBytes = new byte[upload.ContentLength];
             upload.InputStream.Read(myBytes, 0, upload.ContentLength);
             //Image image = new Image { FileName = editVM.Title, ImageData = myBytes };
@@ -162,10 +155,8 @@ namespace OnlineAuction.ServiceClasses
         private static void EditEntity(BaseBusinessObject modelBO, BaseBusinessObject editBO, int key)
         {
             foreach (PropertyInfo prop in listTypes[key].GetProperties()) {
-                //foreach (var type in listTypes) {
                 try {
                     if (!listTypes.Contains(prop.PropertyType)) {
-                        // if (simpleList.Contains(prop.PropertyType.Name.ToLower())) {    //"int", "decimal", "float", "string" 
                         if (simpleList.Where(s=>prop.PropertyType.Name.ToLower().Contains(s)).Count() != 0) {
                             if (prop.PropertyType.Name.ToLower() == "string" && prop.GetValue(editBO) != "") {
                                 prop.SetValue(modelBO, prop.GetValue(editBO));

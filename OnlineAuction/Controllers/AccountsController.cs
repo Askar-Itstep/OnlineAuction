@@ -30,7 +30,7 @@ namespace OnlineAuction.Controllers
         }
 
 
-        //[Authorize(Roles = "admin")]  //конроль роли перенесен в представл.-юзер может смотреть свой аккаунт!
+        //[Authorize(Roles = "admin")]  //контроль роли перенесен в представл.-юзер может смотреть свой аккаунт!
         public async Task<ActionResult> Details(int? id)
         {
             if (id == null) {
@@ -44,65 +44,65 @@ namespace OnlineAuction.Controllers
         }
 
 
+        #region oldCreate
+        ////[Authorize(Roles = "admin")]  
+        //public ActionResult Create()
+        //{
+        //    //return View();
+        //    return RedirectToAction("Registration");
+        //}
 
-        //[Authorize(Roles = "admin")]  //конроль роли перенесен в представл.
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create(Account account)
-        {
-            if (ModelState.IsValid) {
-                db.Account.Add(account);
-
-                //получить данные по роли и юзеру
-                int accountId = (int)db.Account.AsEnumerable().Last().Id;
-                int roleId = db.Roles.FirstOrDefault(r => r.RoleName.Equals("member")).Id;  //11
-                db.RoleAccountLinks.Add(new RoleAccountLink { RoleId = roleId, AccountId = accountId }); //12- переприсваивается???!
-                await db.SaveChangesAsync();
-                return RedirectToAction("Index");
-            }
-            else {
-                return View();
-            }
-        }
-
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<ActionResult> Create(Account account)
+        //{
+        //    if (ModelState.IsValid) {
+        //        db.Account.Add(account);
+        //        //получить данные по роли и юзеру
+        //        int accountId = (int)db.Account.AsEnumerable().Last().Id;
+        //        int roleId = db.Roles.FirstOrDefault(r => r.RoleName.Equals("member")).Id;  //11
+        //        db.RoleAccountLinks.Add(new RoleAccountLink { RoleId = roleId, AccountId = accountId }); //12- переприсваивается???!
+        //        await db.SaveChangesAsync();
+        //        return RedirectToAction("Index");
+        //    }
+        //    else {
+        //        return View();
+        //    }
+        //}
+        #endregion
 
         //контроль роли  в представл.-_Layout
-        public async Task<ActionResult> Edit(int? id, int? flag) //int? accountId, 
+        //id - для админа, accountId - для user'a
+        //flag - ключ из _Layout.html для выбора: редакт. акк. или пополн. баланс
+        public async Task<ActionResult> Edit(int? id, int? flag)
         {
-            if (id == null) { //для юзера
+            //----------для юзера---------------
+            if (id == null) {
                 var accountId = Session["accountId"] ?? 0;
 
-                if ((int)accountId == 0) {
+                if ((int)accountId == 0) { //обяз. перелогин.
                     return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
                 }
-                Account account = await db.Account.FindAsync((int)accountId);
+                //Account account = await db.Account.FindAsync((int)accountId);
+                AccountBO account = DependencyResolver.Current.GetService<AccountBO>().Load((int)accountId);
                 if (account == null) {
                     return HttpNotFound();
                 }
-
-                //flag - ключ из _Layout.html для выбора ред. акк. или пополн. баланс
                 if (flag == null) {
-                    return View(account);
+                    return View(mapper.Map<AccountVM>(account));
                 }
                 else {
-                    return new JsonResult
-                    {
-                        Data = account,
-                        JsonRequestBehavior = JsonRequestBehavior.AllowGet
-                    };
+                    return new JsonResult { Data = account, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
                 }
             }
-            else { //для админа
-                Account account = await db.Account.FindAsync(id);
+            //---------для админа--------------
+            else {
+                //Account account = await db.Account.FindAsync(id);
+                AccountBO account = DependencyResolver.Current.GetService<AccountBO>().Load((int)id);
                 if (account == null) {
                     return HttpNotFound();
                 }
-                return View(account);
+                return View(mapper.Map<AccountVM>(account));
             }
         }
 
