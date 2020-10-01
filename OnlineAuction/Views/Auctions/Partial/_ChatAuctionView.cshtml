@@ -1,0 +1,151 @@
+﻿
+@{
+    ViewBag.Title = "Chat";
+}
+@{
+    if (ViewBag.User != null) {
+        <div class="FullName">@ViewBag.User.FullName</div>
+
+    }
+}
+<h2>Чат-комната</h2>
+
+<div class="main">
+    <div id="chatBody">
+        <div id="header"></div>
+        <div id="inputForm">
+            <input type="text" id="message" />
+
+            <input type="button" id="sendmessage" value="Отправить в общий чат" />            
+            <input type="button" id="sendAuthorMessage" value="Отправить сообщение автору" />
+        </div>
+        <div id="chatroom"></div>
+
+        <div id="chatusers">
+            <p><b>Все пользователи</b></p>
+        </div>
+    </div>
+
+    <input id="hdId" type="hidden" />
+    <input id="username" type="hidden" />
+</div>
+@section scripts {
+    <script src="~/Scripts/jquery.signalR-2.4.1.min.js"></script>
+    <script src="~/signalr/hubs"></script>
+    <script>
+        function htmlEncode(value) {
+            var encodedValue = $('<div />').text(value).html();
+            return encodedValue;
+        }
+        $(function () {
+            // Ссылка на автоматически-сгенерированный прокси хаба
+            var chat = $.connection.chatHub;
+            var users = [];
+            var connectionId = "";
+            var message = "";
+            var auctionId = 0;
+            // Объявление функции, котор. хаб вызывает при получении сообщений
+            chat.client.addMessage = function (name, message) {
+                $('#chatroom').append('<p><b>' + htmlEncode(name) + '</b>: ' + htmlEncode(message) + '</p>');
+            };
+            // Функция, вызываемая при подключении нового пользователя
+            //параметр userName получ. здесь (стр.75)
+            chat.client.onConnected = function (id, userName, allUsers) {
+                // установка в скрытых полях имени и id текущего пользователя
+                $('#hdId').val(id);
+                $('#username').val(userName);
+                $('#header').html('<h3>Добро пожаловать, ' + userName + '</h3>');
+
+                // Добавление всех пользователей в отображен.
+                for (i = 0; i < allUsers.length; i++) {
+                    AddUser(allUsers[i].ConnectionId, allUsers[i].Name);
+                }
+                //$(allUsers).each(function (i, item) {
+                //    console.log("item: " + item.FullName)
+                //})
+                users = allUsers
+            }
+
+            // Добавляем нового пользователя в отображ. в чат-комнаты
+            chat.client.onNewUserConnected = function (id, name) {
+                AddUser(id, name);
+            }
+
+            // Удаляем пользователя из отображ. в чат-комнаты
+            chat.client.onUserDisconnected = function (id, userName) {
+                $('#' + id).remove();
+            }
+
+            //--------- Открываем соединение -------------
+            $.connection.hub.start().done(function () {
+                //connectionId = $.connection.hub.id
+                //message = $('#message').val()
+                //auctionId = localStorage.getItem("auctionId")
+                //срабат. не только при старте
+                $('#sendmessage').click(function () {
+                    message = $('#message').val()
+                    //$(users).each(function(i, item){
+                    //    console.log("item: " + item.FullName)
+                    //})
+                    // Вызываем у хаба метод Send
+                    chat.server.send($('#username').val(), message);
+                    $('#message').val('');
+                });
+      //================== send auctionAuthor message =====================
+                $('#sendAuthorMessage').click(function () {
+                    //connectionId = $.connection.hub.id
+                    //message = $('#message').val()
+                    //auctionId = localStorage.getItem("auctionId")
+                    //отправить на серв. данные для вызова соотв. ф-ции//auctionId, connectionId, message
+                    sendData()
+                    $('#message').val('');
+                });
+                var name = $('div.FullName').html();
+                if (name != undefined && name.length > 0) {
+                    chat.server.connect(name);
+                }
+                else {
+                    chat.server.connect("Noname");
+                }
+                sendData()
+                //$.ajax({                      //auctionId, connectionId, message
+                //    type: "GET",
+                //    url:  '/Auctions/ChatAsync',
+                //    data: { connectionId: $.connection.hub.id},
+                //    success: function (data) {
+                //        //alert(data) //сейчас возвр. View т.е. html-файл
+                //        //$(location).attr('href',"/Auctions/Talk")
+                //    },
+                //    error: function (e, msg) {
+                //        alert("Error: ", msg)
+                //    }
+                //})
+
+            });
+            //-----------------конец ф-ции открытия -------------------
+        });
+        //auctionId, connectionId, message
+        function sendData() {
+            $.ajax({
+                type: "GET",
+                url: '/Auctions/ChatAsync',
+                //data: { auctionId: auctionId, connectionId: connectionId, message: message },
+                data: { auctionId: localStorage.getItem("auctionId"), message: $('#message').val(), connectionId : $.connection.hub.id},
+                success: function (data) {
+                    //alert(data) //сейчас возвр. View т.е. html-файл
+                    //$(location).attr('href',"/Auctions/Talk")
+                },
+                error: function (e, msg) {
+                    alert("Error: ", msg)
+                }
+            })
+        }
+        //Добавление имени нового пользователя отображ. в чат-комнаты
+        function AddUser(id, name) {
+            var userId = $('#hdId').val();
+            if (userId != id) {
+                $("#chatusers").append('<p id="' + id + '"><b>' + name + '</b></p>');
+            }
+        }
+    </script>
+}

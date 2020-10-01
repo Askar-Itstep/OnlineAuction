@@ -1,6 +1,8 @@
-﻿using BusinessLayer.BusinessObject;
+﻿using AutoMapper;
+using BusinessLayer.BusinessObject;
 using OnlineAuction.Schedulers;
 using OnlineAuction.ServiceClasses;
+using OnlineAuction.ViewModels;
 using Quartz;
 using System;
 using System.Collections.Generic;
@@ -13,6 +15,8 @@ namespace OnlineAuction.Jobs
 {
     public class WinnerFinder : IJob    //найти победителя
     {
+        public static IMapper mapper { get; set; }
+
         public async Task Execute(IJobExecutionContext context)
         {
             JobDataMap data = context.JobDetail.JobDataMap;
@@ -23,9 +27,16 @@ namespace OnlineAuction.Jobs
 
             BetAuctionBO betAuctionBO = DependencyResolver.Current.GetService<BetAuctionBO>();
             List<BetAuctionBO> auctionBets = betAuctionBO.LoadAll().Where(b => b.AuctionId == auctionId).ToList();
-            HelperOrderCreate.CloseAuction(auction, bets: auctionBets);
+            BetAuctionBO winnBet = HelperOrderCreate.CloseAuction(auction, bets: auctionBets);
 
-            //запуск доп. задачи!
+            //1)отправить push-уведомл. участникам аукциона
+            AccountBO winnerBO = winnBet.Client.Account;
+            AccountVM winner = mapper.Map<AccountVM>(winnerBO);
+            var sender = PushSender.Instance;
+            sender.AccountVM = winner;
+            await sender.SendMessage(string.Format("Победитель аукциона: {0}", winner.FullName)); // winnBet.Client.Account.FullName
+
+            //2)отправить письма о победителе аукциона
             EmailScheduler.AuctionId = auctionBO.Id;
             EmailScheduler.WinnerId = auctionBO.WinnerId;
             EmailScheduler.Start();

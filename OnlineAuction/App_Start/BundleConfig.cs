@@ -11,6 +11,9 @@ namespace OnlineAuction
                         //"~/Scripts/jquery-3.3.1.js",
                         "~/Scripts/jquery.unobtrusive-ajax.js"));
 
+            bundles.Add(new ScriptBundle("~/bundles/signalr").Include(
+                  "~/Scripts/jquery.signalR-{version}.js"));
+
             bundles.Add(new ScriptBundle("~/bundles/jqueryval").Include(
                         "~/Scripts/jquery.validate*"));
 

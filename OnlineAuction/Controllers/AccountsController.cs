@@ -23,20 +23,24 @@ namespace OnlineAuction.Controllers
             this.mapper = mapper;
         }
 
-        [Authorize(Roles = "admin")]
-        public async Task<ActionResult> Index()
+        [Authorize(Roles = "admin")]    //кнопка "Пользователи" (админ-панель)
+        public ActionResult Index()
         {
-            return View(await db.Account.ToListAsync());
+            AccountBO accountBO = DependencyResolver.Current.GetService<AccountBO>();
+            IEnumerable<AccountBO> accountBOs = accountBO.LoadAll();
+            IEnumerable<AccountVM> accountVMs = accountBOs.Select(a => mapper.Map<AccountVM>(a));
+            return View(accountVMs);
         }
 
 
         //[Authorize(Roles = "admin")]  //контроль роли перенесен в представл.-юзер может смотреть свой аккаунт!
-        public async Task<ActionResult> Details(int? id)
+        public ActionResult Details(int? id)
         {
             if (id == null) {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Account account = await db.Account.FindAsync(id);
+            AccountBO accountBO = DependencyResolver.Current.GetService<AccountBO>().Load((int)id);
+            AccountVM account = mapper.Map<AccountVM>(accountBO);
             if (account == null) {
                 return HttpNotFound();
             }
@@ -80,13 +84,12 @@ namespace OnlineAuction.Controllers
             if (id == null) {
                 var accountId = Session["accountId"] ?? 0;
 
-                if ((int)accountId == 0) { //обяз. перелогин.
-                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                if ((int)accountId == 0) {
+                    return RedirectToAction("Login", "Accounts");
                 }
-                //Account account = await db.Account.FindAsync((int)accountId);
                 AccountBO account = DependencyResolver.Current.GetService<AccountBO>().Load((int)accountId);
                 if (account == null) {
-                    return HttpNotFound();
+                    return HttpNotFound("Пользователь не найден");
                 }
                 if (flag == null) {
                     return View(mapper.Map<AccountVM>(account));
@@ -97,10 +100,9 @@ namespace OnlineAuction.Controllers
             }
             //---------для админа--------------
             else {
-                //Account account = await db.Account.FindAsync(id);
                 AccountBO account = DependencyResolver.Current.GetService<AccountBO>().Load((int)id);
                 if (account == null) {
-                    return HttpNotFound();
+                    return HttpNotFound("Пользователь не найден");
                 }
                 return View(mapper.Map<AccountVM>(account));
             }
@@ -108,35 +110,32 @@ namespace OnlineAuction.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit(Account account, decimal? balance)
+        public async Task<ActionResult> Edit(AccountVM account, decimal? balance)
         {
             if (account.Id != null) { //при простом изм. аккаунта
                 if (ModelState.IsValid) {
                     account.Address.Id = account.AddressId;
-                    var address = account.Address;
-                    db.Entry(address).State = EntityState.Modified;
-
-                    db.Entry(account).State = EntityState.Modified;
-                    await db.SaveChangesAsync();
+                    AddressVM address = account.Address;
+                    AccountBO accountBO = mapper.Map<AccountBO>(account);
+                    AddressBO addressBO = mapper.Map<AddressBO>(address);
+                    accountBO.Save(accountBO);  //address -> cascade?
+                    addressBO.Save(addressBO);
                     return View(account);
                 }
             }
             else if (balance != null) { //при изм. баланса - добав. роль <Moder>(созд. лота)
                 var accountId = (int)Session["accountId"];
-                account = await db.Account.FindAsync(accountId);
-                account.Balance = (decimal)balance;
-
-                var rolesAccountLinks = db.RoleAccountLinks.Where(r => r.AccountId == account.Id).ToList();
-                List<Role> roles = rolesAccountLinks.Select(r => r.Role).ToList();
-
-                //account.SetRoles(roles); //over code-no save!
-                var moderRole = db.Roles.Where(r => r.RoleName.Contains("moder")).FirstOrDefault();
-                db.RoleAccountLinks.Add(new RoleAccountLink { AccountId = (int)account.Id, RoleId = moderRole.Id });
-
-                db.Entry(account).State = EntityState.Modified;
-                await db.SaveChangesAsync();
+                AccountBO accountBO = DependencyResolver.Current.GetService<AccountBO>().LoadAllNoTracking().FirstOrDefault(a=>a.Id==accountId);
+                accountBO.AddBalance((decimal)balance);
+                accountBO.Save(accountBO);
+                
+                var moderRole = DependencyResolver.Current.GetService<RoleBO>().LoadAll().Where(r => r.RoleName.Contains("moder")).FirstOrDefault(); 
+                
+                RoleAccountLinkVM linkVM = new RoleAccountLinkVM { AccountId = (int)accountId, RoleId = moderRole.Id };
+                RoleAccountLinkBO linkBO = mapper.Map<RoleAccountLinkBO>(linkVM);
+                linkBO.Save(linkBO);
             }
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", "Home");
         }
 
 
@@ -148,7 +147,7 @@ namespace OnlineAuction.Controllers
             }
             Account account = await db.Account.FindAsync(id);
             if (account == null) {
-                return HttpNotFound();
+                return HttpNotFound("Пользователь не найден");
             }
             return View(account);
         }
@@ -211,7 +210,7 @@ namespace OnlineAuction.Controllers
                     var isActive = accountBO.IsActive;
                     roleAccountBOList = roleAccountBO.LoadAll().Where(r => r.AccountId == accountBO.Id).ToList();
                     var roles = roleAccountBOList.Select(r => r.Role.RoleName).ToList();
-                    //2) сохр. в Sever-Session
+                    //2) сохр. в Session Server
                     HttpContext.Session["accountId"] = accountId;
                     return Json(new { success = true, message = "Wellcome!", accountId, isActive, roles }); //уйдет в предст. Login.html -> _Layout.html
                 }

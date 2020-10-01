@@ -40,25 +40,22 @@ namespace OnlineAuction.Controllers
             return View(syntetic);
         }
 
-
+        //кнопка Index.html->click Details заблокир. (не нужна)
         //+Edit
         public ActionResult Details(OrderFullMapVM orderFullMap, int? flagDetail)    //int? id
         {
             if (flagDetail is null) { //для Edit
                 if (orderFullMap == null) {
                     return new JsonResult { Data = new { success = false, message = "Error. Object is Null!" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
-                    //return RedirectToAction("Index", new { alert= "Error.Object is Null!" });
                 }
                 OrderVM order = mapper.Map<OrderVM>(orderFullMap); //await db.Orders.FindAsync(id);
                 if (order == null) {
                     return new JsonResult { Data = new { success = false, message = "Error. Order is Null!" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
-                    //return RedirectToAction("Index", new { alert = "Error. Order is Null!" });
                 }
                 Session["orderFullMap"] = orderFullMap;
                 return new JsonResult { Data = new { success = true, message = "It's good!" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
-                //return View(orderFullMap);
             }
-            else {
+            else { //заблокир.
                 if (orderFullMap is null || orderFullMap.Id == 0) {
                     return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
                 }
@@ -89,7 +86,10 @@ namespace OnlineAuction.Controllers
                 if (flagBuyNow == true) {
 
                     //-------------закрыть аукцион!-----------------------------------------
-                    HelperOrderCreate.CloseAuction(auctionBO, endPrice, orderBO);    //auctionId, 
+                    BetAuctionBO winnBet = HelperOrderCreate.CloseAuction(auctionBO, endPrice, orderBO);    //auctionId, 
+
+                    //------------отправить push-уведомл. о заверш. аукциона ------------
+
 
                     //------------отправить письма участникам о заверш. аукц.-----------------
                     EmailScheduler.AuctionId = auctionBO.Id;

@@ -1,4 +1,5 @@
-﻿using OnlineAuction.Jobs;
+﻿using AutoMapper;
+using OnlineAuction.Jobs;
 using Quartz;
 using Quartz.Impl;
 using System;
@@ -25,20 +26,20 @@ namespace OnlineAuction.Schedulers
 
         public static int AuctionId { get; set; }
 
+        public static IMapper mapper { get; set; }
 
         public static async void Start()
         {
+            WinnerFinder.mapper = mapper;
             IScheduler scheduler = await StdSchedulerFactory.GetDefaultScheduler();
             await scheduler.Start();
 
             IJobDetail job = JobBuilder.Create<WinnerFinder>()
-                //.UsingJobData("DateBegin", GetDateBeginString())
                 .UsingJobData("AuctionId", AuctionId)
                 .Build();
 
             ITrigger simpleTrigger = TriggerBuilder.Create()
                  .WithIdentity("trigger2", "group2")
-                //.StartAt(DateTime.SpecifyKind(DateBegin, DateTimeKind.Utc))
                 .EndAt(DateTime.SpecifyKind(DateEnd, DateTimeKind.Utc))
                 .Build();
 

@@ -32,7 +32,8 @@ namespace OnlineAuction
                .ConstructUsing(c => DependencyResolver.Current.GetService<AccountBO>());
 
                 mpr.CreateMap<AccountBO, AccountVM>()
-             .ConstructUsing(c => DependencyResolver.Current.GetService<AccountVM>());
+             .ConstructUsing(c => DependencyResolver.Current.GetService<AccountVM>())
+             .ForMember(dist=>dist.ConnectionId, opt=>opt.MapFrom(src=>0));
 
                 //---------------Role ----------------------------------
                 mpr.CreateMap<Role, RoleBO>()
@@ -64,10 +65,13 @@ namespace OnlineAuction
                 mpr.CreateMap<RoleAccountLinkBO, RoleAccountLink>()
                .ConstructUsing(c => DependencyResolver.Current.GetService<RoleAccountLink>());
 
-                // mpr.CreateMap<RoleAccountLinkVM, RoleAccountLink>()
-                //.ConstructUsing(c => DependencyResolver.Current.GetService<Role>());
+                mpr.CreateMap<RoleAccountLinkVM, RoleAccountLinkBO>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<RoleAccountLinkBO>());
 
-    //--------------------------------------Auctions ---------------------------------------
+                mpr.CreateMap<RoleAccountLink, RoleAccountLinkVM>()
+              .ConstructUsing(c => DependencyResolver.Current.GetService<RoleAccountLinkVM>());
+
+                //--------------------------------------Auctions ---------------------------------------
                 mpr.CreateMap<Auction, AuctionBO>()
                 .ConstructUsing(c => DependencyResolver.Current.GetService<AuctionBO>());
 

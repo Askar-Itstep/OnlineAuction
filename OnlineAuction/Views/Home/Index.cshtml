@@ -5,11 +5,12 @@
     $(function (e) {
         var userId = localStorage.getItem("userId");
         if (userId != null && userId != undefined) {
-            //console.log(userId)
-        }        
+            console.log(userId)
+        }
     })
 </script>
 
+<div class="username">@ViewBag.UserName</div>
 <div class="jumbotron">
     <h1>ASP.NET</h1>
     <p class="lead">

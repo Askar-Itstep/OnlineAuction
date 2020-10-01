@@ -68,7 +68,7 @@ namespace OnlineAuction.Controllers
                     messageError = "Ставка сделана. Данные добавлены!";
                 }
                 catch (Exception e) {
-                    messageError = "Произошла ошибка. Данные не были добавлены!";
+                    messageError = string.Format("Произошла ошибка: {0}. Данные не были добавлены!", e.Message);
                 }
                 return new JsonResult { Data = messageError, JsonRequestBehavior = JsonRequestBehavior.DenyGet };
             }

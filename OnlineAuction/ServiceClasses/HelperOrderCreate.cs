@@ -110,12 +110,12 @@ namespace OnlineAuction.ServiceClasses
             return orderId;
         }
 
-        public static void CloseAuction(AuctionBO auctionBO, decimal endPrice = 0, OrderBO orderBO = null, List<BetAuctionBO> bets = null)   //int? auctionId,
+        public static BetAuctionBO CloseAuction(AuctionBO auctionBO, decimal endPrice = 0, OrderBO orderBO = null, List<BetAuctionBO> bets = null)   //int? auctionId,
         {
             auctionBO.EndTime = DateTime.Now;
             auctionBO.Winner = orderBO.Client;  //только при созд. аукц.
             auctionBO.IsActive = false; //деактивир.
-
+            BetAuctionBO topBetAuction = null;
             if (bets == null) {//вн. изм. в BetAuction (для <Купить> и <Положить в корз>)                
                 BetAuctionBO betAuctionBO = DependencyResolver.Current.GetService<BetAuctionBO>();
                 betAuctionBO.AuctionId = auctionBO.Id;
@@ -125,11 +125,12 @@ namespace OnlineAuction.ServiceClasses
             }
             else { //выюор победителя по заверш. аукц.
                 decimal topBet = bets.Max(b => b.Bet);
-                BetAuctionBO topBetAuction = bets.FirstOrDefault(b => b.Bet == topBet);
+                topBetAuction = bets.FirstOrDefault(b => b.Bet == topBet);
                 ClientBO winner = topBetAuction.Client;
                 auctionBO.Winner = winner;
             }
             auctionBO.Save(auctionBO);
+            return topBetAuction;
         }
         //для получ. аноним. объекта из сессии в OrderController/Confirm()
         public static T Cast<T>(T typeHolder, Object x)
