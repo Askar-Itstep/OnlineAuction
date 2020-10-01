@@ -1,4 +1,4 @@
-﻿@model DataLayer.Entities.Account
+﻿@model OnlineAuction.ViewModels.AccountVM
 
 
 @using (Html.BeginForm("Edit", "Accounts", FormMethod.Post)) {
@@ -30,7 +30,7 @@
 }
 
 <div>
-    @Html.ActionLink("Back to List", "Index")
+    @Html.ActionLink("Back to List", "Index", new { accountId = 0 }, new { @class = "classMyOrders" })
 </div>
 
 

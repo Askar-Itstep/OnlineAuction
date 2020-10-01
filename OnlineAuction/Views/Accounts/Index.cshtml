@@ -1,36 +1,11 @@
-﻿@using DataLayer.Entities
-@model IEnumerable<DataLayer.Entities.Account>
+﻿@model IEnumerable<OnlineAuction.ViewModels.AccountVM>
 
 @{
     ViewBag.Title = "Index";
-    Account account = new Account();
+    //Account account = new Account();
 }
 <script>
-            ////т.к. переход на "Пополнить баланс" может быть из любой точки-код здесь не имеет смысла
-            //$(function () {
-            //    $('.classAddBalance')
-            //        .on('click', function (e) {
-            //            e.preventDefault();
-            //            console.log(e.target)
-
-            //            //$.ajax({
-            //            //    url: "/Accounts/Edit/&flag=1",
-            //            //    type: "GET",
-            //            //    datatype: "json",
-            //            //    success: function (data) {
-            //            //        $('#modalEdit').modal('show');
-            //            //        console.log(data)
-
-            //            //        //$('#editAuthorId').val(data[0]["Id"])
-            //            //        //$('#editFirstName').val(data[0]["FirstName"])
-            //            //        //$('#editLastName').val(data[0]["LastName"])
-            //            //    },
-            //            //    error: function (e, msg) {
-            //            //        alert(msg[1])
-            //            //    }
-            //            //})
-            //        });
-            //})
+                ////переход на "Пополнить баланс" реализован в _Layout.html
 </script>
 
 

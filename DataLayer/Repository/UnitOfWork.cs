@@ -14,6 +14,7 @@ namespace DataLayer.Repository
     {
         private BaseRepository<Account> accounts;
         private BaseRepository<Auction> auctions;
+        private BaseRepository<Address> addresses;
         private BaseRepository<AuctionClientsLink> auctionClientsLinks;
         private BaseRepository<BetAuction> betAuctions;
         private BaseRepository<Client> clients;
@@ -50,7 +51,15 @@ namespace DataLayer.Repository
                 return auctions;
             }
         }
-
+        public BaseRepository<Address> Addresses
+        {
+            get
+            {
+                if (addresses == null)
+                    addresses = new BaseRepository<Address>();
+                return addresses;
+            }
+        }
         public BaseRepository<AuctionClientsLink> AuctionClientsLinks
         {
             get

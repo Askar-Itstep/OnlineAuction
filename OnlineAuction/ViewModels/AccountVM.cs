@@ -8,6 +8,7 @@ namespace OnlineAuction.ViewModels
 {
     public class AccountVM
     {
+        public string ConnectionId { get; set; }
         public int? Id { get; set; }
 
         [Required, Display(Name = "Full Name")]

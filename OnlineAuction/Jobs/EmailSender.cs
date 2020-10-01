@@ -20,9 +20,9 @@ namespace OnlineAuction.Jobs
             int winnerId = data.GetInt("winnerId");
             int auctionId = data.GetInt("auctionId");
             AuctionBO auction = DependencyResolver.Current.GetService<AuctionBO>().Load(auctionId);
-            BetAuctionBO betAuctionBO = DependencyResolver.Current.GetService<BetAuctionBO>();
 
             //ставки в аукционе
+            BetAuctionBO betAuctionBO = DependencyResolver.Current.GetService<BetAuctionBO>();
             List<BetAuctionBO> betAuctions = betAuctionBO.LoadAll().Where(b => b.AuctionId == auctionId).ToList();
 
             //кто делал эти ставки - участники аукциона

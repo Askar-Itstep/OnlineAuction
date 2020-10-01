@@ -85,14 +85,14 @@
             var end = $('.div-end-time').html()
             var dateEndFormatDatetimeJS = getDateTime(end)[2]
 
-            ////console.log(dateEndFormatDatetimeJS)
-            //if (date > dateBeginFormatDatetimeJS && date < dateEndFormatDatetimeJS) {
-            //    var delPermiss = confirm("Время для редактирования истекло. Желаете отменить аукцион?");
-            //    if (delPermiss == true) { //сейчас не нужно
-            //        $('#deleteLink').removeClass("hidden")
-            //    }
-            //    return;
-            //}
+            //console.log(dateEndFormatDatetimeJS)
+            if (date > dateBeginFormatDatetimeJS && date < dateEndFormatDatetimeJS) {
+                var delPermiss = confirm("Время для редактирования истекло. Желаете отменить аукцион?");
+                if (delPermiss == true) { //сейчас не нужно
+                    $('#deleteLink').removeClass("hidden")
+                }
+                return;
+            }
             if (date > dateEndFormatDatetimeJS) {
                  alert("Аукцион уже завершен. Изменение не возможно!")
                  return;
@@ -193,6 +193,15 @@
             }
         })
     }
+
+    //========================= Начать обмен сообщениями с АВТОРОМ аукциона====================================
+    $(function () {
+        $('a.send-message').click(function (e) {
+            var auctionId = $('.div-auction').html()
+            localStorage.setItem("auctionId", auctionId); //понадоб. в чате
+            $(this).attr('href', '/Auctions/ChatAsync/?auctionId=' + auctionId)
+        })
+    })
 </script>
 
 <h2>Details</h2>
@@ -228,8 +237,6 @@
                 <input type="submit" value="Сделать ставку" data-id="" id="bid-btn" class="btn btn-info">
             </div>
         </form>
-
-
 
 
         <form class="clearfix" name="form2" style="margin-top:10px">
@@ -280,6 +287,8 @@
                 @Html.DisplayFor(model => model.EndTime)
             </dd>
         </dl>
+
+        <a class="btn btn-success send-message" style="margin-left:40px" href="/Auctions/Chat">Отправить сообщение автору</a>
     </div>
 </div>
 
