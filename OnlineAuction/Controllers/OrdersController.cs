@@ -42,20 +42,20 @@ namespace OnlineAuction.Controllers
 
         //кнопка Index.html->click Details заблокир. (не нужна)
         //+Edit
-        public ActionResult Details(OrderFullMapVM orderFullMap, int? flagDetail)    //int? id
+        public ActionResult Details(OrderFullMapVM orderFullMap, int? flagDetail)    
         {
             if (flagDetail is null) { //для Edit
                 if (orderFullMap == null) {
                     return new JsonResult { Data = new { success = false, message = "Error. Object is Null!" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
                 }
-                OrderVM order = mapper.Map<OrderVM>(orderFullMap); //await db.Orders.FindAsync(id);
+                OrderVM order = mapper.Map<OrderVM>(orderFullMap); 
                 if (order == null) {
                     return new JsonResult { Data = new { success = false, message = "Error. Order is Null!" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
                 }
                 Session["orderFullMap"] = orderFullMap;
                 return new JsonResult { Data = new { success = true, message = "It's good!" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
             }
-            else { //заблокир.
+            else { 
                 if (orderFullMap is null || orderFullMap.Id == 0) {
                     return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
                 }
@@ -141,7 +141,6 @@ namespace OnlineAuction.Controllers
             //------- "Купить сразу" и "Ленивая Корзина"--------------
             var data = new { message = "", orderId = 0, flagBuyNow = false };
             data = HelperOrderCreate.Cast(data, Session["data"]);
-            //if (data.flagBuyNow == true) {}
             return View(orderVM);
         }
 
@@ -157,7 +156,6 @@ namespace OnlineAuction.Controllers
         }
         public ActionResult BuyBye(int? orderId)
         {
-            //отправить SMS клиенту?
             ViewBag.OrderId = orderId == null ? 0 : orderId;
             return View();
         }
@@ -211,19 +209,15 @@ namespace OnlineAuction.Controllers
 
 
         [HttpPost]
-        //[ValidateAntiForgeryToken]
         public async Task<ActionResult> EditAsync(OrderFullMapVM orderFullMap)
         {
             if (ModelState.IsValid) {
                 OrderBO orderBO = DependencyResolver.Current.GetService<OrderBO>().LoadAsNoTracking(orderFullMap.Id);
                 BuilderSynteticModels.mapper = mapper;
                 await BuilderSynteticModels.EditEntityAsync(orderFullMap, orderBO);
-                //orderBO.Save(orderBO);
-
-                //return RedirectToAction("Index");
+                
                 return new JsonResult { Data = new { success = true, message = "Данные перезаписаны!" }, JsonRequestBehavior = JsonRequestBehavior.DenyGet};
             }
-            //return View();
             return new JsonResult { Data = new { success = false, message = "Извините. Что-то пошло не так!(" }, JsonRequestBehavior = JsonRequestBehavior.DenyGet };
 
         }

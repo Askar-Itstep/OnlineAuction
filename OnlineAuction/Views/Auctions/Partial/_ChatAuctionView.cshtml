@@ -1,34 +1,27 @@
-﻿
-@{
+﻿@{
     ViewBag.Title = "Chat";
-}
-@{
     if (ViewBag.User != null) {
         <div class="FullName">@ViewBag.User.FullName</div>
-
     }
 }
 <h2>Чат-комната</h2>
-
-<div class="main">
-    <div id="chatBody">
+<div class="main container-fluid">
+    <div id="chatBody"  class="jumbotron col-md-8">
         <div id="header"></div>
-        <div id="inputForm">
-            <input type="text" id="message" />
-
-            <input type="button" id="sendmessage" value="Отправить в общий чат" />            
-            <input type="button" id="sendAuthorMessage" value="Отправить сообщение автору" />
+        <div id="inputForm" class="input-group-prepend">
+            <input type="text" style="width:90%; margin-bottom:15px" id="message"/>
+            <input type="button" id="sendmessage" value="SMS в общий чат" class="btn-primary"/>            
+            <input type="button" id="sendAuthorMessage" value="SMS владельцу лота" class="btn-success"/>
         </div>
         <div id="chatroom"></div>
-
-        <div id="chatusers">
-            <p><b>Все пользователи</b></p>
-        </div>
     </div>
-
+    <div id="chatusers" class="col-md-4">
+        <p><b>Все пользователи</b></p>
+    </div>
     <input id="hdId" type="hidden" />
     <input id="username" type="hidden" />
 </div>
+
 @section scripts {
     <script src="~/Scripts/jquery.signalR-2.4.1.min.js"></script>
     <script src="~/signalr/hubs"></script>
@@ -46,7 +39,7 @@
             var auctionId = 0;
             // Объявление функции, котор. хаб вызывает при получении сообщений
             chat.client.addMessage = function (name, message) {
-                $('#chatroom').append('<p><b>' + htmlEncode(name) + '</b>: ' + htmlEncode(message) + '</p>');
+                $('#chatroom').prepend('<p><b>' + htmlEncode(name) + '</b>: ' + htmlEncode(message) + '</p>');
             };
             // Функция, вызываемая при подключении нового пользователя
             //параметр userName получ. здесь (стр.75)
@@ -58,11 +51,8 @@
 
                 // Добавление всех пользователей в отображен.
                 for (i = 0; i < allUsers.length; i++) {
-                    AddUser(allUsers[i].ConnectionId, allUsers[i].Name);
+                    AddUser(allUsers[i].ConnectionId, allUsers[i].FullName);
                 }
-                //$(allUsers).each(function (i, item) {
-                //    console.log("item: " + item.FullName)
-                //})
                 users = allUsers
             }
 
@@ -78,26 +68,27 @@
 
             //--------- Открываем соединение -------------
             $.connection.hub.start().done(function () {
-                //connectionId = $.connection.hub.id
-                //message = $('#message').val()
-                //auctionId = localStorage.getItem("auctionId")
+                {
+                    //connectionId = $.connection.hub.id
+                    //message = $('#message').val()
+                    //auctionId = localStorage.getItem("auctionId")
+                }
                 //срабат. не только при старте
                 $('#sendmessage').click(function () {
                     message = $('#message').val()
-                    //$(users).each(function(i, item){
-                    //    console.log("item: " + item.FullName)
-                    //})
                     // Вызываем у хаба метод Send
                     chat.server.send($('#username').val(), message);
                     $('#message').val('');
                 });
       //================== send auctionAuthor message =====================
                 $('#sendAuthorMessage').click(function () {
-                    //connectionId = $.connection.hub.id
-                    //message = $('#message').val()
-                    //auctionId = localStorage.getItem("auctionId")
-                    //отправить на серв. данные для вызова соотв. ф-ции//auctionId, connectionId, message
-                    sendData()
+                    {
+                        //connectionId = $.connection.hub.id
+                        //message = $('#message').val()
+                        //auctionId = localStorage.getItem("auctionId")
+                        //отправить на серв. данные для вызова соотв. ф-ции//auctionId, connectionId, message
+                    }
+                    sendAjaxData()
                     $('#message').val('');
                 });
                 var name = $('div.FullName').html();
@@ -107,33 +98,32 @@
                 else {
                     chat.server.connect("Noname");
                 }
-                sendData()
-                //$.ajax({                      //auctionId, connectionId, message
-                //    type: "GET",
-                //    url:  '/Auctions/ChatAsync',
-                //    data: { connectionId: $.connection.hub.id},
-                //    success: function (data) {
-                //        //alert(data) //сейчас возвр. View т.е. html-файл
-                //        //$(location).attr('href',"/Auctions/Talk")
-                //    },
-                //    error: function (e, msg) {
-                //        alert("Error: ", msg)
-                //    }
-                //})
-
+                sendAjaxData()
+                {
+                    //$.ajax({                      //auctionId, connectionId, message
+                    //    type: "GET",
+                    //    url:  '/Auctions/ChatAsync',
+                    //    data: { connectionId: $.connection.hub.id},
+                    //    success: function (data) {
+                    //        //alert(data) //сейчас возвр. View т.е. html-файл
+                    //        //$(location).attr('href',"/Auctions/Talk")
+                    //    },
+                    //    error: function (e, msg) {
+                    //        alert("Error: ", msg)
+                    //    }
+                    //})
+                }
             });
             //-----------------конец ф-ции открытия -------------------
         });
         //auctionId, connectionId, message
-        function sendData() {
+        function sendAjaxData() {
             $.ajax({
                 type: "GET",
                 url: '/Auctions/ChatAsync',
-                //data: { auctionId: auctionId, connectionId: connectionId, message: message },
-                data: { auctionId: localStorage.getItem("auctionId"), message: $('#message').val(), connectionId : $.connection.hub.id},
+                data: { auctionId: localStorage.getItem("auctionId"), connectionId: $.connection.hub.id, message: $('#message').val()},
                 success: function (data) {
                     //alert(data) //сейчас возвр. View т.е. html-файл
-                    //$(location).attr('href',"/Auctions/Talk")
                 },
                 error: function (e, msg) {
                     alert("Error: ", msg)

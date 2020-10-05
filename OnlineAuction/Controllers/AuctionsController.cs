@@ -24,7 +24,7 @@ namespace OnlineAuction.Controllers
             this.mapper = mapper;
         }
 
-        //alert - из методов Auctions/Create(), Orders/Confirm()
+        //alert - из методов Auctions/Create(), Orders/Confirm()..
         //isActor - только из _Layout.html (опред. по клику "мои аукц.")
         public ActionResult Index(int? isActor, string alert = null)
         {
@@ -222,9 +222,10 @@ namespace OnlineAuction.Controllers
         }
 
 
-        private static AccountVM AccountVM { get; set; }
+        private static AccountVM Account { get; set; }
+
         //1-ый заход: по клику ссылки "Связаться с Автором"
-        //2-ой: по заходу (и активац. хаба) в _ChatAuctionView - для получ. ConnectID
+        //2-ой: по ajax-заходу (и активац. хаба) в _ChatAuctionView - для получ. ConnectID
         public async Task<ActionResult> ChatAsync(int? auctionId, string connectionId, string message)//1-ый парам. по 1-му заходу, 2-ой по 2-му
         {
             var accountId = Session["accountId"] ?? 0;
@@ -236,32 +237,35 @@ namespace OnlineAuction.Controllers
                 var sender = PushSender.Instance;
                 AccountBO accountBO = DependencyResolver.Current.GetService<AccountBO>().Load((int)accountId);
                 if (accountBO != null) {
-                    AccountVM = mapper.Map<AccountVM>(accountBO);
-                    sender.AccountVM = AccountVM;
-                    ViewBag.User = AccountVM;
+                    Account = mapper.Map<AccountVM>(accountBO);
+                    sender.Account = Account;
+                    ViewBag.User = Account;
                 }
                 if (connectionId == "" || connectionId is null) {
                     return View("Partial/_ChatAuctionView");
                 }
                 AuctionBO auctionBO = DependencyResolver.Current.GetService<AuctionBO>().Load((int)auctionId);
                 ViewBag.Actor = null;
+                string alert = "";
                 if (auctionBO != null) {
                     var actorBO = auctionBO.Actor;
                     var actorAccountBO = actorBO.Account;
                     var actorAccountVM = mapper.Map<AccountVM>(actorAccountBO);
                     ViewBag.Actor = actorAccountVM;
-                    //var hub = ChatHub.Users;
                     var users = PushSender.Users;
                     var actor = users.FirstOrDefault(u => u.Id == actorAccountVM.Id);
-                   
-                    message = message ?? "Hello author!";
-                    await sender.CommunicationWIthAuthor(message, actor.ConnectionId);
-                 }
-                //return View("Partial/_ChatAuctionView");
-                return new JsonResult { Data = "It's good", JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                    if (actor != null) {
+                        message = message.Equals("") ? "Hello author!" : message;
+                        await sender.CommunicationWIthAuthor(message, actor.ConnectionId, connectionId);
+                        PushSender.SaveMessage(message, accountId, actorBO);   //сохр. в БД
+                        alert = "It's good";
+                    }
+                    else alert = "Actor is Null!";
+                }
+                return new JsonResult { Data = alert, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
             }
         }
-
+        
         protected override void Dispose(bool disposing)
         {
             if (disposing) {

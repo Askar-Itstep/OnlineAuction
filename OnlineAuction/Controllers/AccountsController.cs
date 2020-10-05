@@ -33,7 +33,7 @@ namespace OnlineAuction.Controllers
         }
 
 
-        //[Authorize(Roles = "admin")]  //контроль роли перенесен в представл.-юзер может смотреть свой аккаунт!
+        [Authorize(Roles = "admin")]  
         public ActionResult Details(int? id)
         {
             if (id == null) {
@@ -108,7 +108,7 @@ namespace OnlineAuction.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost]      //+ addBalance!
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Edit(AccountVM account, decimal? balance)
         {
@@ -128,7 +128,7 @@ namespace OnlineAuction.Controllers
                 AccountBO accountBO = DependencyResolver.Current.GetService<AccountBO>().LoadAllNoTracking().FirstOrDefault(a=>a.Id==accountId);
                 accountBO.AddBalance((decimal)balance);
                 accountBO.Save(accountBO);
-                
+                //добав. роль "модер" -если такой нет
                 var moderRole = DependencyResolver.Current.GetService<RoleBO>().LoadAll().Where(r => r.RoleName.Contains("moder")).FirstOrDefault(); 
                 
                 RoleAccountLinkVM linkVM = new RoleAccountLinkVM { AccountId = (int)accountId, RoleId = moderRole.Id };
@@ -255,14 +255,10 @@ namespace OnlineAuction.Controllers
             roleBO = IsRole(roleBO, "client");    //проверка, если надо-установ.
 
             //1-create Address
-            var address = new Address { Region = model.Region, City = model.City, Street = model.Street, House = model.House };
-            db.Addresses.Add(address);
+            //var address = mapper.Map<AddressBO>(model);
 
             //2)созд. account
-            accountBO.FullName = model.FullName;
-            accountBO.Email = model.Email;
-            accountBO.Password = model.Password;
-            accountBO.Address = mapper.Map<AddressBO>(address);
+            accountBO = mapper.Map<AccountBO>(model);
             accountBO.Save(accountBO);
 
             int accountLastId = accountBO.GetLastId();
