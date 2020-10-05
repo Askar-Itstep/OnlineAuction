@@ -25,12 +25,10 @@ namespace OnlineAuction.ServiceClasses
         {
             ImageBO image = CreateImageEntity(editVM, upload);
             ProductBO product = CreateProductEntity(editVM, image);
-
-            //var client = db.Clients.Where(c => c.AccountId == (int)userId).FirstOrDefault();
+            
             var client = DependencyResolver.Current.GetService<ClientBO>().LoadAll().Where(c => c.AccountId == (int)userId).FirstOrDefault();
             CreateAuctionEntity(editVM, ref auction, product, client);
-            CreateBetAuctionEntity(editVM, auction);    //, client
-            ////await db.SaveChangesAsync();
+            CreateBetAuctionEntity(editVM, auction);    
             return await Task.FromResult(auction);
         }
 
@@ -44,37 +42,26 @@ namespace OnlineAuction.ServiceClasses
                 auction.Step = editVM.Price * (decimal)0.1;
             }
             auction.Product = product;
-            //auction.RedemptionPrice = editVM.RedemptionPrice == 0 ? auction.Product.Price * 3 : editVM.RedemptionPrice;
-            //auction.Description = editVM.Description;
-            //auction.BeginTime = editVM.DayBegin + editVM.TimeBegin;
-            //auction.EndTime = auction.BeginTime + TimeSpan.FromHours((int)editVM.Duration);
             auction.ActorId = (int)client.Id;
             auction.WinnerId = (int)client.Id; // в начале! - потом перезапишется
             auction.IsActive = true;
-            ////db.Auctions.Add(auction);
-            ////auction.Save(auction);
         }
 
-        private static void CreateBetAuctionEntity(AuctionEditVM editVM, AuctionBO auction)    //, ClientBO client
+        private static void CreateBetAuctionEntity(AuctionEditVM editVM, AuctionBO auction)    
         {
-            //BetAuction betAuction = new BetAuction { Auction = auction, Bet = editVM.Price, Client = client };
             var betAuction = DependencyResolver.Current.GetService<BetAuctionBO>();
             betAuction.Auction = auction;
             betAuction.Bet = editVM.Price;
             betAuction.ClientId = auction.ActorId;
-            //db.BetAuction.Add(betAuction);
             betAuction.Save(betAuction);
         }
 
         private static ProductBO CreateProductEntity(AuctionEditVM editVM, ImageBO image)
         {
-            //Product product = new Product { Image = image, Price = editVM.Price, Title = editVM.Title };
             var product = DependencyResolver.Current.GetService<ProductBO>();
             product.Image = image;
             product.Price = editVM.Price;
             product.Title = editVM.Title;
-            ////db.Products.Add(product);
-            //product.Save(product);
             return product;
         }
 
@@ -83,15 +70,9 @@ namespace OnlineAuction.ServiceClasses
         {
             byte[] myBytes = new byte[upload.ContentLength];
             upload.InputStream.Read(myBytes, 0, upload.ContentLength);
-            //Image image = new Image { FileName = editVM.Title, ImageData = myBytes };
             var image = DependencyResolver.Current.GetService<ImageBO>();
             image.FileName = editVM.Title;
             image.ImageData = myBytes;
-            
-            //if (flag == false) {
-            //    //db.Images.Add(image);
-            //    image.Save(image);
-            //}
             return image;
         }
 
@@ -122,15 +103,12 @@ namespace OnlineAuction.ServiceClasses
                     imageBO = DependencyResolver.Current.GetService<ImageBO>();
                     imageBO = imageBO.LoadAll().FirstOrDefault(i => i.Id == auctionBO.Product.ImageId);
                     if (imageBO != null) {
-                        //Image image = CreateImageEntity((AuctionEditVM)editVM, upload, true);    //true->edit
                         ImageBO editImageBO = DependencyResolver.Current.GetService<ImageBO>();
-                        //ImageBO editImageBO = mapper.Map<ImageBO>(image);
                         editImageBO = CreateImageEntity((AuctionEditVM)editVM, upload, true);    //true->edit
                         EditEntity(imageBO, editImageBO, 3);
                         imageBO.Save(imageBO);
 
                         //при редактир. нет новой записи ->переустанова ссылок не треб.
-                        //productBO.ImageId = newImageBO.Id;
                         productBO.Image = imageBO;
                     }
                 }
@@ -143,13 +121,14 @@ namespace OnlineAuction.ServiceClasses
                 OrderVM orderVM = mapper.Map<OrderVM>(editVM);
                 OrderBO editBO = mapper.Map<OrderBO>(orderVM);
                 EditEntity(orderBO, editBO, 5);
-                //orderBO.Save(orderBO);
             }
 
 
         }
+
         private static List<Type> listTypes = new List<Type>()
         { typeof(AuctionBO), typeof(ProductBO), typeof(ClientBO), typeof(ImageBO), typeof(BetAuctionBO) , typeof(OrderBO), typeof(ItemBO)};
+
         private static List<string> simpleList = new List<string>() { "int32", "nullable", "decimal", "float", "string", "byte[]", "double", "bool" };
 
         private static void EditEntity(BaseBusinessObject modelBO, BaseBusinessObject editBO, int key)

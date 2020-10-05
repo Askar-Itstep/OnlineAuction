@@ -34,8 +34,6 @@
     <script>
         $(function (e) {
             var accountId = localStorage.getItem("accountId");
-            //var roles = sessionStorage.getItem("roles");
-            //var isActive = sessionStorage.getItem("isActive");
 
             $(".classDeleteAccounts").attr("href", "/Accounts/Delete/?id=" + accountId); //здесь удаление не из представл. админа "Все аккаунты", поэтому нет модели
             $(".classMyAuctions").attr("href", "/Auctions/Index/?isActor=1");
@@ -85,10 +83,17 @@
                                 <li>@Html.ActionLink("Пользователи", "Index", "Accounts")</li>
                             }
                         }
-
-                        <li>@Html.ActionLink("Домашняя страница", "Index", "Home")</li>
-                        <li>@Html.ActionLink("О программе", "About", "Home")</li>
-                        <li>@Html.ActionLink("Контакт", "Contact", "Home")</li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                                <div>Домашняя страница</div> <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu" role="menu">
+                                <li>@Html.ActionLink("Домашняя страница", "Index", "Home")</li>
+                                <li>@Html.ActionLink("О программе", "About", "Home")</li>
+                                <li>@Html.ActionLink("Контакты", "Contact", "Home")</li>
+                            </ul>
+                        </li>
+                        <li>@Html.ActionLink("Чат", "Chat", "Home")</li>
                     </ul>
                     <ul class="nav navbar-nav">
                         @{

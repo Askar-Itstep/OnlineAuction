@@ -35,6 +35,17 @@ namespace OnlineAuction
              .ConstructUsing(c => DependencyResolver.Current.GetService<AccountVM>())
              .ForMember(dist=>dist.ConnectionId, opt=>opt.MapFrom(src=>0));
 
+                //-------------------RegisterVM ------------------------------
+                mpr.CreateMap<RegisterModel, AccountBO>()
+                .ConstructUsing(c => DependencyResolver.Current.GetService<AccountBO>())
+                .ForMember(dist => dist.Address, opt => opt.MapFrom(src => new AddressVM { City = src.City, Region=src.Region, Street=src.Street, House=src.House}))
+                .ForMember(dist=>dist.Balance, opt=>opt.MapFrom(src=>0))
+                .ForMember(dist => dist.Email, opt => opt.MapFrom(src => src.Email))
+                .ForMember(dist => dist.FullName, opt => opt.MapFrom(src => src.FullName))
+                .ForMember(dist => dist.Password, opt => opt.MapFrom(src => src.Password))
+                ;
+
+
                 //---------------Role ----------------------------------
                 mpr.CreateMap<Role, RoleBO>()
                 .ConstructUsing(c => DependencyResolver.Current.GetService<RoleBO>());
@@ -161,6 +172,12 @@ namespace OnlineAuction
                 .ForMember(dest => dest.Bet, opt => opt.MapFrom(src => src.Price));
                 //============================================
 
+                //--------------------------------------Message ---------------------------------------
+                mpr.CreateMap<Message, MessageBO>()
+                                .ConstructUsing(c => DependencyResolver.Current.GetService<MessageBO>());
+
+                mpr.CreateMap<MessageBO, Message>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<Message>());
 
                 //--------------------------------------Orders ---------------------------------------
                 mpr.CreateMap<Order, OrderBO>()

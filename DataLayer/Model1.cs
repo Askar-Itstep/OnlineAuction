@@ -8,9 +8,7 @@ namespace OnlineAuction.Entities
 
     public partial class Model1 : DbContext
     {
-        public Model1()
-            : base("name=Model1")
-        {
+        public Model1() : base("name=Model1")  {
         }
         
         public virtual DbSet<Role> Roles { get; set; }
@@ -24,25 +22,16 @@ namespace OnlineAuction.Entities
         public virtual DbSet<Message> Messages { get; set; }
         public virtual DbSet<Auction> Auctions { get; set; }
         public virtual DbSet<AuctionClientsLink> AuctionClientsLinks { get; set; }
-
         public virtual DbSet<BetAuction> BetAuction { get; set; }
 
         public virtual DbSet<RoleAccountLink> RoleAccountLinks { get; set; }
-
-        protected override void OnModelCreating(DbModelBuilder modelBuilder)
-        {
-        }
-
-        //public System.Data.Entity.DbSet<OnlineAuction.ViewModels.OrderVM> OrderVMs { get; set; }
-
-        //public System.Data.Entity.DbSet<OnlineAuction.ViewModels.ClientVM> ClientVMs { get; set; }
-
-        //public System.Data.Entity.DbSet<OnlineAuction.ViewModels.AuctionEditVM> AuctionEditVMs { get; set; }
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)  {
+        }        
     }
 
-    public class MyContextInitializer : DropCreateDatabaseIfModelChanges<Model1>    //Always //
+    public class MyContextInitializer : DropCreateDatabaseIfModelChanges<Model1>    
     {
-        protected override void Seed(Model1 context)    //1-ое обращ. из AccauntC.\Login - ?
+        protected override void Seed(Model1 context)    
         {
             //1) Roles
             Role adminRole = new Role { RoleName = "admin" };

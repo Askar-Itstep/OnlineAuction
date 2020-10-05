@@ -47,7 +47,10 @@
                 "clientId": $('div.div-client').html(),
                 "bet": yourBet
             }
-
+            if (data.clientId == undefined || data.clientId == NaN) {
+                alert("Вы не являетесь клиентом. Проверте баланс!")
+                return
+            }
             $.ajax({
                 method: "Post",
                 url: '@Url.Action("Create", "BetAuctions")',

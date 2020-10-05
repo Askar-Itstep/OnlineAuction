@@ -3,6 +3,8 @@ using BusinessLayer.BusinessObject;
 using OnlineAuction.Entities;
 using OnlineAuction.ServiceClasses;
 using OnlineAuction.ViewModels;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 
@@ -12,7 +14,7 @@ namespace OnlineAuction.Controllers
     {
         private Model1 db = new Model1();
         private IMapper mapper;
-        private static AccountVM AccountVM { get; set; }
+        private static AccountVM Account { get; set; }
 
         public HomeController(IMapper mapper)
         {
@@ -23,11 +25,14 @@ namespace OnlineAuction.Controllers
             var accountId = Session["accountId"] ?? 0;
             if ((int)accountId != 0) {
                 AccountBO account = DependencyResolver.Current.GetService<AccountBO>().Load((int)accountId);
-                if (account != null) {
-                    AccountVM = mapper.Map<AccountVM>(account);
+                List<RoleAccountLinkBO> rolesAccount= DependencyResolver.Current.GetService<RoleAccountLinkBO>()
+                    .LoadAll().Where(r=>r.AccountId==(int)accountId).ToList();
+                var roleAdmin = rolesAccount.FirstOrDefault(r => r.Role.RoleName.Contains("admin"));
+                if (account != null && roleAdmin == null) {
+                    Account = mapper.Map<AccountVM>(account);
                     var sender = PushSender.Instance;
-                    sender.AccountVM = AccountVM;
-                    await sender.SendMessage(string.Format("А у нас новый участник: {0}", AccountVM.FullName));
+                    sender.Account = Account;
+                    await sender.SendMessage(string.Format("А у нас новый участник: {0}", Account.FullName));
                 }
             }
             return View();
@@ -38,7 +43,7 @@ namespace OnlineAuction.Controllers
                 if ((int)accountId == 0) {
                     return RedirectToAction("Login", "Accounts");
                 }
-                ViewBag.User = AccountVM;
+                ViewBag.User = Account;
                 return View("Partial/_ChatPartialView");  
         }
        
