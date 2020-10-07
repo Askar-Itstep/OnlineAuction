@@ -13,8 +13,10 @@
             <input type="button" id="sendmessage" value="SMS в общий чат" class="btn-primary" />
             <input type="button" id="sendAuthorMessage" value="SMS отправителю" class="btn-info" />
         </div>
+
         <div id="chatroom"></div>
     </div>
+
     <div id="chatusers" class="col-md-4">
         <p><b>Все пользователи</b></p>
     </div>
@@ -33,10 +35,18 @@
         $(function () {
             // Ссылка на автоматически-сгенерированный прокси хаба
             var chat = $.connection.chatHub;
-            var users = [];
+            var friendAccountId = 0;
+            var friendConnId = 0;
             // Объявление функции, котор. хаб вызывает при получении сообщений
-            chat.client.addMessage = function (name, message) {
-                $('#chatroom').prepend('<p><b>' + htmlEncode(name) + '</b>: ' + htmlEncode(message) + '</p>');
+            chat.client.addMessage = function (name, message, accId) {
+                $('#chatroom').prepend('<p><b>' + htmlEncode(name) + '</b>: ' + htmlEncode(message)
+                    + '<span class ="hidden">' + accId + '</span>' +
+                    + '</p>');
+                friendAccountId = accId;
+                //console.log("span: " + accountId)
+            };
+            chat.client.hello = function (name, message) {
+                $('#chatroom').prepend('<p><b>' + "System" + '</b>: ' + htmlEncode(message) + '</p>');
             };
             // Функция, вызываемая при подключении нового пользователя
             //параметр userName получ. здесь (стр.75)
@@ -51,14 +61,17 @@
                     AddUser(allUsers[i].ConnectionId, allUsers[i].FullName);
                 }
                 $(allUsers).each(function (i, item) {
+                    //for (var val in item) {
+                    //    console.log("val: " + item[val])
+                    //}
                     console.log("item: " + item.FullName)
                 })
-                users = allUsers
+                localStorage.setItem("allUsers", JSON.stringify(allUsers));
             }
 
             // Добавляем нового пользователя в отображ. в чат-комнаты
-            chat.client.onNewUserConnected = function (id, name) {
-                AddUser(id, name);
+            chat.client.onNewUserConnected = function (connId, name) {
+                AddUser(connId, name); //добав. в представл. (не в хранилищ)
             }
 
             // Удаляем пользователя из отображ. в чат-комнаты
@@ -66,41 +79,66 @@
                 $('#' + id).remove();
             }
 
-            // Открываем соединение
+            var connectID = $.connection.hub.id
+            localStorage.setItem("connectID", connectID);
+            //--------- Открываем соединение -------------
             $.connection.hub.start().done(function () {
 
-                //срабат. не только при старте
+   //----------------SEND---------срабат. не только при старте------------------------------------
                 $('#sendmessage').click(function () {
-                    $(users).each(function(i, item){
-                        console.log("item: " + item.FullName)
-                    })
+                    message = $('#message').val()
                     // Вызываем у хаба метод Send
-                    chat.server.send($('#username').val(), $('#message').val());
+                    chat.server.send($('#username').val(), message);
+                    $('#message').val('');
+                });
+                //================== send auctionAuthor message =====================
+                $('#sendAuthorMessage').click(function () {
+                    if (connectID == undefined || connectID == NaN) {
+                        connectID = localStorage.getItem("connectID");
+                    }
+                    var friendName = $('#chatroom').children().first().children().first().html();
+                    var allUsers = JSON.parse(localStorage.getItem("allUsers"))
+                    $(allUsers).each(function (i, item) {
+                        console.log(item)
+                        if (item.accountId == friendAccountId) {
+                            friendConnId = item.ConnectionId
+                        }
+                    })
+                    console.log("friend: ", friendName)
+
+                    sendAjaxData(connectID, $('#message').val(), friendConnId)
                     $('#message').val('');
                 });
                 var name = $('div.FullName').html();
                 if (name != undefined && name.length > 0) {
                     chat.server.connect(name);
                 }
-                else console.log("name is Null!")
-                var connectionId = $.connection.hub.id
-                //console.log("connID: " + connectionId)
-                $.ajax({
-                    type: "GET",
-                    url:  '/Home/Chat',
-                    data: { connectionId: connectionId },
-                    success: function (data) {
-                        //alert(data) //сейчас возвр. View т.е. html-файл
-                        //$(location).attr('href',"/Auctions/Talk")
-                    },
-                    error: function (e, msg) {
-                        alert("Error: ", msg)
-                    }
-                })
+                else {
+                    chat.server.connect("Noname");
+                }
+                sendAjaxData(connectID, $('#message').val(), friendConnId)
+            })
+              //-----------------конец ф-ции открытия -------------------
 
-            });
         });
-
+        //auctionId, connectionId, message
+        function sendAjaxData(connectID, message, friendConnId) {
+            $.ajax({
+                type: "GET",
+                url: '/Home/ChatAsync',
+                data: {
+                    connectionId: connectID,
+                    message: message,
+                    friendConnectId: friendConnId
+                    },
+                success: function (data) {
+                    //alert(data) //сейчас возвр. View т.е. html-файл
+                },
+                error: function (e, msg) {
+                    alert("Error: ", msg)
+                }
+            })
+        }
         //Добавление имени нового собеседника в  отображ. чат-комнаты
         function AddUser(id, name) {
             var userId = $('#hdId').val();

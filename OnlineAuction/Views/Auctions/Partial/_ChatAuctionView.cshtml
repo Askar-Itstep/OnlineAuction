@@ -13,6 +13,7 @@
             <input type="button" id="sendmessage" value="SMS в общий чат" class="btn-primary"/>            
             <input type="button" id="sendAuthorMessage" value="SMS владельцу лота" class="btn-success"/>
         </div>
+        @*<button class="btn btn-info exit">Выйти из чата</button>*@
         <div id="chatroom"></div>
     </div>
     <div id="chatusers" class="col-md-4">
@@ -67,12 +68,7 @@
             }
 
             //--------- Открываем соединение -------------
-            $.connection.hub.start().done(function () {
-                {
-                    //connectionId = $.connection.hub.id
-                    //message = $('#message').val()
-                    //auctionId = localStorage.getItem("auctionId")
-                }
+            $.connection.hub.start().done(function () {               
                 //срабат. не только при старте
                 $('#sendmessage').click(function () {
                     message = $('#message').val()
@@ -82,12 +78,7 @@
                 });
       //================== send auctionAuthor message =====================
                 $('#sendAuthorMessage').click(function () {
-                    {
-                        //connectionId = $.connection.hub.id
-                        //message = $('#message').val()
-                        //auctionId = localStorage.getItem("auctionId")
-                        //отправить на серв. данные для вызова соотв. ф-ции//auctionId, connectionId, message
-                    }
+                   
                     sendAjaxData()
                     $('#message').val('');
                 });
@@ -99,20 +90,8 @@
                     chat.server.connect("Noname");
                 }
                 sendAjaxData()
-                {
-                    //$.ajax({                      //auctionId, connectionId, message
-                    //    type: "GET",
-                    //    url:  '/Auctions/ChatAsync',
-                    //    data: { connectionId: $.connection.hub.id},
-                    //    success: function (data) {
-                    //        //alert(data) //сейчас возвр. View т.е. html-файл
-                    //        //$(location).attr('href',"/Auctions/Talk")
-                    //    },
-                    //    error: function (e, msg) {
-                    //        alert("Error: ", msg)
-                    //    }
-                    //})
-                }
+
+                
             });
             //-----------------конец ф-ции открытия -------------------
         });
@@ -121,7 +100,10 @@
             $.ajax({
                 type: "GET",
                 url: '/Auctions/ChatAsync',
-                data: { auctionId: localStorage.getItem("auctionId"), connectionId: $.connection.hub.id, message: $('#message').val()},
+                data: { auctionId: localStorage.getItem("auctionId"), connectionId: $.connection.hub.id, message: $('#message').val() },
+                beforeSend: function () {
+                    console.log("connID: ", $.connection.hub.id)
+                },
                 success: function (data) {
                     //alert(data) //сейчас возвр. View т.е. html-файл
                 },
