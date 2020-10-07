@@ -87,10 +87,7 @@ namespace OnlineAuction.Controllers
 
                     //-------------закрыть аукцион!-----------------------------------------
                     BetAuctionBO winnBet = HelperOrderCreate.CloseAuction(auctionBO, endPrice, orderBO);    //auctionId, 
-
-                    //------------отправить push-уведомл. о заверш. аукциона ------------
-
-
+                    
                     //------------отправить письма участникам о заверш. аукц.-----------------
                     EmailScheduler.AuctionId = auctionBO.Id;
                     EmailScheduler.WinnerId = auctionBO.WinnerId;
@@ -138,6 +135,7 @@ namespace OnlineAuction.Controllers
             }
             //просмотр деталей заказа + <Оплатить>
             OrderVM orderVM = mapper.Map<OrderVM>(orderBO);
+
             //------- "Купить сразу" и "Ленивая Корзина"--------------
             var data = new { message = "", orderId = 0, flagBuyNow = false };
             data = HelperOrderCreate.Cast(data, Session["data"]);
@@ -154,29 +152,13 @@ namespace OnlineAuction.Controllers
             orderBO.Save(orderBO);
             return new JsonResult { Data = new { message = "Спасибо за покупки!", orderBO.Id } };
         }
+
         public ActionResult BuyBye(int? orderId)
         {
             ViewBag.OrderId = orderId == null ? 0 : orderId;
             return View();
         }
-
-        #region old code
-        //[HttpPost]        //представление OrderCreate не нужно
-        //[ValidateAntiForgeryToken]
-        //public async Task<ActionResult> Create([Bind(Include = "Id,ClientId,IsApproved")] Order order)
-        //{
-        //    if (ModelState.IsValid) {
-        //        db.Orders.Add(order);
-        //        await db.SaveChangesAsync();
-        //        return RedirectToAction("Index");
-        //    }
-
-        //    ViewBag.ClientId = new SelectList(db.Clients, "Id", "Id", order.ClientId);
-        //    return View(order);
-        //}
-
-        #endregion
-
+        
 
         //2-ой заход после Details (Index.html->ajax->Details)
         [Authorize(Roles = "admin")]
@@ -189,21 +171,6 @@ namespace OnlineAuction.Controllers
             if (orderFullMap.Id == 0) {
                 new JsonResult { Data = new { success = false, message = "Error. OrderId Not Found!" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
             }
-            //не используются!
-            #region for DropDownList
-            //OrderVM orderVM = mapper.Map<OrderVM>(orderFullMap);
-            //OrderBO order = mapper.Map<OrderBO>(orderVM);
-            //ClientBO clientBO = DependencyResolver.Current.GetService<ClientBO>();
-            //List<ClientBO> clients = clientBO.LoadAll().ToList();
-          
-            //AuctionVM auctionVM = mapper.Map<AuctionVM>(orderFullMap);
-            //List<AuctionBO> auctions =DependencyResolver.Current.GetService<AuctionBO>().LoadAll().ToList();
-            //ViewBag.OrderIds = new SelectList(db.Orders, "Id", "Id");
-            //ViewBag.Auctions = new SelectList(auctions.Select(a => mapper.Map<AuctionVM>(a)), "Id", "Description");
-            //ViewBag.ClientId = new SelectList(db.Clients, "Id", "Account.FullName");
-            //ViewBag.EndTimes = new SelectList(db.Auctions.Select(a=>a.EndTime), "EndTime");
-            //ViewBag.ProductIds = new SelectList(db.Products, "Id", "Title");
-            #endregion
             return View(orderFullMap);
         }
 

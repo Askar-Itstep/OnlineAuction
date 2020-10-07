@@ -40,7 +40,7 @@ namespace BusinessLayer.BusinessObject
             var message = unitOfWork.Messages.GetById(id);
             return mapper.Map(message, this);
         }
-        public void Save(MessageBO messageBO)
+        public MessageBO Save(MessageBO messageBO)
         {
             var message = mapper.Map<Message>(messageBO);
             if (messageBO.Id == 0) {
@@ -50,6 +50,7 @@ namespace BusinessLayer.BusinessObject
                 Update(message);
             }
             unitOfWork.Messages.Save();
+            return messageBO;
         }
         private void Add(Message message)
         {

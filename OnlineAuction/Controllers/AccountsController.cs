@@ -185,9 +185,9 @@ namespace OnlineAuction.Controllers
                 List<RoleBO> rolesBO = roleAccountBOList.Where(r => r.AccountId == accountBO.Id).Select(r => r.Role).ToList();
                 accountBO.RolesBO = rolesBO;
 
-                //связь котор. надо удалить или добавить
+                //связь котор. надо удалить или добавить-нет денег удал. роль клиента
                 RoleAccountLinkBO linkRoleClientAccount = roleAccountBOList.Where(r => r.Role.RoleName.Contains("moder")).FirstOrDefault();    //client
-                if (accountBO.Balance <= 0) { //удал. роль клиента
+                if (accountBO.Balance <= 0) { 
 
                     if (linkRoleClientAccount != null) {
                         roleAccountBOList.Where(r => r.Role.RoleName.Contains("moder")).FirstOrDefault().DeleteSave(linkRoleClientAccount);
@@ -205,11 +205,12 @@ namespace OnlineAuction.Controllers
                 if (accountBO != null) {
                     FormsAuthentication.SetAuthCookie(model.Login, true);
 
-                    //КЛЮЧЕВОЙ МОМЕНТ: далее accountId, roles, isActive будут храниться в КЛИЕНТЕ
+                    //далее accountId, roles, isActive будут храниться в КЛИЕНТЕ
                     var accountId = accountBO.Id;
                     var isActive = accountBO.IsActive;
                     roleAccountBOList = roleAccountBO.LoadAll().Where(r => r.AccountId == accountBO.Id).ToList();
                     var roles = roleAccountBOList.Select(r => r.Role.RoleName).ToList();
+
                     //2) сохр. в Session Server
                     HttpContext.Session["accountId"] = accountId;
                     return Json(new { success = true, message = "Wellcome!", accountId, isActive, roles }); //уйдет в предст. Login.html -> _Layout.html

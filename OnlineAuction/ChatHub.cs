@@ -10,27 +10,22 @@ namespace OnlineAuction
     public class ChatHub : Hub  //хаб-концентратор
     {
         public static List<AccountVM> Users = new List<AccountVM>();
-        //public static Dictionary<Tuple<int, string>, AccountVM> usersDict = new Dictionary<Tuple<int, string>, AccountVM>();
         public static AccountVM Account { get; set; } //аккаунт пользователя
 
         public void Hello()
         {
             Clients.All.hello();
         }
-
+        public async Task HelloCaller(string name, string message)
+        {
+            await Clients.Caller.addMessage(name, message);
+        }
         //к данным методам обращ. в клиенте API SignalR
         public void Send(string name, string message)
         {
-            Clients.All.addMessage(name, message);
+            Clients.All.addMessage(name, message, Account.Id);
         }
-
-        //public void SendById(string connectId, string name, string message)
-        //{
-        //    //Clients.Client(connectId).addMessage(name, message);
-        //    Clients.Client(connectId).sendById(name, message);
-        //}
-        // Подключение нового пользователя
-
+        
         public void Connect(string userName)
         {
             var id = Context.ConnectionId;
@@ -41,7 +36,7 @@ namespace OnlineAuction
                 // подключить текущего пользователю
                 Clients.Caller.onConnected(id, userName, Users);
 
-                // Посылаем сообщение всем пользователям, кроме текущего
+                // Показать кто вошел - всем пользователям, кроме текущего
                 Clients.AllExcept(id).onNewUserConnected(id, userName);
             }           
         }
@@ -62,7 +57,7 @@ namespace OnlineAuction
         public async Task JoinRoomAsync(string roomName)
         {
             await Groups.Add(Context.ConnectionId, roomName);
-            Clients.Group(roomName).addChatMessage(Context.User.Identity.Name + " joined.");
+            Clients.Group(roomName).addMessage(Context.User.Identity.Name + " joined.");
         }
 
         public Task LeaveRoom(string roomName)

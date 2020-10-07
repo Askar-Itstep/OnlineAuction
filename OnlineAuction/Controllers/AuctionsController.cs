@@ -234,7 +234,7 @@ namespace OnlineAuction.Controllers
             }
             else {
                 ViewBag.User = null;
-                var sender = PushSender.Instance;
+                var sender = PushSender.InstanceClient;
                 AccountBO accountBO = DependencyResolver.Current.GetService<AccountBO>().Load((int)accountId);
                 if (accountBO != null) {
                     Account = mapper.Map<AccountVM>(accountBO);
