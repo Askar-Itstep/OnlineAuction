@@ -32,8 +32,8 @@ namespace OnlineAuction
                .ConstructUsing(c => DependencyResolver.Current.GetService<AccountBO>());
 
                 mpr.CreateMap<AccountBO, AccountVM>()
-             .ConstructUsing(c => DependencyResolver.Current.GetService<AccountVM>())
-             .ForMember(dist=>dist.ConnectionId, opt=>opt.MapFrom(src=>0));
+             .ConstructUsing(c => DependencyResolver.Current.GetService<AccountVM>());
+             //.ForMember(dist=>dist.ConnectionId, opt=>opt.MapFrom(src=>0));
 
                 //-------------------RegisterVM ------------------------------
                 mpr.CreateMap<RegisterModel, AccountBO>()

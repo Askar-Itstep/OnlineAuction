@@ -35,19 +35,20 @@
         $(function () {
             // Ссылка на автоматически-сгенерированный прокси хаба
             var chat = $.connection.chatHub;
-            var friendAccountId = 0;
-            var friendConnId = 0;
+            var friendConnId = "";
+
             // Объявление функции, котор. хаб вызывает при получении сообщений
             chat.client.addMessage = function (name, message, accId) {
                 $('#chatroom').prepend('<p><b>' + htmlEncode(name) + '</b>: ' + htmlEncode(message)
-                    + '<span class ="hidden">' + accId + '</span>' +
-                    + '</p>');
-                friendAccountId = accId;
-                //console.log("span: " + accountId)
+                    + '<span class ="hidden">' + accId + '</span></p>');
+                console.log("addMessage accId: " + accId)
+                localStorage.setItem("friendAccountId", accId);
             };
+
             chat.client.hello = function (name, message) {
                 $('#chatroom').prepend('<p><b>' + "System" + '</b>: ' + htmlEncode(message) + '</p>');
             };
+
             // Функция, вызываемая при подключении нового пользователя
             //параметр userName получ. здесь (стр.75)
             chat.client.onConnected = function (id, userName, allUsers) {
@@ -60,12 +61,6 @@
                 for (i = 0; i < allUsers.length; i++) {
                     AddUser(allUsers[i].ConnectionId, allUsers[i].FullName);
                 }
-                $(allUsers).each(function (i, item) {
-                    //for (var val in item) {
-                    //    console.log("val: " + item[val])
-                    //}
-                    console.log("item: " + item.FullName)
-                })
                 localStorage.setItem("allUsers", JSON.stringify(allUsers));
             }
 
@@ -79,32 +74,54 @@
                 $('#' + id).remove();
             }
 
-            var connectID = $.connection.hub.id
-            localStorage.setItem("connectID", connectID);
             //--------- Открываем соединение -------------
             $.connection.hub.start().done(function () {
+                var connectID = $.connection.hub.id
+                localStorage.setItem("connectID", connectID);
 
    //----------------SEND---------срабат. не только при старте------------------------------------
                 $('#sendmessage').click(function () {
                     message = $('#message').val()
                     // Вызываем у хаба метод Send
-                    chat.server.send($('#username').val(), message);
-                    $('#message').val('');
+                    try {
+                        chat.server.send($('#username').val(), message, localStorage.getItem("accountId"));
+                        $('#message').val('');
+                        for (item in chat.server) {
+                            console.log("server: " + item)
+                        }                        
+                    }
+                    catch (e) { //разрыв соедин.
+                        console.log('Ошибка ' + e.name + ":" + e.message + "\n" + e.stack)
+                        
+                        $.connection.hub.start().done(function () {
+                            var connectID = $.connection.hub.id
+                            var name = $('div.FullName').html();
+                            chat.server.connect(name);
+                            localStorage.setItem("connectID", connectID);
+                            var myAccountId = localStorage.getItem("accountId"); //запись в Login.html
+                            chat.server.send($('#username').val(), message, myAccountId);
+                            $('#message').val('');
+                        })
+                    }
+                    
                 });
                 //================== send auctionAuthor message =====================
                 $('#sendAuthorMessage').click(function () {
                     if (connectID == undefined || connectID == NaN) {
                         connectID = localStorage.getItem("connectID");
                     }
-                    var friendName = $('#chatroom').children().first().children().first().html();
+                    //var friendName = $('#chatroom').children().first().children().first().html();
                     var allUsers = JSON.parse(localStorage.getItem("allUsers"))
                     $(allUsers).each(function (i, item) {
-                        console.log(item)
-                        if (item.accountId == friendAccountId) {
+                        console.log("AccountId: " + item.AccountId)
+                        console.log("friendAccountId: " + localStorage.getItem("friendAccountId"))
+                        console.log("ConnectId: " + item.ConnectionId)
+                        if (item.AccountId == localStorage.getItem("friendAccountId")) {
+                            console.log("!!!!!!")
                             friendConnId = item.ConnectionId
                         }
                     })
-                    console.log("friend: ", friendName)
+                    console.log("friendConnId: ", friendConnId)
 
                     sendAjaxData(connectID, $('#message').val(), friendConnId)
                     $('#message').val('');

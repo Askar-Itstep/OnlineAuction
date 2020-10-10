@@ -1,4 +1,5 @@
 ﻿using BusinessLayer.BusinessObject;
+using DataLayer.Entities;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
 using OnlineAuction.ViewModels;
@@ -12,7 +13,7 @@ namespace OnlineAuction.ServiceClasses
 {
     public class PushSender
     {
-        //private readonly static Lazy<PushSender> _instanceGroup = new Lazy<PushSender>(() 
+         //private readonly static Lazy<PushSender> _instanceGroup = new Lazy<PushSender>(() 
         //    => new PushSender(GlobalHost.ConnectionManager.GetHubContext<ChatHub>().Groups)); 
 
         private readonly static Lazy<PushSender> _instanceClient = new Lazy<PushSender>(()
@@ -33,38 +34,38 @@ namespace OnlineAuction.ServiceClasses
 
         private IHubConnectionContext<dynamic> Clients { get; set; }
 
-        public static List<AccountVM> Users = ChatHub.Users;    //new List<AccountVM>();
+        public static List<UserHub> Users = ChatHub.Users;    
         //private IGroupManager Groups { get; set; }
 
-        public  AccountVM Account { get; set; }
+        public  UserHub User { get; set; }
 
         public async Task SendHello(string message)
         {
-            ChatHub.Account = Account;
-            await Clients.All.hello(Account.FullName, message);
+            ChatHub.User = User;
+            await Clients.All.hello(User.Account.FullName, message);
         }
         public  async Task SendMessage(string message)
         {
             //var context = Microsoft.AspNet.SignalR.GlobalHost.ConnectionManager.GetHubContext<ChatHub>();
-            ChatHub.Account = Account;
-            await Clients.All.addMessage(Account.FullName, message, Account.Id);
+            ChatHub.User = User;
+            await Clients.All.addMessage(User.Account.FullName, message, User.Account.Id);
 
             //сохр. в БД
-            var clientBO = DependencyResolver.Current.GetService<ClientBO>();
-            ClientBO sender = clientBO.LoadAll().FirstOrDefault(c => c.AccountId == Account.Id);
-            List<ClientBO> addressers = clientBO.LoadAll().ToList();
-            addressers.ForEach(a => SaveMessage(message, Account.Id, a));
+            //var clientBO = DependencyResolver.Current.GetService<ClientBO>();
+            //ClientBO sender = clientBO.LoadAll().FirstOrDefault(c => c.AccountId == User.Account.Id);
+            //List<ClientBO> addressers = clientBO.LoadAll().ToList();
+            //addressers.ForEach(a => SaveMessage(message, User.Account.Id, a));
         }
 
-        public async Task CommunicationWIthAuthor(string message, string connectId, string myConnectId)
+        public async Task CommunicationWIthAuthor(string message, string myConnectId, string connectId)
         {
-            ChatHub.Account = Account;
+            ChatHub.User = User;
 
             //signalR отправит и откр. сообщ. только у получателя!
-            await Clients.Client(connectId).addMessage(Account.FullName, message);
+            await Clients.Client(connectId).addMessage(User.Account.FullName, message, User.AccountId);
            
             //доп сообщ. self-send
-            await Clients.Client(myConnectId).addMessage(Account.FullName, message);
+            await Clients.Client(myConnectId).addMessage(User.Account.FullName, message, User.AccountId);
         }
 
         public static void SaveMessage(string message, object accountId, ClientBO actorBO)

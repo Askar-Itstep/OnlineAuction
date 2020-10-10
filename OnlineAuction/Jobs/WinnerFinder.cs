@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BusinessLayer.BusinessObject;
+using DataLayer.Entities;
 using OnlineAuction.Schedulers;
 using OnlineAuction.ServiceClasses;
 using OnlineAuction.ViewModels;
@@ -31,9 +32,9 @@ namespace OnlineAuction.Jobs
 
             //1)отправить push-уведомл. участникам аукциона
             AccountBO winnerBO = winnBet.Client.Account;
-            AccountVM winner = mapper.Map<AccountVM>(winnerBO);
+            Account winner = mapper.Map<Account>(winnerBO);
             var sender = PushSender.InstanceClient;
-            sender.Account = winner;
+            sender.User.Account = winner;
             await sender.SendMessage(string.Format("Победитель аукциона: {0}", winner.FullName)); // winnBet.Client.Account.FullName
 
             //2)отправить письма о победителе аукциона

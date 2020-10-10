@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNet.SignalR;
-using OnlineAuction.ViewModels;
+﻿using DataLayer.Entities;
+using Microsoft.AspNet.SignalR;
+using OnlineAuction.Entities;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -9,8 +11,8 @@ namespace OnlineAuction
 {
     public class ChatHub : Hub  //хаб-концентратор
     {
-        public static List<AccountVM> Users = new List<AccountVM>();
-        public static AccountVM Account { get; set; } //аккаунт пользователя
+        public static List<UserHub> Users { get; set; } // new List<UserHub>();
+        public static UserHub User { get; set; } //аккаунт пользователя
 
         public void Hello()
         {
@@ -21,48 +23,77 @@ namespace OnlineAuction
             await Clients.Caller.addMessage(name, message);
         }
         //к данным методам обращ. в клиенте API SignalR
-        public void Send(string name, string message)
+        public void Send(string name, string message, int?accountId)
         {
-            Clients.All.addMessage(name, message, Account.Id);
+            Clients.All.addMessage(name, message, accountId);
         }
-        
-        public void Connect(string userName)
-        {
-            var id = Context.ConnectionId;
-            //если имеющ. юзеры не имеют такого подключ. - добав.нов.юзера
-            if (!Users.Any(x => x.ConnectionId == id)) {
-                Account.ConnectionId = id;
-                Users.Add(Account);
-                // подключить текущего пользователю
-                Clients.Caller.onConnected(id, userName, Users);
 
-                // Показать кто вошел - всем пользователям, кроме текущего
-                Clients.AllExcept(id).onNewUserConnected(id, userName);
-            }           
+        public async Task Connect(string userName)
+        {
+            using (Model1 db = new Model1()) {                
+                Users = db.UserHubs.ToList(); //должно обновл.
+                
+                var id = Context.ConnectionId;
+
+                //если имеющ. юзеры не имеют такого подключ. - добав.нов.юзера
+                if (!Users.Any(x => x.ConnectionId == id)) {
+                    User.ConnectionId = id;
+                    if (Users.FirstOrDefault(u => u.AccountId == User.AccountId) != null) {
+                        SqlParameter paramConnId = new SqlParameter("@ConnId", id);
+                        SqlParameter paramAccId = new SqlParameter("@AccId", User.AccountId);
+                        db.Database.ExecuteSqlCommand("Update UserHubs SET ConnectionId = @ConnId WHERE AccountId = @AccId", paramConnId, paramAccId);
+                    }
+                    else {
+                        Users.Add(User);
+                        db.UserHubs.Add(User);
+                    }
+                    db.SaveChanges();
+
+                    // подключить текущего пользователю
+                    Clients.Caller.onConnected(id, userName, Users);//сбой Users lazy?
+
+                    // Показать кто вошел - всем пользователям, кроме текущего
+                    Clients.AllExcept(id).onNewUserConnected(id, userName);
+                }
+            }
+
         }
 
         // Отключение пользователя
         public override Task OnDisconnected(bool stopCalled)
         {
-            var item = Users.FirstOrDefault(x => x.ConnectionId == Context.ConnectionId);
-            if (item != null) { 
-                Users.Remove(item);
-                var id = Context.ConnectionId;
-                Clients.All.onUserDisconnected(id, item.FullName);  // key.Item2
-            }
+            using (Model1 db = new Model1()) {
+                //после отвала соед. в Connect() -перезапись ConnId->может не найти!->Error
+                var user = Users.FirstOrDefault(x => x.ConnectionId == Context.ConnectionId);
+                if (user != null) {
+                    string id = "";
+                    try {
+                        ////Users.Remove(user);
+                        //db.UserHubs.Remove(user);
+                        //db.SaveChanges();
+                        //id = Context.ConnectionId;
+                    }
+                    catch(Exception e) {
+                        System.Diagnostics.Debug.WriteLine("Error: ", e.Message);
+                    }
 
+                    Clients.All.onUserDisconnected(id, user.Account.FullName);
+                }
+            }
             return base.OnDisconnected(stopCalled);
         }
-        //---------не используются-----------------
-        public async Task JoinRoomAsync(string roomName)
-        {
-            await Groups.Add(Context.ConnectionId, roomName);
-            Clients.Group(roomName).addMessage(Context.User.Identity.Name + " joined.");
-        }
 
-        public Task LeaveRoom(string roomName)
-        {
-            return Groups.Remove(Context.ConnectionId, roomName);
-        }
+
+        ////---------не используются-----------------
+        //public async Task JoinRoomAsync(string roomName)
+        //{
+        //    await Groups.Add(Context.ConnectionId, roomName);
+        //    Clients.Group(roomName).addMessage(Context.User.Identity.Name + " joined.");
+        //}
+
+        //public Task LeaveRoom(string roomName)
+        //{
+        //    return Groups.Remove(Context.ConnectionId, roomName);
+        //}
     }
 }

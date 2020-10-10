@@ -40,7 +40,7 @@ namespace OnlineAuction.Controllers
             return View(syntetic);
         }
 
-        //кнопка Index.html->click Details заблокир. (не нужна)
+        //кнопка Index.html->click Details заблокир. (не нужна)-но метод исп. для редактир.!
         //+Edit
         public ActionResult Details(OrderFullMapVM orderFullMap, int? flagDetail)    
         {
