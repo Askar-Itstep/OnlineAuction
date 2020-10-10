@@ -222,7 +222,7 @@ namespace OnlineAuction.Controllers
         }
 
 
-        private static AccountVM Account { get; set; }
+        private new static UserHub User { get; set; }
 
         //1-ый заход: по клику ссылки "Связаться с Автором"
         //2-ой: по ajax-заходу (и активац. хаба) в _ChatAuctionView - для получ. ConnectID
@@ -233,17 +233,28 @@ namespace OnlineAuction.Controllers
                 return RedirectToAction("Login", "Accounts");
             }
             else {
+                //----------------sender-------------------
                 ViewBag.User = null;
                 var sender = PushSender.InstanceClient;
                 AccountBO accountBO = DependencyResolver.Current.GetService<AccountBO>().Load((int)accountId);
-                if (accountBO != null) {
-                    Account = mapper.Map<AccountVM>(accountBO);
-                    sender.Account = Account;
-                    ViewBag.User = Account;
+                List<RoleAccountLinkBO> rolesAccount = DependencyResolver.Current.GetService<RoleAccountLinkBO>()
+                    .LoadAll().Where(r => r.AccountId == (int)accountId).ToList();
+                var roleAdmin = rolesAccount.FirstOrDefault(r => r.Role.RoleName.Contains("admin"));
+                if (accountBO != null && roleAdmin == null) {
+                    User = db.UserHubs.FirstOrDefault(u => u.AccountId == (int)accountId);
+                    if (User == null) {
+                        User = new UserHub { AccountId = (int)accountId, ConnectionId = "" };
+                        db.UserHubs.Add(User);
+                        await db.SaveChangesAsync();
+                    }
+                    User.Account = mapper.Map<Account>(accountBO);
+                    sender.User = User;
+                    ViewBag.User = User.Account;
                 }
                 if (connectionId == "" || connectionId is null) {
                     return View("Partial/_ChatAuctionView");
                 }
+                //----------------addresser-------------------
                 AuctionBO auctionBO = DependencyResolver.Current.GetService<AuctionBO>().Load((int)auctionId);
                 ViewBag.Actor = null;
                 string alert = "";
@@ -252,12 +263,14 @@ namespace OnlineAuction.Controllers
                     var actorAccountBO = actorBO.Account;
                     var actorAccountVM = mapper.Map<AccountVM>(actorAccountBO);
                     ViewBag.Actor = actorAccountVM;
-                    var users = PushSender.Users;
-                    var actor = users.FirstOrDefault(u => u.Id == actorAccountVM.Id);
+                    var users = db.UserHubs.ToList(); //PushSender.Users;
+                    var actor = users.FirstOrDefault(u => u.AccountId == actorAccountVM.Id);
                     if (actor != null) {
                         message = message.Equals("") ? "Hello author!" : message;
-                        await sender.CommunicationWIthAuthor(message, actor.ConnectionId, connectionId);
-                        PushSender.SaveMessage(message, accountId, actorBO);   //сохр. в БД
+                        await sender.CommunicationWIthAuthor(message, connectionId, actor.ConnectionId);
+
+                        //PushSender.SaveMessage(message, accountId, actorBO);   //сохр. в БД
+
                         alert = "It's good";
                     }
                     else alert = "Actor is Null!";

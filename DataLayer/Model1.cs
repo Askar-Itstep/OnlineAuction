@@ -25,6 +25,10 @@ namespace OnlineAuction.Entities
         public virtual DbSet<BetAuction> BetAuction { get; set; }
 
         public virtual DbSet<RoleAccountLink> RoleAccountLinks { get; set; }
+        
+        //--------SignalR-----------------
+        public virtual DbSet<UserHub> UserHubs { get; set; }
+
         protected override void OnModelCreating(DbModelBuilder modelBuilder)  {
         }        
     }

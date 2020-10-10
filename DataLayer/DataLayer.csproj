@@ -71,6 +71,7 @@
     <Compile Include="Entities\Product.cs" />
     <Compile Include="Entities\Role.cs" />
     <Compile Include="Entities\RoleAccountLink.cs" />
+    <Compile Include="Entities\UserHub.cs" />
     <Compile Include="Migrations\202008241611515_FirstMigration.cs" />
     <Compile Include="Migrations\202008241611515_FirstMigration.Designer.cs">
       <DependentUpon>202008241611515_FirstMigration.cs</DependentUpon>
@@ -131,6 +132,10 @@
     <Compile Include="Migrations\202009121711190_Auctions_add_field_IsActive.designer.cs">
       <DependentUpon>202009121711190_Auctions_add_field_IsActive.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202010070505350_Add-UserHub.cs" />
+    <Compile Include="Migrations\202010070505350_Add-UserHub.designer.cs">
+      <DependentUpon>202010070505350_Add-UserHub.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -185,6 +190,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202009121711190_Auctions_add_field_IsActive.resx">
       <DependentUpon>202009121711190_Auctions_add_field_IsActive.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202010070505350_Add-UserHub.resx">
+      <DependentUpon>202010070505350_Add-UserHub.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
