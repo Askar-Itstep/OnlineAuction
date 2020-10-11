@@ -1,5 +1,4 @@
-﻿@*@model OnlineAuction.ViewModels.OrderVM*@
-@model OnlineAuction.ViewModels.OrderFullMapVM
+﻿@model OnlineAuction.ViewModels.OrderFullMapVM
 @using OnlineAuction.ServiceClasses;
 
 @{
@@ -43,8 +42,6 @@
 <h2>Edit</h2>
 
 @using (Html.BeginForm("EditAsync", "Orders", FormMethod.Post)) {
-@*@using (Ajax.BeginForm("Edit", new AjaxOptions { OnSuccess = "OnSuccess" })) {*@ 
-    @*@Html.AntiForgeryToken()*@
 
 <div class="form-horizontal">
     <h4>OrderFullMapVM</h4>

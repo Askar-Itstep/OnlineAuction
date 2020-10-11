@@ -59,7 +59,8 @@
 
                 // Добавление всех пользователей в отображен.
                 for (i = 0; i < allUsers.length; i++) {
-                    AddUser(allUsers[i].ConnectionId, allUsers[i].FullName);
+                    AddUser(allUsers[i].ConnectionId, allUsers[i].Account.FullName);
+                    //console.log("user[i]: " + allUsers[i].Account.FullName)
                 }
                 localStorage.setItem("allUsers", JSON.stringify(allUsers));
             }
@@ -86,9 +87,6 @@
                     try {
                         chat.server.send($('#username').val(), message, localStorage.getItem("accountId"));
                         $('#message').val('');
-                        for (item in chat.server) {
-                            console.log("server: " + item)
-                        }                        
                     }
                     catch (e) { //разрыв соедин.
                         console.log('Ошибка ' + e.name + ":" + e.message + "\n" + e.stack)
@@ -110,14 +108,11 @@
                     if (connectID == undefined || connectID == NaN) {
                         connectID = localStorage.getItem("connectID");
                     }
-                    //var friendName = $('#chatroom').children().first().children().first().html();
                     var allUsers = JSON.parse(localStorage.getItem("allUsers"))
                     $(allUsers).each(function (i, item) {
-                        console.log("AccountId: " + item.AccountId)
-                        console.log("friendAccountId: " + localStorage.getItem("friendAccountId"))
-                        console.log("ConnectId: " + item.ConnectionId)
+                        //console.log("AccountId: " + item.AccountId)
+                        //console.log("friendAccountId: " + localStorage.getItem("friendAccountId"))
                         if (item.AccountId == localStorage.getItem("friendAccountId")) {
-                            console.log("!!!!!!")
                             friendConnId = item.ConnectionId
                         }
                     })

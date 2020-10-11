@@ -23,19 +23,8 @@ namespace BusinessLayer.BusinessObject
         public int AddressId { get; set; }
         public virtual AddressBO Address  {  get; set;  }
 
-
         public ICollection<RoleBO> RolesBO { get; set; }
-        public bool IsActive
-        {
-            get
-            {
-                if (Balance < 0) {
-                    return false;
-                }
-                else return true;
-            }
-            protected set { }
-        }
+        public bool IsActive { get; set; }
         public decimal Balance { get; private set; } = 0;
         public void AddBalance(decimal value)
         {

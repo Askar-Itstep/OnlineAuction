@@ -11,7 +11,7 @@ namespace OnlineAuction
 {
     public class ChatHub : Hub  //хаб-концентратор
     {
-        public static List<UserHub> Users { get; set; } // new List<UserHub>();
+        public static List<UserHub> Users { get; set; } 
         public static UserHub User { get; set; } //аккаунт пользователя
 
         public void Hello()
@@ -47,7 +47,7 @@ namespace OnlineAuction
                         Users.Add(User);
                         db.UserHubs.Add(User);
                     }
-                    db.SaveChanges();
+                    await db.SaveChangesAsync();
 
                     // подключить текущего пользователю
                     Clients.Caller.onConnected(id, userName, Users);//сбой Users lazy?
@@ -66,18 +66,16 @@ namespace OnlineAuction
                 //после отвала соед. в Connect() -перезапись ConnId->может не найти!->Error
                 var user = Users.FirstOrDefault(x => x.ConnectionId == Context.ConnectionId);
                 if (user != null) {
-                    string id = "";
                     try {
-                        ////Users.Remove(user);
-                        //db.UserHubs.Remove(user);
-                        //db.SaveChanges();
-                        //id = Context.ConnectionId;
+                        Users.Remove(user);
+                        db.UserHubs.Remove(user);
+                        db.SaveChanges();
                     }
                     catch(Exception e) {
                         System.Diagnostics.Debug.WriteLine("Error: ", e.Message);
                     }
 
-                    Clients.All.onUserDisconnected(id, user.Account.FullName);
+                    Clients.All.onUserDisconnected(Context.ConnectionId, user.Account.FullName);
                 }
             }
             return base.OnDisconnected(stopCalled);

@@ -33,19 +33,7 @@ namespace DataLayer.Entities
             Roles = roles;
         }
 
-        public bool IsActive
-        { //какая зависимость, с чем: со статистикой входа? С балансом?
-            get                     //наруш. этики (сообщения)?
-            {
-                if (Balance < 0) { //Заменить
-                    return false;
-                }
-                else {
-                    return true;
-                }
-            }
-            protected set { }
-        }
+        public bool IsActive  { get; set; }
         public decimal Balance { get; set; } = 0;
 
         //-------------методы Business Logic - можно удалить----------------------

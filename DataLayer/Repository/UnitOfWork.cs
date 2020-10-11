@@ -25,6 +25,7 @@ namespace DataLayer.Repository
         private BaseRepository<Product> products;
         private BaseRepository<Role> roles;
         private BaseRepository<RoleAccountLink> roleAccountLinks;
+        private BaseRepository<UserHub> userHubs;
         private Model1 db;
         
 
@@ -158,6 +159,15 @@ namespace DataLayer.Repository
                 return roleAccountLinks;
             }
         }
-
+        
+        public BaseRepository<UserHub> UserHubs
+        {
+            get
+            {
+                if (userHubs == null)
+                    userHubs = new BaseRepository<UserHub>();
+                return userHubs;
+            }
+        }
     }
 }

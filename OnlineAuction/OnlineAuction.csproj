@@ -212,11 +212,8 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
-    <Compile Include="ChatHub.cs" />
-    <Compile Include="ServiceClasses\PushSender.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="App_Start\UnityConfig.cs" />
-    <Compile Include="App_Start\UnityMvcActivator.cs" />
     <Compile Include="Controllers\AccountsController.cs" />
     <Compile Include="Controllers\AuctionsController.cs" />
     <Compile Include="Controllers\BetAuctionsController.cs" />
@@ -228,7 +225,6 @@
     <Compile Include="Schedulers\BetAuctionScheduler.cs" />
     <Compile Include="Schedulers\EmailScheduler.cs" />
     <Compile Include="ServiceClasses\BuilderSynteticModels.cs" />
-    <Compile Include="ServiceClasses\DatePickerHelper.cs" />
     <Compile Include="ServiceClasses\HelperOrderCreate.cs" />
     <Compile Include="ServiceClasses\ISyntetic.cs" />
     <Compile Include="ViewModels\JsonRequestCreateBet.cs" />
@@ -251,7 +247,7 @@
     <Compile Include="ViewModels\LoginModel.cs" />
     <Compile Include="ViewModels\RoleAccountLinkVM.cs" />
     <Compile Include="ViewModels\RoleVM.cs" />
-    <Compile Include="ViewModels\User.cs" />
+    <Compile Include="ViewModels\UserHubVM.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\font-awesome.css" />
@@ -416,7 +412,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />
@@ -442,6 +437,10 @@
     <ProjectReference Include="..\DataLayer\DataLayer.csproj">
       <Project>{c8c500e1-cc12-45ac-a7ee-68b1f105ef49}</Project>
       <Name>DataLayer</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MyHub\MyHub.csproj">
+      <Project>{05f57fc2-3da9-4159-b224-c1f1bf3d8665}</Project>
+      <Name>MyHub</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>

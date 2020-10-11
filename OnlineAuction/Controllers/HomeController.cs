@@ -15,7 +15,7 @@ namespace OnlineAuction.Controllers
     {
         private Model1 db = new Model1();
         private IMapper mapper;
-        private new static UserHub User { get; set; }
+        private static UserHubBO UserHub { get; set; }
 
         public HomeController(IMapper mapper)
         {
@@ -27,19 +27,23 @@ namespace OnlineAuction.Controllers
             if ((int)accountId != 0) {
                 AccountBO accountBO = DependencyResolver.Current.GetService<AccountBO>().Load((int)accountId);
                 List<RoleAccountLinkBO> rolesAccount = DependencyResolver.Current.GetService<RoleAccountLinkBO>()
-                    .LoadAll().Where(r => r.AccountId == (int)accountId).ToList();
+                                                                                .LoadAll().Where(r => r.AccountId == (int)accountId).ToList();
                 var roleAdmin = rolesAccount.FirstOrDefault(r => r.Role.RoleName.Contains("admin"));
                 if (accountBO != null && roleAdmin == null) {
-                    User = db.UserHubs.FirstOrDefault(u => u.AccountId == (int)accountId);
-                    if(User == null) {
-                        User = new UserHub { AccountId=(int)accountId, ConnectionId="" };
-                        db.UserHubs.Add(User);
-                        await db.SaveChangesAsync();
+                    UserHub = DependencyResolver.Current.GetService<UserHubBO>().Load((int)accountId);
+                        //db.UserHubs.FirstOrDefault(u => u.AccountId == (int)accountId);
+                    if(UserHub == null) {
+                        UserHubVM userHubVM = new UserHubVM { AccountId=(int)accountId, ConnectionId="" };
+                        UserHub = mapper.Map<UserHubBO>(userHubVM);
+                        UserHub.Save(UserHub);
+                        //db.UserHubs.Add(UserHub);
+                        //await db.SaveChangesAsync();
                     }
-                    User.Account = mapper.Map<Account>(accountBO);
+                    UserHub.Account = accountBO;
                     var sender = PushSender.InstanceClient;
-                    sender.User = User;
-                    await sender.SendHello(string.Format("А у нас новый участник: {0}", User.Account.FullName));
+                    sender.User = UserHub;
+                    sender.mapper = mapper;
+                    await sender.SendHello(string.Format("А у нас новый участник: {0}", UserHub.Account.FullName));
                 }
             }
             return View();
@@ -50,7 +54,7 @@ namespace OnlineAuction.Controllers
             if ((int)accountId == 0) {
                 return RedirectToAction("Login", "Accounts");
             }
-            ViewBag.User = User.Account;
+            ViewBag.User = UserHub.Account;
             return View("Partial/_ChatPartialView");
         }
         public async Task<ActionResult> ChatAsync(string connectionId, string message, string friendConnectId)//1-ый парам. по 1-му заходу, 2-ой по 2-му
@@ -66,9 +70,9 @@ namespace OnlineAuction.Controllers
                 var sender = PushSender.InstanceClient;
                 AccountBO accountBO = DependencyResolver.Current.GetService<AccountBO>().Load((int)accountId);
                 if (accountBO != null) {
-                    User.Account = mapper.Map<Account>(accountBO);
-                    sender.User.Account = User.Account;
-                    ViewBag.User = User.Account;
+                    UserHub.Account = accountBO;
+                    sender.User.Account = UserHub.Account;
+                    ViewBag.User = UserHub.Account;
                 }
                 if (connectionId == "" || connectionId is null) {
                     return View("Partial/_ChatAuctionView");
@@ -80,9 +84,8 @@ namespace OnlineAuction.Controllers
                     await sender.CommunicationWIthAuthor(message, connectionId, friendConnectId);
                 }
                 else {
-                    await sender.SendMessage(message); //SendCaller(message, connectionId);
-                }
-                
+                    await sender.SendMessage(message); 
+                }                
                 return new JsonResult { Data = alert, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
             }
         }

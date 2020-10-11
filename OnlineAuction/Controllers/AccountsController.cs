@@ -27,8 +27,12 @@ namespace OnlineAuction.Controllers
         public ActionResult Index()
         {
             AccountBO accountBO = DependencyResolver.Current.GetService<AccountBO>();
-            IEnumerable<AccountBO> accountBOs = accountBO.LoadAll();
+            IEnumerable<AccountBO> accountBOs = accountBO.LoadAll().Where(a=>a.IsActive);
             IEnumerable<AccountVM> accountVMs = accountBOs.Select(a => mapper.Map<AccountVM>(a));
+
+            IEnumerable<AccountBO> delAccountBOs = accountBO.LoadAll().Where(a => !a.IsActive);
+            IEnumerable<AccountVM> delAccountVMs = delAccountBOs.Select(a => mapper.Map<AccountVM>(a));
+            ViewBag.DelAccounts = delAccountVMs;
             return View(accountVMs);
         }
 
@@ -47,33 +51,6 @@ namespace OnlineAuction.Controllers
             return View(account);
         }
 
-
-        #region oldCreate
-        ////[Authorize(Roles = "admin")]  
-        //public ActionResult Create()
-        //{
-        //    //return View();
-        //    return RedirectToAction("Registration");
-        //}
-
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<ActionResult> Create(Account account)
-        //{
-        //    if (ModelState.IsValid) {
-        //        db.Account.Add(account);
-        //        //получить данные по роли и юзеру
-        //        int accountId = (int)db.Account.AsEnumerable().Last().Id;
-        //        int roleId = db.Roles.FirstOrDefault(r => r.RoleName.Equals("member")).Id;  //11
-        //        db.RoleAccountLinks.Add(new RoleAccountLink { RoleId = roleId, AccountId = accountId }); //12- переприсваивается???!
-        //        await db.SaveChangesAsync();
-        //        return RedirectToAction("Index");
-        //    }
-        //    else {
-        //        return View();
-        //    }
-        //}
-        #endregion
 
         //контроль роли  в представл.-_Layout
         //id - для админа, accountId - для user'a
@@ -139,8 +116,9 @@ namespace OnlineAuction.Controllers
         }
 
 
-        //контроль роли перенесен в представл.
-        public async Task<ActionResult> Delete(int? id) //id del client, not user-admin
+        //контроль роли в представл.
+        //удал. производ. административно - по письму к админу
+        public async Task<ActionResult> Delete(int? id) 
         {
             if (id == null) {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -157,8 +135,8 @@ namespace OnlineAuction.Controllers
         public async Task<ActionResult> DeleteConfirmed(int id)
         {
             Account account = await db.Account.FindAsync(id);
-            db.Account.Remove(account);
-            //db.RoleAccountLinks.Remove() - не нужно, БД следует по каскаду!
+            //db.Account.Remove(account); //нужно не удалять, а помечать как удаленный!
+            account.IsActive = false;
             await db.SaveChangesAsync();
             return RedirectToAction("Index");
         }
@@ -175,8 +153,9 @@ namespace OnlineAuction.Controllers
                 var accountBO = DependencyResolver.Current.GetService<AccountBO>();
                 var roleAccountBO = DependencyResolver.Current.GetService<RoleAccountLinkBO>();
 
-                var accountBOList = accountBO.LoadAll();
-                accountBO = accountBOList.FirstOrDefault(u => (u.Email.Contains(model.Login) || u.Email.Contains(model.Login)) && u.Password.Equals(model.Password));
+                var accountBOList = accountBO.LoadAll().Where(a=>a.IsActive); //только действующие аккаунты
+                accountBO = accountBOList.FirstOrDefault(u => (u.Email.Contains(model.Login) 
+                                                                || u.Email.Contains(model.Login)) && u.Password.Equals(model.Password));
                 if (accountBO == null) {
                     return RedirectToAction("Index", "Home");
                 }
