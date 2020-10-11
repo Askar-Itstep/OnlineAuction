@@ -254,6 +254,19 @@ namespace OnlineAuction
                .ForMember(dest => dest.BetAuctions, opt => opt.MapFrom(src => new List<BetAuctionVM>() { new BetAuctionVM() }))
                .ForMember(dest => dest.WinnerId, opt => opt.MapFrom(src => src.ClientId))
                .ForMember(dest => dest.Winner, opt => opt.MapFrom(src => src.Client));
+
+                //======================= UserHub ========================================
+                mpr.CreateMap<UserHub, UserHubBO>()
+                               .ConstructUsing(c => DependencyResolver.Current.GetService<UserHubBO>());
+
+                mpr.CreateMap<UserHubBO, UserHub>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<UserHub>());
+
+                mpr.CreateMap<UserHubVM, UserHubBO>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<UserHubBO>());
+
+                mpr.CreateMap<UserHubBO, UserHubVM>()
+                 .ConstructUsing(c => DependencyResolver.Current.GetService<UserHubVM>());
             });
          }
     }

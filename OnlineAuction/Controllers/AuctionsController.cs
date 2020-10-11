@@ -232,7 +232,7 @@ namespace OnlineAuction.Controllers
         }
 
 
-        private new static UserHub User { get; set; }
+        private static UserHubBO UserHub { get; set; }
 
         //1-ый заход: по клику ссылки "Связаться с Автором"
         //2-ой: по ajax-заходу (и активац. хаба) в _ChatAuctionView - для получ. ConnectID
@@ -251,15 +251,18 @@ namespace OnlineAuction.Controllers
                     .LoadAll().Where(r => r.AccountId == (int)accountId).ToList();
                 var roleAdmin = rolesAccount.FirstOrDefault(r => r.Role.RoleName.Contains("admin"));
                 if (accountBO != null && roleAdmin == null) {
-                    User = db.UserHubs.FirstOrDefault(u => u.AccountId == (int)accountId);
-                    if (User == null) {
-                        User = new UserHub { AccountId = (int)accountId, ConnectionId = "" };
-                        db.UserHubs.Add(User);
-                        await db.SaveChangesAsync();
+                    //User = db.UserHubs.FirstOrDefault(u => u.AccountId == (int)accountId);
+                    UserHub = DependencyResolver.Current.GetService<UserHubBO>().Load((int)accountId);
+                    if (UserHub == null) {
+                        var userHubVM = new UserHubVM { AccountId = (int)accountId, ConnectionId = "" };
+                        //db.UserHubs.Add(User);
+                        //await db.SaveChangesAsync();
+                        UserHub = mapper.Map<UserHubBO>(userHubVM);
+                        UserHub.Save(UserHub);
                     }
-                    User.Account = mapper.Map<Account>(accountBO);
-                    sender.User = User;
-                    ViewBag.User = User.Account;
+                    UserHub.Account = accountBO; // mapper.Map<Account>(accountBO);
+                    sender.User = UserHub;
+                    ViewBag.User = UserHub.Account;
                 }
                 if (connectionId == "" || connectionId is null) {
                     return View("Partial/_ChatAuctionView");
@@ -277,6 +280,7 @@ namespace OnlineAuction.Controllers
                     var actor = users.FirstOrDefault(u => u.AccountId == actorAccountVM.Id);
                     if (actor != null) {
                         message = message.Equals("") ? "Hello author!" : message;
+                        sender.mapper = mapper;
                         await sender.CommunicationWIthAuthor(message, connectionId, actor.ConnectionId);
 
                         //PushSender.SaveMessage(message, accountId, actorBO);   //сохр. в БД

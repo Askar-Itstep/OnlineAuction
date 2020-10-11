@@ -2,10 +2,10 @@
 
 @{
     ViewBag.Title = "Index";
-    //Account account = new Account();
+    var model2 =ViewBag.DelAccounts;
 }
 <script>
-                ////переход на "Пополнить баланс" реализован в _Layout.html
+                    ////переход на "Пополнить баланс" реализован в _Layout.html
 </script>
 
 
@@ -42,7 +42,7 @@
             <td>
                 @Html.DisplayFor(modelItem => item.Password)
             </td>
-            <td>
+            <td id="is-active" data-active="">
                 @Html.DisplayFor(modelItem => item.IsActive)
             </td>
             <td>
@@ -55,3 +55,44 @@
 
 </table>
 
+<h3>Удаленные аккаунты</h3>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.FullName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Email)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Password)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.IsActive)
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in ViewBag.DelAccounts) {
+        <tr>
+            <td>
+                @item.FullName
+            </td>
+            <td>
+                @item.Email
+            </td>
+            <td>
+                @item.Password
+            </td>
+            <td>
+                @item.IsActive
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+                @Html.ActionLink("Details", "Details", new { id = item.Id }) |
+                @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+            </td>
+        </tr>
+    }
+
+</table>
