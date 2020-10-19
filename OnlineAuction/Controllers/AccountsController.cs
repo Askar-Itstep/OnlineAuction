@@ -192,13 +192,16 @@ namespace OnlineAuction.Controllers
 
                     //2) сохр. в Session Server
                     HttpContext.Session["accountId"] = accountId;
-                    return Json(new { success = true, message = "Wellcome!", accountId, isActive, roles }); //уйдет в предст. Login.html -> _Layout.html
+                    //return Json(new { success = true, message = "Wellcome!", accountId, isActive, roles }); //уйдет в предст. Login.html -> _Layout.html
+                    return new JsonResult { Data=new { success = true, message = "Wellcome!", accountId, isActive, roles }, JsonRequestBehavior=JsonRequestBehavior.DenyGet };
                 }
                 else {
-                    return Json(new { success = false, message = "Пользователя с таким логином и паролем нет" });
+                    //return Json(new { success = false, message = "Пользователя с таким логином и паролем нет" });
+                    return new JsonResult { Data = new { success = false, message = "Пользователя с таким логином и паролем нет" }, JsonRequestBehavior = JsonRequestBehavior.DenyGet };
                 }
             }
-            return Json(new { success = false, message = "Модель не валидна!" });
+            //return Json(new { success = false, message = "Модель не валидна!" });
+            return new JsonResult { Data = new { success = false, message = "Модель не валидна!" }, JsonRequestBehavior = JsonRequestBehavior.DenyGet };
         }
         //------------------------------------------Registration ---------------------------------------------------------------------
         public ActionResult Registration()
