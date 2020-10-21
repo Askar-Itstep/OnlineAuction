@@ -14,6 +14,8 @@ namespace DataLayer.Entities
 
         public string FileName { get; set; }
 
-        public byte[] ImageData { get; set; }
+        //public byte[] ImageData { get; set; }
+
+        public string URI { get; set; }
     }
 }

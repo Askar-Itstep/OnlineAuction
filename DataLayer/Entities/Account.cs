@@ -13,6 +13,9 @@ namespace DataLayer.Entities
         [StringLength(255)]
         public string FullName { get; set; }
 
+        [ForeignKey("Image")]
+        public int ImageId { get; set; }
+        public virtual Image Image { get; set; }
 
         [ForeignKey("Address")]
         public int AddressId { get; set; }

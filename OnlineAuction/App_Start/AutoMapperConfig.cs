@@ -5,6 +5,7 @@ using System.Web.Mvc;
 using AutoMapper;
 using BusinessLayer.BusinessObject;
 using DataLayer.Entities;
+using OnlineAuction.ServiceClasses;
 using OnlineAuction.ViewModels;
 using Unity;
 
@@ -114,8 +115,12 @@ namespace OnlineAuction
 
                 mpr.CreateMap<ImageVM, ImageBO>()
                .ConstructUsing(c => DependencyResolver.Current.GetService<ImageBO>()).ReverseMap();
+                //---------------------Addon!-----------------------------
+                mpr.CreateMap<string, Uri>().ConvertUsing<StringToUriConverter>();
+                mpr.CreateMap<Uri, string>().ConvertUsing<UriToStringConverter>();
 
-      //--------------------------------------Address ------------------------------------------
+
+                //--------------------------------------Address ------------------------------------------
                 mpr.CreateMap<Address, AddressBO>()
                                 .ConstructUsing(c => DependencyResolver.Current.GetService<AddressBO>());
 
@@ -267,6 +272,7 @@ namespace OnlineAuction
 
                 mpr.CreateMap<UserHubBO, UserHubVM>()
                  .ConstructUsing(c => DependencyResolver.Current.GetService<UserHubVM>());
+
             });
          }
     }

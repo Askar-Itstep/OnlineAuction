@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\EntityFramework.6.4.4\build\EntityFramework.props"/>
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"/>
+  <Import Project="..\packages\EntityFramework.6.4.4\build\EntityFramework.props" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -136,6 +136,14 @@
     <Compile Include="Migrations\202010070505350_Add-UserHub.designer.cs">
       <DependentUpon>202010070505350_Add-UserHub.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202010211302220_fixImage-RemoveByte.cs" />
+    <Compile Include="Migrations\202010211302220_fixImage-RemoveByte.designer.cs">
+      <DependentUpon>202010211302220_fixImage-RemoveByte.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202010211358496_fixAccount-AddImage.cs" />
+    <Compile Include="Migrations\202010211358496_fixAccount-AddImage.designer.cs">
+      <DependentUpon>202010211358496_fixAccount-AddImage.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -193,6 +201,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202010070505350_Add-UserHub.resx">
       <DependentUpon>202010070505350_Add-UserHub.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202010211302220_fixImage-RemoveByte.resx">
+      <DependentUpon>202010211302220_fixImage-RemoveByte.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202010211358496_fixAccount-AddImage.resx">
+      <DependentUpon>202010211358496_fixAccount-AddImage.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
