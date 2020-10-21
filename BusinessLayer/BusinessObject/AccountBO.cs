@@ -16,7 +16,10 @@ namespace BusinessLayer.BusinessObject
         #region simple fields
         public int? Id { get; set; }
         public string FullName { get; set; }
-        
+
+        public int ImageId { get; set; }
+        public virtual ImageBO Image { get; set; }
+
         public string Email { get; set; }
         public string Password { get; set; }
 

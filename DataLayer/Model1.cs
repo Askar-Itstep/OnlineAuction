@@ -48,7 +48,8 @@ namespace OnlineAuction.Entities
             context.Roles.Add(clientRole);
 
             //2)Account
-            Account account = new Account { FullName = "admin", Email = "admin@mail.ru", Password = "admin"};
+            Address address = new Address { Region = "Akmola", City = "Nur-Sultan", Street = "Imanova", House = "22" };
+            Account account = new Account { FullName = "admin", Email = "admin@mail.ru", Password = "admin", Address=address};
             context.Account.Add(account);
 
 

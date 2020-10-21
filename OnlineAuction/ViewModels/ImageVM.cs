@@ -11,6 +11,7 @@ namespace OnlineAuction.ViewModels
 
         public string FileName { get; set; }
 
-        public byte[] ImageData { get; set; }
+        //public byte[] ImageData { get; set; }
+        public Uri URI { get; set; }
     }
 }

@@ -14,7 +14,10 @@ namespace OnlineAuction.ViewModels
         [Required, Display(Name = "Full Name")]
         [StringLength(255)]
         public string FullName { get; set; }
-        
+
+        public int ImageId { get; set; }
+        public virtual ImageVM Image { get; set; }
+
         public int AddressId { get; set; }
         public virtual AddressVM Address { get; set; }
 

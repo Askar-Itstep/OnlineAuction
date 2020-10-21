@@ -23,7 +23,7 @@ namespace OnlineAuction.ServiceClasses
         }
         public static async Task<AuctionBO> CreateEntity(AuctionEditVM editVM, AuctionBO auction, object userId, HttpPostedFileBase upload)
         {
-            ImageBO image = CreateImageEntity(editVM, upload);
+            ImageBO image = await CreateImageEntity(editVM, upload);
             ProductBO product = CreateProductEntity(editVM, image);
             
             var client = DependencyResolver.Current.GetService<ClientBO>().LoadAll().Where(c => c.AccountId == (int)userId).FirstOrDefault();
@@ -66,19 +66,27 @@ namespace OnlineAuction.ServiceClasses
         }
 
         //Create->flag:false, Edit->flag:true
-        private static ImageBO CreateImageEntity(AuctionEditVM editVM, HttpPostedFileBase upload, bool flag = false)
+        #region OldCode
+        //private static ImageBO CreateImageEntity(AuctionEditVM editVM, HttpPostedFileBase upload, bool flag = false)
+        //{
+        //    byte[] myBytes = new byte[upload.ContentLength];
+        //    upload.InputStream.Read(myBytes, 0, upload.ContentLength);
+        //    var image = DependencyResolver.Current.GetService<ImageBO>();
+        //    image.FileName = editVM.Title;
+        //    image.ImageData = myBytes;
+        //    return image;
+        //}
+        #endregion
+        private static async Task<ImageBO> CreateImageEntity(ISyntetic editVM, HttpPostedFileBase upload, bool flag = false, AccountBO account = null)
         {
-            byte[] myBytes = new byte[upload.ContentLength];
-            upload.InputStream.Read(myBytes, 0, upload.ContentLength);
-            var image = DependencyResolver.Current.GetService<ImageBO>();
-            image.FileName = editVM.Title;
-            image.ImageData = myBytes;
-            return image;
+            ImageVM imageVM = new ImageVM { FileName = ((AuctionEditVM)editVM).Title };
+            ImageBO imageBO = DependencyResolver.Current.GetService<ImageBO>();
+            return await BlobHelper.SetImageAsync(upload, imageVM, imageBO, mapper, account);
         }
 
 
         //------------------- E.D.I.T.--------------------------------------------
-        public static async Task EditEntityAsync(ISyntetic editVM, BaseBusinessObject businessObject, HttpPostedFileBase upload=null)//AuctionEditVM editVM, AuctionBO auctionBO
+        public static async Task EditEntityAsync(ISyntetic editVM, BaseBusinessObject businessObject, HttpPostedFileBase upload=null)
         {
             if (businessObject is AuctionBO auctionBO) {
                 editVM = (AuctionEditVM)editVM;
@@ -104,7 +112,7 @@ namespace OnlineAuction.ServiceClasses
                     imageBO = imageBO.LoadAll().FirstOrDefault(i => i.Id == auctionBO.Product.ImageId);
                     if (imageBO != null) {
                         ImageBO editImageBO = DependencyResolver.Current.GetService<ImageBO>();
-                        editImageBO = CreateImageEntity((AuctionEditVM)editVM, upload, true);    //true->edit
+                        editImageBO = await CreateImageEntity((AuctionEditVM)editVM, upload, true);    //true->edit
                         EditEntity(imageBO, editImageBO, 3);
                         imageBO.Save(imageBO);
 
