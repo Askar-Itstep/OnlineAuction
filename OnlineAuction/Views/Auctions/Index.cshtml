@@ -102,7 +102,8 @@
     <div class="jumbotron  alert-info  container-fluid main-card">
         <h3>Главный экспонат</h3>
         <div class="col-md-5">
-            @Html.Raw("<img  style='width: 300px',  src=\"data:image/jpeg;base64," + Convert.ToBase64String(ViewBag.BestAuction.Product.Image.ImageData) + "\" />")
+            @*@Html.Raw("<img  style='width: 300px',  src=\"data:image/jpeg;base64," + Convert.ToBase64String(ViewBag.BestAuction.Product.Image.ImageData) + "\" />")*@
+            <img style='width: 300px',  src="@ViewBag.BestAuction.Product.Image.URI"/>
         </div>
         <div class="hidden auctionId">
             ViewBag.BestAuction.Id
@@ -128,7 +129,8 @@
                 var product = auction.Product;
                 <div class="card table-bordered col-md-4" style="height:300px; width: 200px; margin:10px; padding-left:0px">
                     <div class="hidden auctionId">@auction.Id</div>
-                    @Html.Raw("<img  style='width: 90%; height: 130px',  src=\"data:image/jpeg;base64," + Convert.ToBase64String(product.Image.ImageData) + "\" />")
+                    @*@Html.Raw("<img  style='width: 90%; height: 130px',  src=\"data:image/jpeg;base64," + Convert.ToBase64String(product.Image.ImageData) + "\" />")*@
+                    <img  style='width: 90%; height: 130px', src="@auction.Product.Image.URI"/>
                     <table class="table">
                         <tr>
                             <th>Title</th>
@@ -148,6 +150,7 @@
     else {
         <div>
             <h4>Желаете выставить товар? Тогда нажмите "Создать аукцион"</h4>
+            <p>Как видно из яндекс-диска загрузка медленее!))</p>
             <div><img style="width: 75%" src="https://getfile.dokpub.com/yandex/get/https://yadi.sk/i/GWWs5U_NFCraYQ" /></div>
         </div>
     }

@@ -38,29 +38,33 @@ namespace OnlineAuction.ViewModels
         public bool IsActive { get; set; }
         public decimal Balance { get; set; } = 0;
 
-        //-------------методы Business Logic - можно удалить----------------------
-        public void AddBalance(decimal value)
+        public string GetAddress()
         {
-            Balance += value;
+            return Address.Region + ", " + Address.City + ", " + Address.Street + ", " + Address.House;
         }
+        ////-------------методы Business Logic - можно удалить----------------------
+        //public void AddBalance(decimal value)
+        //{
+        //    Balance += value;
+        //}
 
-        public void AddRole(RoleVM role)
-        {
-            if (Roles.Contains(role)) {
-                return;
-            }
+        //public void AddRole(RoleVM role)
+        //{
+        //    if (Roles.Contains(role)) {
+        //        return;
+        //    }
 
-            Roles.Add(role);
-        }
-        public void RemoveRole(RoleVM role)
-        {
-            if (!role.RoleName.Contains("admin") && Roles != null) {
-                if (Roles.Contains(role)) {
-                    Roles.Remove(role);
-                }
-            }
-            return;
-        }
+        //    Roles.Add(role);
+        //}
+        //public void RemoveRole(RoleVM role)
+        //{
+        //    if (!role.RoleName.Contains("admin") && Roles != null) {
+        //        if (Roles.Contains(role)) {
+        //            Roles.Remove(role);
+        //        }
+        //    }
+        //    return;
+        //}
 
     }
 }

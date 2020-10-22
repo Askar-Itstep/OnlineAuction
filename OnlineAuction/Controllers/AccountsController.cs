@@ -2,6 +2,7 @@
 using BusinessLayer.BusinessObject;
 using DataLayer.Entities;
 using OnlineAuction.Entities;
+using OnlineAuction.ServiceClasses;
 using OnlineAuction.ViewModels;
 using System.Collections.Generic;
 using System.Data;
@@ -9,6 +10,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
 
@@ -53,8 +55,8 @@ namespace OnlineAuction.Controllers
 
 
         //контроль роли  в представл.-_Layout
-        //id - для админа, accountId - для user'a
-        //flag - ключ из _Layout.html для выбора: редакт. акк. или пополн. баланс
+        //Изм. аккаун. по: id - для админа, accountId - для user'a
+        //flag - ключ ajax из _Layout.html для пополн. баланс
         public async Task<ActionResult> Edit(int? id, int? flag)
         {
             //----------для юзера---------------
@@ -68,10 +70,10 @@ namespace OnlineAuction.Controllers
                 if (account == null) {
                     return HttpNotFound("Пользователь не найден");
                 }
-                if (flag == null) {
+                if (flag == null) { //редакт. свой аккаунт
                     return View(mapper.Map<AccountVM>(account));
                 }
-                else {
+                else {//по запросу на изм. баланса //->ajax/_Layout.html
                     return new JsonResult { Data = account, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
                 }
             }
@@ -87,17 +89,24 @@ namespace OnlineAuction.Controllers
 
         [HttpPost]      //+ addBalance!
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit(AccountVM account, decimal? balance)
+        public async Task<ActionResult> Edit(AccountVM account, HttpPostedFileBase upload, decimal? balance)
         {
             if (account.Id != null) { //при простом изм. аккаунта
                 if (ModelState.IsValid) {
+                    ImageVM imageVM = DependencyResolver.Current.GetService<ImageVM>();
+                    ImageBO imageBase = DependencyResolver.Current.GetService<ImageBO>();
                     account.Address.Id = account.AddressId;
                     AddressVM address = account.Address;
                     AccountBO accountBO = mapper.Map<AccountBO>(account);
                     AddressBO addressBO = mapper.Map<AddressBO>(address);
+                    if (upload != null)
+                    {
+                        var imgBase = await BlobHelper.SetImageAsync(upload, imageVM, imageBase, mapper, accountBO);//если такого нет - записать в БД и вернуть! 
+                    }
                     accountBO.Save(accountBO);  //address -> cascade?
                     addressBO.Save(addressBO);
-                    return View(account);
+                    //return View(account);
+                    return new JsonResult { Data = "Данные записаны", JsonRequestBehavior = JsonRequestBehavior.DenyGet };
                 }
             }
             else if (balance != null) { //при изм. баланса - добав. роль <Moder>(созд. лота)
