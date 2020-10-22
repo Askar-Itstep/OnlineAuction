@@ -223,8 +223,8 @@
 
 <div style="display:flex">
     <div class="col-md-6">
-        @Html.Raw("<img  style='width: 100%',  src=\"data:image/jpeg;base64," + Convert.ToBase64String(Model.Product.Image.ImageData) + "\" />")
-
+        @*@Html.Raw("<img  style='width: 100%',  src=\"data:image/jpeg;base64," + Convert.ToBase64String(Model.Product.Image.ImageData) + "\" />")*@
+        <img  style='width: 100%', src="@Model.Product.Image.URI"/>
 
         <form class="clearfix" name="form1">
             <input type="hidden" name="auctionId" value=@Model.Id>

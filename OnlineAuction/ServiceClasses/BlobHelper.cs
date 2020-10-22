@@ -19,7 +19,7 @@ namespace OnlineAuction.ServiceClasses
         const string blobContainerName = "blobcontainer";
         private const string uripath = "https://storageauction.blob.core.windows.net/blobcontainer";
 
-        public static async Task<ImageBO> SetImageAsync(HttpPostedFileBase upload, ImageVM imageVM, ImageBO imageBase, IMapper mapper, AccountBO userBO=null)
+        public static async Task<ImageBO> SetImageAsync(HttpPostedFileBase upload, ImageVM imageVM, ImageBO imageBase, IMapper mapper, AccountBO userBO = null)
         {
             //а)------запись в blobStorage ----------------------            
             string filename = Path.GetFileName(upload.FileName);
@@ -38,7 +38,10 @@ namespace OnlineAuction.ServiceClasses
                 }
                 List<ImageBO> imageBases = DependencyResolver.Current.GetService<ImageBO>().LoadAll().Where(i => i.FileName == imageVM.FileName).ToList();
                 imageBase = imageBases[0];
-                userBO.ImageId = imageBase.Id;
+                if (userBO != null)
+                {
+                    userBO.ImageId = imageBase.Id;
+                }
             }
             return imageBase;
         }
@@ -67,7 +70,7 @@ namespace OnlineAuction.ServiceClasses
                 return false;
             }
         }
-        
+
         public static List<string> DowloadUriBackground()
         {
             string storageKey = ConfigurationManager.ConnectionStrings["blobBoxBackground"].ConnectionString;

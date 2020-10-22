@@ -5,20 +5,71 @@
 }
 
 <h2>Edit</h2>
+<script>
+    $(document).ready(function () {
+        //------------Send model + Upload Files ---------------------------
+        var myForm = document.forms[0];
+        $('input[type=submit').on('click', function (e) {
+            $(this).attr("disabled", "disabled");
+            $(myForm).triggerHandler('submit');
+        });
+        $(myForm).on('submit', function (e) {
+            var files = document.getElementById('customFile').files;
+            console.log(files)
+            if (window.FormData !== undefined) {
+                var data = new FormData(document.forms[0]);
+                console.log(data)
+                for (var x = 0; x < files.length; x++) {
+                    data.append("file" + x, files[x]);
+                }
+                $.ajax({
+                    type: "POST",
+                    url: "/Accounts/Edit",
+                    contentType: false,
+                    processData: false,
+                    data: data,
+                    success: function (data) {
+                        console.log(data)
+                        alert(data); //"Данные записаны!"
+                        $(location).attr('href', '/Accounts/Details/?id=' + $('#hidden-input-id').val());
+                    },
+                    error: function (xhr, status) {
+                        alert(status);
+                        $('input[type=submit').attr("disabled", "disabled");
+                    }
+                });
+            } else {
+                alert("Браузер не поддерживает загрузку файлов HTML5!");
+            }
+        });
+    })
+</script>
 
+
+<h4>Account</h4>
+<hr />
+<div class="col-lg-4">
+    <img style="width:150px; height:150px" src="@Model.Image.URI" />
+</div>
 
 @using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
-    
-<div class="form-horizontal">
-    <h4>Account</h4>
-    <hr />
+
+<div class="form-horizontal col-lg-8">
+
     @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-    @Html.HiddenFor(model => model.Id)
+    @Html.HiddenFor(model => model.Id, new { @id="hidden-input-id"})
     @Html.HiddenFor(model => model.AddressId)
     @Html.HiddenFor(model => model.Balance)
 
+    <div style="display:flex">
+        <div style="width:8%; height:10px;"></div>
+        <div class="custom-file">
+            <input type="file" class="custom-file-input col-md-auto" name="upload" accept="image/jpeg" id="customFile">
+            <label class="custom-file-label" for="customFile">Choose file</label>
+        </div>
+    </div>
     <div class="form-group">
         @Html.LabelFor(model => model.FullName, htmlAttributes: new { @class = "control-label col-md-2" })
         <div class="col-md-10">
@@ -43,15 +94,13 @@
         </div>
     </div>
 
-    @*<div class="form-group">
-            @Html.LabelFor(model => model.IsActive, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                <div class="checkbox">
-                    @Html.EditorFor(model => model.IsActive)
-                    @Html.ValidationMessageFor(model => model.IsActive, "", new { @class = "text-danger" })
-                </div>
-            </div>
-        </div>*@
+    <div class="form-group">
+        @Html.LabelFor(model => model.IsActive, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.IsActive, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.IsActive, "", new { @class = "text-danger" })
+        </div>
+    </div>
 
     <div class="form-group">
         @Html.LabelFor(model => model.Address.Region, htmlAttributes: new { @class = "control-label col-md-2" })

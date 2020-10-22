@@ -157,7 +157,8 @@
         <img src="~/Files/create.png" alt="noImg" />
     }
     else {
-        @Html.Raw("<img  style='width: 100%',  src=\"data:image/jpeg;base64," + Convert.ToBase64String(ViewBag.editImg.ImageData) + "\" />")
+        @*@Html.Raw("<img  style='width: 100%',  src=\"data:image/jpeg;base64," + Convert.ToBase64String(ViewBag.editImg.ImageData) + "\" />")*@
+        <img  style='width: 100%',  src="@ViewBag.editImg.URI"/>
     }
 
 </div>

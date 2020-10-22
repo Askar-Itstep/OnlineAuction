@@ -27,7 +27,7 @@
                 }
             });
             $('.td-is-approved').each(function (ind, item) {
-                if ($(item).data("i") == i) { 
+                if ($(item).data("i") == i) {
                     data.IsApproved = [$(this).html()]
                 }
             });
@@ -71,56 +71,70 @@
     });
 </script>
 <h2>All orders</h2>
-<table class="table table-striped">
-    <tr>
-        <th>OrderID</th>
-        <th> ClientID</th>
-        <th>@Html.DisplayNameFor(model => model.Client.Account.FullName)</th>
-        <th> @Html.DisplayNameFor(model => model.IsApproved)</th>
-        <th>AuctionID</th>
-        <th>EndTime</th>
-        <th>Product</th>
-        <th>ImageProduct</th>
-    </tr>
-    @{
-        int i = 0, j = 0, n = 0, m = 0;
-        foreach (var order in Model) {
-            i++;
+@{
+    if (Model.Count() != 0)
+    {
+
+        <table class="table table-striped">
             <tr>
-                <td class="td-order-id" data-i=@i>@Html.DisplayFor(modelItem => order.Id)</td>
-                <td class="td-client-id" data-i=@i> @Html.DisplayFor(modelItem => order.Client.Id)</td>
-                <td data-i=@i>@Html.DisplayFor(modelItem => order.Client.Account.FullName)</td>
-                <td class="td-is-approved" data-i=@i> @Html.DisplayFor(modelItem => order.IsApproved)</td>
-
-                @foreach (var auctionId in order.AuctionIds) {
-                    j++;
-                    <td class="td-auction-id" data-i=@i data-j=@j>@Html.DisplayFor(modelItem => auctionId)</td>
-                }
-                @foreach (var endtime in order.EndTimes) {
-                    n++;
-                    <td class="td-endtime" data-i=@i data-j=@n>@Html.DisplayFor(modelItem => endtime)</td>
-                }
-                @foreach (var product in order.Products) {
-                    m++;
-                    <td class="hidden product-id" data-i=@i data-j=@m>@product.Id</td>
-                    <td class="col-lg-1">@Html.DisplayFor(modelItem => product.Title)</td>
-                    <td class="col-lg-2">
-                        @Html.Raw("<img  style='width: 100%',  src=\"data:image/jpeg;base64," + Convert.ToBase64String(product.Image.ImageData) + "\" />")
-                    </td>
-                    <td>
-                        @if (User.IsInRole("admin")) {
-                            @Html.ActionLink("Edit", "Edit", null, new { @class = "edit_link", data_i = i, data_j = m })
-                        }
-                        |
-                        @*@Html.ActionLink("Details", "Details", null, new { @class = "details_link", data_i = i, data_j = m }) |*@
-                        @Html.ActionLink("Delete", "Delete", new { id = order.Id })
-                    </td>
-                }
-
+                <th>OrderID</th>
+                <th> ClientID</th>
+                <th>@Html.DisplayNameFor(model => model.Client.Account.FullName)</th>
+                <th> @Html.DisplayNameFor(model => model.IsApproved)</th>
+                <th>AuctionID</th>
+                <th>EndTime</th>
+                <th>Product</th>
+                <th>ImageProduct</th>
             </tr>
-        }
-    }
+            @{
+                int i = 0, j = 0, n = 0, m = 0;
+                foreach (var order in Model)
+                {
+                    i++;
+                    <tr>
+                        <td class="td-order-id" data-i=@i>@Html.DisplayFor(modelItem => order.Id)</td>
+                        <td class="td-client-id" data-i=@i> @Html.DisplayFor(modelItem => order.Client.Id)</td>
+                        <td data-i=@i>@Html.DisplayFor(modelItem => order.Client.Account.FullName)</td>
+                        <td class="td-is-approved" data-i=@i> @Html.DisplayFor(modelItem => order.IsApproved)</td>
 
-</table>
+                        @foreach (var auctionId in order.AuctionIds)
+                        {
+                            j++;
+                            <td class="td-auction-id" data-i=@i data-j=@j>@Html.DisplayFor(modelItem => auctionId)</td>
+                        }
+                        @foreach (var endtime in order.EndTimes)
+                        {
+                            n++;
+                            <td class="td-endtime" data-i=@i data-j=@n>@Html.DisplayFor(modelItem => endtime)</td>
+                        }
+                        @foreach (var product in order.Products)
+                        {
+                            m++;
+                            <td class="hidden product-id" data-i=@i data-j=@m>@product.Id</td>
+                            <td class="col-lg-1">@Html.DisplayFor(modelItem => product.Title)</td>
+                            <td class="col-lg-2">
+                                <img style='width: 100%' , src="@product.Image.URI" />
+                            </td>
+                            <td>
+                                @if (User.IsInRole("admin"))
+                                {
+                                    @Html.ActionLink("Edit", "Edit", null, new { @class = "edit_link", data_i = i, data_j = m })
+                                }
+                                |
+                                @Html.ActionLink("Delete", "Delete", new { id = order.Id })
+                            </td>
+                        }
+
+                    </tr>
+                }
+            }
+
+        </table>
+                }
+                else
+                {
+                <h2>Упс.. У вас еще нет заказов</h2>
+                }
+}
 
 
