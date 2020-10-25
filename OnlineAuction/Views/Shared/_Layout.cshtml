@@ -33,8 +33,19 @@
 <body>
     <script>
         $(function (e) {
-            var accountId = localStorage.getItem("accountId");
+            var accountId = sessionStorage.getItem("accountId");
 
+            console.log("accID: " + parseInt(accountId))
+            if (accountId == undefined || accountId == NaN) {
+                $('#second-dropdown').addClass('hidden')
+                $('li#hidden-out').removeClass('hidden')
+            }
+            else {
+                $('#second-dropdown').removeClass('hidden')
+                $('li#hidden-out').addClass('hidden')
+                var username = $('#UserIdentityName').html()
+                $('.div-hello').html('Hello '+ username + '!')
+            }
             $(".classDeleteAccounts").attr("href", "/Accounts/Delete/?id=" + accountId); //здесь удаление не из представл. админа "Все аккаунты", поэтому нет модели
             $(".classMyAuctions").attr("href", "/Auctions/Index/?isActor=1");
             $(".classMyOrders").attr("href", "/Orders/Index/?accountId=" + accountId);  //Мои заказы + Back to List (_AddBalancePartialView)
@@ -63,6 +74,7 @@
                 });
         })
     </script>
+    <div class="hidden" id="UserIdentityName">@User.Identity.Name</div>
 
     <div class="navbar  navbar-fixed-top" style="background-color:azure">
         <div class="container">
@@ -97,18 +109,21 @@
                     </ul>
                     <ul class="nav navbar-nav">
                         @{
-                            if (User.Identity.Name.Equals("")) {
+                            if (User.Identity.Name.Equals(""))
+                            {
                                 <li>@Html.ActionLink("Войти", "Login", "Accounts")</li>
                                 <li>@Html.ActionLink("Зарегистрироваться", "Registration", "Accounts")</li>
                             }
                         }
 
-                        @{ if (!User.Identity.Name.Equals("")) {
-                                if (!User.IsInRole("admin")) {
+                        @{ if (!User.Identity.Name.Equals(""))
+                            {
+                                if (!User.IsInRole("admin"))
+                                {
                                     <li>@Html.ActionLink("Создать аукцион", "Create", "Auctions", new { flagCreate = 1 }, new { @class = "classCreateAuction" })</li>
                                     <li>@Html.ActionLink("Аукционы", "Index", "Auctions")</li>
-                                    <li class="dropdown">
-                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><div>Hello @User.Identity.Name!</div> <span class="caret"></span></a>
+                                    <li class="dropdown" id="second-dropdown">
+                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><div class="div-hello"></div> <span class="caret"></span></a>
                                         <ul class="dropdown-menu" role="menu">
                                             <li>@Html.ActionLink("Мои аукционы", "Index", "Auctions", new { accountId = 0 }, new { @class = "classMyAuctions" })</li>
                                             <li>@Html.ActionLink("Мои заказы", "Index", "Orders", new { accountId = 0 }, new { @class = "classMyOrders" })</li>
@@ -120,10 +135,12 @@
                                             <li>@Html.ActionLink("Выйти", "Logoff", "Accounts")</li>
                                         </ul>
                                     </li>
+                                    <li class="hidden" id="hidden-out">@Html.ActionLink("Обновить и зайти", "Logoff", "Accounts")</li>
                                 }
-                                else {
+                                else
+                                {
                                     <li class="dropdown">
-                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><div>Hello @User.Identity.Name!</div> <span class="caret"></span></a>
+                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><div class="div-hello"></div> <span class="caret"></span></a>
                                         <ul class="dropdown-menu" id="person_menu" role="menu">
                                             <li>@Html.ActionLink("Заказы", "Index", "Orders")</li>
                                             <li>@Html.ActionLink("Редактировать аккаунт", "Edit", "Accounts", new { accountId = 0 }, new { @class = "classEditAccounts" })</li>
@@ -139,6 +156,8 @@
             </div>
         </div>
     </div>
+
+
 
     <div class="container body-content">
         @RenderBody()

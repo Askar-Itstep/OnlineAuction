@@ -100,7 +100,7 @@
             $.ajax({
                 type: "GET",
                 url: '/Auctions/ChatAsync',
-                data: { auctionId: localStorage.getItem("auctionId"), connectionId: $.connection.hub.id, message: $('#message').val() },
+                data: { auctionId: sessionStorage.getItem("auctionId"), connectionId: $.connection.hub.id, message: $('#message').val() },
                 beforeSend: function () {
                     console.log("connID: ", $.connection.hub.id)
                 },

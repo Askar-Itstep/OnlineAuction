@@ -201,7 +201,7 @@
     $(function () {
         $('a.send-message').click(function (e) {
             var auctionId = $('.div-auction').html()
-            localStorage.setItem("auctionId", auctionId); //понадоб. в чате
+            sessionStorage.setItem("auctionId", auctionId); //понадоб. в чате
             $(this).attr('href', '/Auctions/ChatAsync/?auctionId=' + auctionId)
         })
     })

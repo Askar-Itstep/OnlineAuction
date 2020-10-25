@@ -35,7 +35,7 @@ namespace OnlineAuction.ServiceClasses
             await Clients.All.hello(User.Account.FullName, message);
         }
 
-        public  async Task SendMessage(string message)
+        public  async Task SendMessage(string message, bool keySignIn = false)
         {
             //var context = Microsoft.AspNet.SignalR.GlobalHost.ConnectionManager.GetHubContext<ChatHub>();
             ChatHub.User = mapper.Map<UserHub>(User);
@@ -54,7 +54,10 @@ namespace OnlineAuction.ServiceClasses
                                                 .Where(c => c.client.AccountId == c.account.Id)
                                                 .Select(c => c.client);
 
-            chatClients.ToList().ForEach(a => SaveMessage(message, User.Account.Id, a));
+            if (keySignIn == false) //запись кроме сообщ. приветствия
+            {
+                chatClients.ToList().ForEach(a => SaveMessage(message, User.Account.Id, a));
+            }
         }
 
 

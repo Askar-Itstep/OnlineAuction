@@ -3,7 +3,7 @@
 }
 <script>
     $(function (e) {
-        var userId = localStorage.getItem("userId");
+        var userId = sessionStorage.getItem("userId");
         if (userId != null && userId != undefined) {
             console.log(userId)
         }
