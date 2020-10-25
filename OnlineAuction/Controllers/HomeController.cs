@@ -34,7 +34,7 @@ namespace OnlineAuction.Controllers
                     if(UserHub == null) {
                         UserHubVM userHubVM = new UserHubVM { AccountId=(int)accountId, ConnectionId="" };
                         UserHub = mapper.Map<UserHubBO>(userHubVM);
-                        UserHub.Save(UserHub);
+                        //UserHub.Save(UserHub);
                     }
                     UserHub.Account = accountBO;
                     var sender = PushSender.InstanceClient;
@@ -81,7 +81,7 @@ namespace OnlineAuction.Controllers
                     await sender.CommunicationWIthAuthor(message, connectionId, friendConnectId);
                 }
                 else {
-                    await sender.SendMessage(message); 
+                    await sender.SendMessage(message, true); //+key SignIn
                 }                
                 return new JsonResult { Data = alert, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
             }
