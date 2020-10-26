@@ -17,9 +17,7 @@
                 success: function (data) {
                     if (data.success == true) {
                         sessionStorage.setItem("accountId", JSON.stringify(data.accountId));
-                        sessionStorage.setItem("roles", JSON.stringify(data.roles));
-                        //console.log(data.roles[0])
-                        sessionStorage.setItem("isActive", JSON.stringify(data.isActive));
+                        sessionStorage.setItem("myURI", data.myURI);
                         $(location).attr('href', '/Home/Index');
                     }
                     else {

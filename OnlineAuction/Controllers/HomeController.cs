@@ -30,11 +30,11 @@ namespace OnlineAuction.Controllers
                                                                                 .LoadAll().Where(r => r.AccountId == (int)accountId).ToList();
                 var roleAdmin = rolesAccount.FirstOrDefault(r => r.Role.RoleName.Contains("admin"));
                 if (accountBO != null && roleAdmin == null) {
-                    UserHub = DependencyResolver.Current.GetService<UserHubBO>().Load((int)accountId);
+                    UserHub = DependencyResolver.Current.GetService<UserHubBO>().LoadAll().Where(u=>u.AccountId ==(int)accountId).FirstOrDefault();
                     if(UserHub == null) {
                         UserHubVM userHubVM = new UserHubVM { AccountId=(int)accountId, ConnectionId="" };
                         UserHub = mapper.Map<UserHubBO>(userHubVM);
-                        //UserHub.Save(UserHub);
+                        UserHub.Save(UserHub);
                     }
                     UserHub.Account = accountBO;
                     var sender = PushSender.InstanceClient;

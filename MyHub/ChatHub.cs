@@ -45,28 +45,31 @@ namespace OnlineAuction
                     }
                     else {
                         Users.Add(User);
-                        db.UserHubs.Add(User);
+                        db.UserHubs.Add(User);  //добавл., но также доб. нов. Account??????????
                     }
                     await db.SaveChangesAsync();
+                    //Users = db.UserHubs.ToList();
 
-                    // подключить текущего пользователю
-                    Clients.Caller.onConnected(id, userName, Users);//сбой Users lazy?
+                    //текущему пользователю вывести список юзеров на клиенте
+                    Clients.Caller.onConnected(id, userName, Users);//только на клиенте вызывающ. юзера
 
-                    // Показать кто вошел - всем пользователям, кроме текущего
-                    Clients.AllExcept(id).onNewUserConnected(id, userName);
+                    // Показать нов. юзера - всем пользователям, кроме текущего
+                    Clients.AllExcept(id).onNewUserConnected(id, User); //userName
                 }
             }
 
         }
 
-        // Отключение пользователя
+        // Отключение пользователя - при переходе на др. страницу или закрыт. браузера (только не сервера!)
         public override Task OnDisconnected(bool stopCalled)
         {
             using (Model1 db = new Model1()) {
-                //после отвала соед. в Connect() -перезапись ConnId->может не найти!->Error
+                Users = db.UserHubs.ToList();
+                //после отвала соед. в Connect() в клиенте происх. перезапись ConnId (стр. 91 _ChatPartView) ->может не найти!->Error
                 var user = Users.FirstOrDefault(x => x.ConnectionId == Context.ConnectionId);
                 if (user != null) {
                     try {
+                        Clients.All.onUserDisconnected(Context.ConnectionId, user.Account.FullName);
                         Users.Remove(user);
                         db.UserHubs.Remove(user);
                         db.SaveChanges();
@@ -75,7 +78,6 @@ namespace OnlineAuction
                         System.Diagnostics.Debug.WriteLine("Error: ", e.Message);
                     }
 
-                    Clients.All.onUserDisconnected(Context.ConnectionId, user.Account.FullName);
                 }
             }
             return base.OnDisconnected(stopCalled);
