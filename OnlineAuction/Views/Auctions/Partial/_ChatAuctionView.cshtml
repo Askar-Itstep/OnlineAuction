@@ -113,10 +113,10 @@
             })
         }
         //Добавление имени нового пользователя отображ. в чат-комнаты
-        function AddUser(id, name) {
+        function AddUser(id, name, uri = "") {
             var userId = $('#hdId').val();
             if (userId != id) {
-                $("#chatusers").append('<p id="' + id + '"><b>' + name + '</b></p>');
+                $("#chatusers").append('<p id="' + id + '"><b>' + name + '</b> '</b > <img src=' + uri +' style="width:40px; heigh:40px" /></p>');
             }
         }
     </script>

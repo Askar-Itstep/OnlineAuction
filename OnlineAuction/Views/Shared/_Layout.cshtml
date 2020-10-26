@@ -13,7 +13,7 @@
     @Scripts.Render("~/bundles/jqueryui")
     @Scripts.Render("~/bundles/jqueryval")
     @Scripts.Render("~/bundles/signalr")
-    
+
 
     @using OnlineAuction.ViewModels
 
@@ -34,8 +34,15 @@
     <script>
         $(function (e) {
             var accountId = sessionStorage.getItem("accountId");
+            //console.log("accID: " + parseInt(accountId))
+            var data = sessionStorage.getItem("myURI");
+            if (data != null && data != undefined) {
+                var img = document.createElement("img");
+                $(img).css({ 'width': '40px', 'height': '40px' });
+                $(img).attr('src', data);
+                $('.divImg').append(img);
+            }
 
-            console.log("accID: " + parseInt(accountId))
             if (accountId == undefined || accountId == NaN) {
                 $('#second-dropdown').addClass('hidden')
                 $('li#hidden-out').removeClass('hidden')
@@ -44,7 +51,7 @@
                 $('#second-dropdown').removeClass('hidden')
                 $('li#hidden-out').addClass('hidden')
                 var username = $('#UserIdentityName').html()
-                $('.div-hello').html('Hello '+ username + '!')
+                $('.div-hello').html('Hello ' + username + '!')
             }
             $(".classDeleteAccounts").attr("href", "/Accounts/Delete/?id=" + accountId); //здесь удаление не из представл. админа "Все аккаунты", поэтому нет модели
             $(".classMyAuctions").attr("href", "/Auctions/Index/?isActor=1");
@@ -91,7 +98,8 @@
                 <div style="display:flex; justify-content:space-between">
                     <ul class="nav navbar-nav">
                         @{
-                            if (User.IsInRole("admin")) {
+                            if (User.IsInRole("admin"))
+                            {
                                 <li>@Html.ActionLink("Пользователи", "Index", "Accounts")</li>
                             }
                         }
@@ -123,7 +131,10 @@
                                     <li>@Html.ActionLink("Создать аукцион", "Create", "Auctions", new { flagCreate = 1 }, new { @class = "classCreateAuction" })</li>
                                     <li>@Html.ActionLink("Аукционы", "Index", "Auctions")</li>
                                     <li class="dropdown" id="second-dropdown">
-                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><div class="div-hello"></div> <span class="caret"></span></a>
+                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                                            <div class="div-hello"></div>
+                                            <span class="caret"></span>
+                                        </a>
                                         <ul class="dropdown-menu" role="menu">
                                             <li>@Html.ActionLink("Мои аукционы", "Index", "Auctions", new { accountId = 0 }, new { @class = "classMyAuctions" })</li>
                                             <li>@Html.ActionLink("Мои заказы", "Index", "Orders", new { accountId = 0 }, new { @class = "classMyOrders" })</li>
@@ -134,6 +145,10 @@
                                             <li class="divider"></li>
                                             <li>@Html.ActionLink("Выйти", "Logoff", "Accounts")</li>
                                         </ul>
+                                    </li>
+                                    <li>
+                                        <div class="divImg">
+                                        </div>
                                     </li>
                                     <li class="hidden" id="hidden-out">@Html.ActionLink("Обновить и зайти", "Logoff", "Accounts")</li>
                                 }
@@ -147,6 +162,10 @@
                                             <li class="divider"></li>
                                             <li>@Html.ActionLink("Выйти", "Logoff", "Accounts")</li>
                                         </ul>
+                                    </li>
+                                    <li>
+                                        <div class="divImg">
+                                        </div>
                                     </li>
                                 }
                             }

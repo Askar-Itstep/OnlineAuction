@@ -41,33 +41,35 @@
             chat.client.addMessage = function (name, message, accId) {
                 $('#chatroom').prepend('<p><b>' + htmlEncode(name) + '</b>: ' + htmlEncode(message)
                     + '<span class ="hidden">' + accId + '</span></p>');
-                console.log("addMessage accId: " + accId)
+                //console.log("addMessage accId: " + accId)
                 sessionStorage.setItem("friendAccountId", accId);
             };
 
             chat.client.hello = function (name, message) {
                 $('#chatroom').prepend('<p><b>' + "System" + '</b>: ' + htmlEncode(message) + '</p>');
             };
+                 
+            ////приветствие нового юзера
+            //chat.client.onGreeted = function (id, userName) {               
+            //}
 
-            // Функция, вызываемая при подключении нового пользователя
-            //параметр userName получ. здесь (стр.75)
+            //параметр userName получ. здесь (стр.99)
             chat.client.onConnected = function (id, userName, allUsers) {
                 // установка в скрытых полях имени и id текущего пользователя
                 $('#hdId').val(id);
                 $('#username').val(userName);
                 $('#header').html('<h3>Добро пожаловать, ' + userName + '</h3>');
-
                 // Добавление всех пользователей в отображен.
                 for (i = 0; i < allUsers.length; i++) {
-                    AddUser(allUsers[i].ConnectionId, allUsers[i].Account.FullName);
-                    //console.log("user[i]: " + allUsers[i].Account.FullName)
+                    AddUser(allUsers[i].ConnectionId, allUsers[i].Account.FullName, allUsers[i].Account.Image.URI);
+                    console.log("user[i]: " + allUsers[i].Account.Image.URI)
                 }
                 sessionStorage.setItem("allUsers", JSON.stringify(allUsers));
             }
 
             // Добавляем нового пользователя в отображ. в чат-комнаты
-            chat.client.onNewUserConnected = function (connId, name) {
-                AddUser(connId, name); //добав. в представл. (не в хранилищ)
+            chat.client.onNewUserConnected = function (connId, user) {
+                AddUser(connId, user.Account.FullName, user.Account.Image.URI); //добав. в представл. (не в хранилищ)
             }
 
             // Удаляем пользователя из отображ. в чат-комнаты
@@ -152,10 +154,11 @@
             })
         }
         //Добавление имени нового собеседника в  отображ. чат-комнаты
-        function AddUser(id, name) {
+        function AddUser(id, name, uri = "") {
             var userId = $('#hdId').val();
+            //console.log("hdId: "+id)
             if (userId != id) {
-                $("#chatusers").append('<p id="' + id + '"><b>' + name + '</b></p>');
+                $("#chatusers").append('<p id="' + id + '"><b>' + name + '</b><img src=' + uri +' style="width:40px; heigh:40px" /></p>');
             }
         }
     </script>

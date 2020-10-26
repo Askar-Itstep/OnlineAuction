@@ -56,7 +56,7 @@ namespace OnlineAuction.ServiceClasses
 
             if (keySignIn == false) //запись кроме сообщ. приветствия
             {
-                chatClients.ToList().ForEach(a => SaveMessage(message, User.Account.Id, a));
+                //chatClients.ToList().ForEach(a => SaveMessage(message, User.Account.Id, a));
             }
         }
 

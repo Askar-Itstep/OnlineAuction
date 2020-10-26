@@ -193,23 +193,18 @@ namespace OnlineAuction.Controllers
                 if (accountBO != null) {
                     FormsAuthentication.SetAuthCookie(model.Login, true);
 
-                    //далее accountId, roles, isActive будут храниться в КЛИЕНТЕ
+                    //далее accountId,  будут храниться в КЛИЕНТЕ   
                     var accountId = accountBO.Id;
-                    var isActive = accountBO.IsActive;
-                    roleAccountBOList = roleAccountBO.LoadAll().Where(r => r.AccountId == accountBO.Id).ToList();
-                    var roles = roleAccountBOList.Select(r => r.Role.RoleName).ToList();
-
+                    var myURI = accountBO.Image.URI;
                     //2) сохр. в Session Server
                     HttpContext.Session["accountId"] = accountId;
-                    //return Json(new { success = true, message = "Wellcome!", accountId, isActive, roles }); //уйдет в предст. Login.html -> _Layout.html
-                    return new JsonResult { Data=new { success = true, message = "Wellcome!", accountId, isActive, roles }, JsonRequestBehavior=JsonRequestBehavior.DenyGet };
+                    return new JsonResult { Data=new { success = true, message = "Wellcome!", accountId,  myURI} 
+                                                                        , JsonRequestBehavior=JsonRequestBehavior.DenyGet };
                 }
                 else {
-                    //return Json(new { success = false, message = "Пользователя с таким логином и паролем нет" });
                     return new JsonResult { Data = new { success = false, message = "Пользователя с таким логином и паролем нет" }, JsonRequestBehavior = JsonRequestBehavior.DenyGet };
                 }
             }
-            //return Json(new { success = false, message = "Модель не валидна!" });
             return new JsonResult { Data = new { success = false, message = "Модель не валидна!" }, JsonRequestBehavior = JsonRequestBehavior.DenyGet };
         }
         //------------------------------------------Registration ---------------------------------------------------------------------
@@ -285,7 +280,7 @@ namespace OnlineAuction.Controllers
         public ActionResult Logoff()
         {
             FormsAuthentication.SignOut();
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Login", "Accounts");
         }
 
         protected override void Dispose(bool disposing)
