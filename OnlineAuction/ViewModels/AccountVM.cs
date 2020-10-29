@@ -6,6 +6,7 @@ using System.Web;
 
 namespace OnlineAuction.ViewModels
 {
+    public enum Gender { MEN, WOMEN, UNDEFINED }
     public class AccountVM
     {
         //public string ConnectionId { get; set; }
@@ -29,6 +30,7 @@ namespace OnlineAuction.ViewModels
         [StringLength(255)]
         public string Password { get; set; }
 
+        public Gender Gender { get; set; }
         private ICollection<RoleVM> Roles { get; set; }   //-> RoleAccountLinks
 
         public void SetRoles(List<RoleVM> roles)

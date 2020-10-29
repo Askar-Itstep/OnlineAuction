@@ -27,6 +27,8 @@ namespace BusinessLayer.BusinessObject
         public virtual AddressBO Address  {  get; set;  }
 
         public ICollection<RoleBO> RolesBO { get; set; }
+
+        public Gender Gender { get; set; }
         public bool IsActive { get; set; }
         public decimal Balance { get; private set; } = 0;
         public void AddBalance(decimal value)
