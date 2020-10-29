@@ -261,6 +261,7 @@
     <Compile Include="ServiceClasses\BuilderSynteticModels.cs" />
     <Compile Include="ServiceClasses\HelperOrderCreate.cs" />
     <Compile Include="ServiceClasses\ISyntetic.cs" />
+    <Compile Include="ViewModels\CategoryVM.cs" />
     <Compile Include="ViewModels\JsonRequestCreateBet.cs" />
     <Compile Include="ViewModels\AccountVM.cs" />
     <Compile Include="ViewModels\AddressVM.cs" />

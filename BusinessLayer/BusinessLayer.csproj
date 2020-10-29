@@ -93,8 +93,10 @@
     <Compile Include="BusinessObject\AuctionClientsLinkBO.cs" />
     <Compile Include="BusinessObject\BaseBusinessObject.cs" />
     <Compile Include="BusinessObject\BetAuctionBO.cs" />
+    <Compile Include="BusinessObject\CategoryBO.cs" />
     <Compile Include="BusinessObject\ClientBO.cs" />
     <Compile Include="BusinessObject\ImageBO.cs" />
+    <Compile Include="BusinessObject\ImageProductLinkBO.cs" />
     <Compile Include="BusinessObject\ItemBO.cs" />
     <Compile Include="BusinessObject\MessageBO.cs" />
     <Compile Include="BusinessObject\OrderBO.cs" />

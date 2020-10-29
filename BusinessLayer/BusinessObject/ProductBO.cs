@@ -20,6 +20,9 @@ namespace BusinessLayer.BusinessObject
         public int? ImageId { get; set; }
         public virtual ImageBO Image { get; set; }
 
+        public int? CategoryId { get; set; }
+        public virtual CategoryBO Category { get; set; }
+
         //------------------------------
         readonly IUnityContainer unityContainer;
         public ProductBO(IMapper mapper, UnitOfWork unitOfWork, IUnityContainer container)

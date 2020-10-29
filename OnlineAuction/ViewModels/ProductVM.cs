@@ -17,6 +17,8 @@ namespace OnlineAuction.ViewModels
 
         public int? ImageId { get; set; }
         public virtual ImageVM Image { get; set; }
-
+        
+        public int? CategoryId { get; set; }
+        public virtual CategoryVM Category { get; set; }
     }
 }
