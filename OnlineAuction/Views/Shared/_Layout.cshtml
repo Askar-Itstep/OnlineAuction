@@ -20,32 +20,22 @@
     @{
         //необх. для AddBalancePartialView
         AccountVM account = new AccountVM();
+
     }
-    <style>
-        /*.ui-datepicker-next, .ui-datepicker-prev {
-            display: none;
-        }*/
-        .ui-datepicker .ui-datepicker-prev span, .ui-datepicker .ui-datepicker-next span {
-            color: transparent;
-        }
-    </style>
+
 </head>
 <body>
-    <script>
+    <script> 
+        //настройка - юзеру юзерово, админу ..
         $(function (e) {
             var accountId = sessionStorage.getItem("accountId");
-            //console.log("accID: " + parseInt(accountId))
-            var data = sessionStorage.getItem("myURI");
-            if (data != null && data != undefined) {
-                var img = document.createElement("img");
-                $(img).css({ 'width': '40px', 'height': '40px' });
-                $(img).attr('src', data);
-                $('.divImg').append(img);
-            }
-
             if (accountId == undefined || accountId == NaN) {
                 $('#second-dropdown').addClass('hidden')
-                $('li#hidden-out').removeClass('hidden')
+                $('#li-hidden-out').removeClass('hidden')
+                $('#li-container').hide()
+
+                $('#ul-one').hide()
+                $('#ul-two').hide()
             }
             else {
                 $('#second-dropdown').removeClass('hidden')
@@ -53,6 +43,16 @@
                 var username = $('#UserIdentityName').html()
                 $('.div-hello').html('Hello ' + username + '!')
             }
+            
+            var data = sessionStorage.getItem("myURI");
+
+            if (data != null && data != undefined) {
+                var img = document.createElement("img");
+                $(img).css({ 'width': '40px', 'height': '40px' });
+                $(img).attr('src', data);
+                $('.divImg').append(img);
+            }
+            //настройка ссылок перехода- добавл. ключей
             $(".classDeleteAccounts").attr("href", "/Accounts/Delete/?id=" + accountId); //здесь удаление не из представл. админа "Все аккаунты", поэтому нет модели
             $(".classMyAuctions").attr("href", "/Auctions/Index/?isActor=1");
             $(".classMyOrders").attr("href", "/Orders/Index/?accountId=" + accountId);  //Мои заказы + Back to List (_AddBalancePartialView)
@@ -80,11 +80,12 @@
                     })
                 });
         })
+     
     </script>
     <div class="hidden" id="UserIdentityName">@User.Identity.Name</div>
 
     <div class="navbar  navbar-fixed-top" style="background-color:azure">
-        <div class="container">
+        <div class="container" >
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
                     <span class="icon-bar"></span>
@@ -96,7 +97,7 @@
             </div>
             <div class="navbar-collapse">
                 <div style="display:flex; justify-content:space-between">
-                    <ul class="nav navbar-nav">
+                    <ul class="nav navbar-nav" id="ul-one">
                         @{
                             if (User.IsInRole("admin"))
                             {
@@ -115,7 +116,7 @@
                         </li>
                         <li>@Html.ActionLink("Чат", "Chat", "Home")</li>
                     </ul>
-                    <ul class="nav navbar-nav">
+                    <ul class="nav navbar-nav" id="ul-two">
                         @{
                             if (User.Identity.Name.Equals(""))
                             {
@@ -126,7 +127,7 @@
 
                         @{ if (!User.Identity.Name.Equals(""))
                             {
-                                if (!User.IsInRole("admin"))
+                                if (!User.IsInRole("admin"))    //просто юзер
                                 {
                                     <li>@Html.ActionLink("Создать аукцион", "Create", "Auctions", new { flagCreate = 1 }, new { @class = "classCreateAuction" })</li>
                                     <li>@Html.ActionLink("Аукционы", "Index", "Auctions")</li>
@@ -150,9 +151,9 @@
                                         <div class="divImg">
                                         </div>
                                     </li>
-                                    <li class="hidden" id="hidden-out">@Html.ActionLink("Обновить и зайти", "Logoff", "Accounts")</li>
+
                                 }
-                                else
+                                else //User.Name - админ
                                 {
                                     <li class="dropdown">
                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><div class="div-hello"></div> <span class="caret"></span></a>
@@ -168,8 +169,12 @@
                                         </div>
                                     </li>
                                 }
+                                
                             }
                         }
+                    </ul>
+                    <ul class="nav navbar-nav">
+                        <li class="hidden" id="li-hidden-out">@Html.ActionLink("Обновить и зайти", "Logoff", "Accounts")</li>
                     </ul>
                 </div>
             </div>

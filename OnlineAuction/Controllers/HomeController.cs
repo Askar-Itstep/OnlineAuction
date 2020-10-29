@@ -86,6 +86,14 @@ namespace OnlineAuction.Controllers
                 return new JsonResult { Data = alert, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
             }
         }
+        public ActionResult SwitchContainer(string nameContainer)
+        {
+            if (nameContainer.ToUpper().Contains("AWS"))
+            {
+
+            }
+            return RedirectToAction("Index");
+        }
         public ActionResult About()
         {
             ViewBag.Message = "Your application description page.";

@@ -20,8 +20,10 @@ namespace OnlineAuction.Entities
         public virtual DbSet<Address> Addresses { get; set; }
         public virtual DbSet<Client> Clients { get; set; }
         public virtual DbSet<Image> Images { get; set; }
+        public virtual DbSet<ImageProductLink> ImageProductLinks { get; set; }
         public virtual DbSet<Item> Items { get; set; }
         public virtual DbSet<Product> Products { get; set; }
+        public virtual DbSet<Category> Categories { get; set; }
         public virtual DbSet<Order> Orders { get; set; }
         public virtual DbSet<Message> Messages { get; set; }
         public virtual DbSet<Auction> Auctions { get; set; }
@@ -94,7 +96,6 @@ namespace OnlineAuction.Entities
                         UploadFile(filestream, connectName, blobContainerName);
                     }
                 }
-
             }
             //сохр. в БД дефолт. изобр. юзера и товара
             foreach (var filename in filenames)
