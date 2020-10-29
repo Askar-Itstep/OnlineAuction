@@ -2,15 +2,60 @@
     ViewBag.Title = "Home Page";
 }
 <script>
+     //-----установ. AWS - Azure--------------------
     $(function (e) {
-        var userId = sessionStorage.getItem("userId");
-        if (userId != null && userId != undefined) {
-            console.log(userId)
+        var myRoles = JSON.parse(sessionStorage.getItem("myRoles"))
+        console.log(typeof (myRoles))
+        console.log("roles: " + myRoles)
+        if (myRoles.includes("admin")) {
+            $('.row').hide()
+
+            $('.jumbotron').children().each(function (i, item) {
+                console.log(item)
+                if (i != 3) {
+                    console.log(item)
+                    $(item).hide()
+                }
+                else {
+                    $(item)
+                        .removeClass('hidden')
+                        .css('width', '300px')
+                }
+            })            
+            $('.jumbotron').prepend('<h2>Admin Panel</h2>')
         }
+    })
+//-----обработ. переключ. AWS - Azure--------------------
+    $(function () {
+        var key = 1;
+        var flag = true;
+        $('input[name=switchOption]').click(function (e) {
+            key *= -1;
+            flag = key < 0 ? false : true;
+            $(this).attr('checked', flag)
+            if (flag == true) {
+                $(this).val('Azur')
+            }
+            else {
+                $(this).val('AWS');
+            }
+            $.ajax({
+                url: "/Home/SwitchContainer",
+                method: "GET",
+                data: { nameContainer: $(this).val() },    //AWS - Azure
+                success: function (data) {
+                    alert("It's good!")
+                },
+                error: function (e, msg) {
+                    alert(msg)
+                }
+            })
+        })
     })
 </script>
 
 <div class="username">@ViewBag.UserName</div>
+
 <div class="jumbotron">
     <h1>ASP.NET</h1>
     <p class="lead">
@@ -19,6 +64,15 @@
         и элементов корзины.
     </p>
     <p><a href="https://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
+
+    <div class="list-group-item hidden" id="div-container">
+        AWS container
+        <div class="material-switch pull-right">
+            <input id="switchOptionContainer" name="switchOption" type="checkbox" checked="checked" />
+            <label for="switchOptionContainer" class="label-default"></label>
+            Azure container
+        </div>
+    </div>
 </div>
 
 <div class="row">

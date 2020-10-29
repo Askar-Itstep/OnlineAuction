@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataLayer.Entities
 {
+    public enum Gender { MEN, WOMEN, UNDEFINED}
     public class Account
     {
         [Key]
@@ -38,6 +39,8 @@ namespace DataLayer.Entities
 
         public bool IsActive  { get; set; }
         public decimal Balance { get; set; } = 0;
+
+        public Gender Gender { get; set; }
 
         //-------------методы Business Logic - можно удалить----------------------
         public void AddBalance(decimal value)

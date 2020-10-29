@@ -173,7 +173,7 @@ namespace OnlineAuction.Controllers
                 List<RoleBO> rolesBO = roleAccountBOList.Where(r => r.AccountId == accountBO.Id).Select(r => r.Role).ToList();
                 accountBO.RolesBO = rolesBO;
 
-                //связь котор. надо удалить или добавить-нет денег удал. роль клиента
+                //связь котор. надо удалить или добавить-нет денег удал. роль moder //клиента
                 RoleAccountLinkBO linkRoleClientAccount = roleAccountBOList.Where(r => r.Role.RoleName.Contains("moder")).FirstOrDefault();    //client
                 if (accountBO.Balance <= 0) { 
 
@@ -196,9 +196,10 @@ namespace OnlineAuction.Controllers
                     //далее accountId,  будут храниться в КЛИЕНТЕ   
                     var accountId = accountBO.Id;
                     var myURI = accountBO.Image.URI;
+                    IEnumerable<string> myRoles = rolesBO.Select(r => r.RoleName);
                     //2) сохр. в Session Server
                     HttpContext.Session["accountId"] = accountId;
-                    return new JsonResult { Data=new { success = true, message = "Wellcome!", accountId,  myURI} 
+                    return new JsonResult { Data=new { success = true, message = "Wellcome!", accountId,  myURI, myRoles} 
                                                                         , JsonRequestBehavior=JsonRequestBehavior.DenyGet };
                 }
                 else {
