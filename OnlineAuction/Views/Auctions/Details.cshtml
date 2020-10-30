@@ -1,4 +1,4 @@
-﻿@model DataLayer.Entities.Auction
+﻿@model OnlineAuction.ViewModels.AuctionVM
 
 @{
     ViewBag.Title = "Details";
@@ -72,7 +72,7 @@
             $('.redemption').html(parseFloat($('.curr_bet').html()) * 3.0)
         }
     })
-//------------------------------------ редактирование аукциона ------------------------------------------------------------------------------------
+//------------------------------------к редактированию аукциона ------------------------------------------------------------------------------------
     $(function () {
         $('a#editLink').click(function (e) {
             e.preventDefault();
@@ -105,10 +105,9 @@
             var nextBet = parseFloat($('.bet').html())
             var step = nextBet == 0 || isNaN(nextBet) ? (price / 10) : (nextBet - price)
 
-            var dateBegin = getDateTime(begin)[0]   // v.1 +
-            var timeBegin = getDateTime(begin)[1]   // v.2 => DateTime.ASP
+            var dateBegin = getDateTime(begin)[0]   // vol.1 -исп.в контролл. преобраз. в DateTime.ASP
+            var timeBegin = getDateTime(begin)[1]   // vol.2 -тоже
 
-            
             var duration = (dateEndFormatDatetimeJS - dateBeginFormatDatetimeJS) / (1000 * 3600);    //- только часы
 
             //пакет для редактир. (в методе Create!)=>AuctionEditVM!
@@ -116,6 +115,7 @@
                 id: parseInt($('.div-auction').html()),
                 title: $('.div-title').html(),
                 description: $('#description').html(),
+                productId: $('.div-prod-id').html(),
                 price: price,
                 step: step,
                 redemptionPrice: parseFloat($('.redemption').html()),
@@ -124,7 +124,7 @@
                 duration: duration,
                 imageId: parseInt($('.div-image-id').html())
             }
-            console.log(data)
+            console.log(data.productId)
             $.ajax({
                 method: "Get",
                 url: '@Url.Action("Create", "Auctions")',
@@ -205,6 +205,7 @@
             $(this).attr('href', '/Auctions/ChatAsync/?auctionId=' + auctionId)
         })
     })
+
 </script>
 
 <h2>Details</h2>
@@ -223,44 +224,19 @@
 
 <div style="display:flex">
     <div class="col-md-6">
-        @*@Html.Raw("<img  style='width: 100%',  src=\"data:image/jpeg;base64," + Convert.ToBase64String(Model.Product.Image.ImageData) + "\" />")*@
-        <img  style='width: 100%', src="@Model.Product.Image.URI"/>
-
-        <form class="clearfix" name="form1">
-            <input type="hidden" name="auctionId" value=@Model.Id>
-            <div class="col-md-3">
-                <h5><b>Текущая ставка</b></h5>
-                <div class="curr_bet">@ViewBag.TopBet.Bet</div>
-            </div>
-            <div class="col-md-4" style="margin-top:7px">
-                <h5 class="title" style="cursor: pointer;" title="Делайте ставку дамы и господа!"><b>Ставка</b></h5>
-                <input type="text" name="bet" id="bet" placeholder=@ViewBag.OfferNextBet class="form-control">
-            </div>
-            <div class="col-md-5" style="margin-top:41px">
-                <input type="submit" value="Сделать ставку" data-id="" id="bid-btn" class="btn btn-info">
-            </div>
-        </form>
-
-
-        <form class="clearfix" name="form2" style="margin-top:10px">
-            <input type="hidden" name="auctionId" value=@Model.Id>
-            @*<input type="hidden" name="item_id" value="">*@
-            <div class="col-md-4" style="margin-top:10px">
-                <h5><b>Цена “купить сейчас”</b></h5>
-                <div class="redemption">@Model.RedemptionPrice</div>
-            </div>
-            <div class="col-md-6" style="margin-top:35px">
-                <input type="button" value="Купить сейчас" id="buy-now-btn" class="btn btn-danger btn-lg">
-            </div>
-            <div class="col-md-2" style="margin-top:35px">
-                <button class="btn btn-success" type="submit" id="btn_add_to_cart">
-                    <i class="fa fa-cart-plus fa-2x" aria-hidden="true"></i>
-                </button>
-            </div>
-        </form>
-
-
+        <div class="big-slide">
+            <img style='width: 100%' , src="@Model.Product.Image.URI" id="current" />
+        </div>
+        <div class="list-img" style="display:flex">
+            @{
+                foreach (var image in @ViewBag.ListImg)
+                {
+                    <img src="@image.URI" />
+                }
+            }
+        </div>
     </div>
+
     <div class="col-md-6">
         <dl style="margin-left:40px">
             <dd id="actor_id">
@@ -292,6 +268,41 @@
         </dl>
 
         <a class="btn btn-success send-message" style="margin-left:40px" href="/Auctions/Chat">Отправить сообщение автору</a>
+
+        <div class="fa-border" style="margin-top:50px">
+            <form class="clearfix" name="form1">
+                <input type="hidden" name="auctionId" value=@Model.Id>
+                <div class="col-md-3">
+                    <h5><b>Текущая ставка</b></h5>
+                    <div class="curr_bet">@ViewBag.TopBet.Bet</div>
+                </div>
+                <div class="col-md-4" style="margin-top:7px">
+                    <h5 class="title" style="cursor: pointer;" title="Делайте ставку дамы и господа!"><b>Ставка</b></h5>
+                    <input type="text" name="bet" id="bet" placeholder=@ViewBag.OfferNextBet class="form-control">
+                </div>
+                <div class="col-md-5" style="margin-top:41px">
+                    <input type="submit" value="Сделать ставку" data-id="" id="bid-btn" class="btn btn-info">
+                </div>
+            </form>
+
+
+            <form class="clearfix" name="form2" style="margin-top:10px">
+                <input type="hidden" name="auctionId" value=@Model.Id>
+                <div class="col-md-4" style="margin-top:10px">
+                    <h5><b>Цена “купить сейчас”</b></h5>
+                    <div class="redemption">@Model.RedemptionPrice</div>
+                </div>
+                <div class="col-md-6" style="margin-top:35px">
+                    <input type="button" value="Купить сейчас" id="buy-now-btn" class="btn btn-danger btn-lg">
+                </div>
+                <div class="col-md-2" style="margin-top:35px">
+                    <button class="btn btn-success" type="submit" id="btn_add_to_cart">
+                        <i class="fa fa-cart-plus fa-2x" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
     </div>
 </div>
 
@@ -301,3 +312,5 @@
 
     @Html.ActionLink("Delete", "Delete", new { id = Model.Id }, new { @id = "deleteLink", @class = "hidden" })
 </p>
+
+<script src="~/Scripts/MyGalleryScript/myGalleyScript.js" type="text/javascript"></script>

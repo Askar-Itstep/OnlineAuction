@@ -26,6 +26,7 @@ namespace OnlineAuction
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/bootstrap.css",
                       "~/Content/font-awesome.min.css",
+                       "~/Content/myGalleryStyle.css",
                        "~/Content/myStyle.css",
                       "~/Content/site.css"));
             bundles.Add(new StyleBundle("~/bundles/jqueryui").Include(

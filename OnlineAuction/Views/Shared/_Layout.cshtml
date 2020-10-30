@@ -6,23 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewBag.Title – приложение ASP.NET</title>
     @Styles.Render("~/Content/css")
-    @Scripts.Render("~/bundles/modernizr")
-    @Scripts.Render("~/bundles/jquery")
     @Styles.Render("~/Content/themes/base/jquery.ui.datepicker.css")
     @Styles.Render("~/Content/themes/base/jquery.ui.theme.css")
+
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/jqueryui")
     @Scripts.Render("~/bundles/jqueryval")
     @Scripts.Render("~/bundles/signalr")
 
 
     @using OnlineAuction.ViewModels
-
     @{
         //необх. для AddBalancePartialView
         AccountVM account = new AccountVM();
 
     }
-
 </head>
 <body>
     <script> 
@@ -45,10 +44,10 @@
             }
             
             var data = sessionStorage.getItem("myURI");
-
+            //установ. изображ.
             if (data != null && data != undefined) {
                 var img = document.createElement("img");
-                $(img).css({ 'width': '40px', 'height': '40px' });
+                $(img).css({ 'width': '50px', 'height': '50px' });
                 $(img).attr('src', data);
                 $('.divImg').append(img);
             }

@@ -1,16 +1,31 @@
-﻿/*.ui-datepicker-next, .ui-datepicker-prev {
+﻿/*Index, Details.html*/
+
+div#box-auction {
+    position: relative;
+}
+
+#sidebar {
+    z-index: 50;
+    position: absolute;
+    top: -35px;
+    left: -100px;
+}
+#box-auction{
+    margin-top:40px;
+    padding-right:0px;
+}
+.main-card{
+    height:90%;
+}
+/*----------------datepicker----------------------*/
+/*.ui-datepicker-next, .ui-datepicker-prev {
             display: none;
         }*/
 .ui-datepicker .ui-datepicker-prev span, .ui-datepicker .ui-datepicker-next span {
     color: transparent;
 }
 
-
-
-
-
-
-
+/*---------стили для галлереи изобр.---------------------*/
 
 .material-switch > input[type="checkbox"] {
     display: none;

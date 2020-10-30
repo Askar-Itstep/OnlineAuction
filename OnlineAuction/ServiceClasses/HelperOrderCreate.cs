@@ -45,9 +45,9 @@ namespace OnlineAuction.ServiceClasses
                 q => q.Order.Id,
                 (os, qs) => new
                 {
-                    os.Id,
-                    os.Client,
-                    os.IsApproved,
+                   Id = os.Id,
+                   Client = os.Client,
+                   IsApproved = os.IsApproved,
                     OrderAuctions = qs.Select(q => new
                     {
                         AuctionId = q.Id,
@@ -58,19 +58,23 @@ namespace OnlineAuction.ServiceClasses
                 });
 
             #region example res
-            //foreach (var r in res) {
-            //    System.Diagnostics.Debug.WriteLine($"OrderID: {r.Id}");
-            //    System.Diagnostics.Debug.WriteLine($"Client: {r.Client.Account.FullName}");
-            //    foreach (var auct in r.OrderAuctions) {
-            //        System.Diagnostics.Debug.WriteLine($"AuctionID: {auct.AuctionId}");
-            //        foreach (var item in auct.Order.Items) {
-            //            System.Diagnostics.Debug.WriteLine($"Product: {item.Product.Title}");
-            //        }
-            //    }
-            //}
+            ////System.Diagnostics.Debug.WriteLine($"Server:");
+            ////foreach (var r in res)
+            ////{
+            ////    System.Diagnostics.Debug.WriteLine($"OrderID: {r.Id}");
+            ////    System.Diagnostics.Debug.WriteLine($"Client: {r.Client.Account.FullName}");
+            ////    foreach (var auct in r.OrderAuctions)
+            ////    {
+            ////        System.Diagnostics.Debug.WriteLine($"AuctionID: {auct.AuctionId}");
+            ////        foreach (var item in auct.Order.Items)
+            ////        {
+            ////            System.Diagnostics.Debug.WriteLine($"Product: {item.Product.Title}");
+            ////        }
+            ////    }
+            ////}
             #endregion
 
-            //----------теперь получить синтетик ----------
+            //----------теперь получить синтетик - полн. карта списка заказов  ----------
             IEnumerable<OrderFullMapVM> syntetic = res.Select(r => new OrderFullMapVM
             {
                 Id = (int)r.Id,
@@ -81,15 +85,20 @@ namespace OnlineAuction.ServiceClasses
                 Products = r.OrderAuctions.Select(oa => mapper.Map<ProductVM>(oa.Product))
             });
 
-            #region find Null Syntetic 
+            #region Syntetic.Products isEmpty?
             //IEnumerable<OrderFullMapVM> syntetic2 = new List<OrderFullMapVM>();
-            //foreach (var order in res) {
+            //foreach (var order in res)
+            //{
             //    var orderMap = new OrderFullMapVM();
-            //    orderMap.OrderId = (int)order.Id;
+            //    orderMap.Id = (int)order.Id;
             //    orderMap.Client = mapper.Map<ClientVM>(order.Client);
             //    orderMap.IsApproved = order.IsApproved;
-            //    foreach (var auct in order.OrderAuctions) {
-            //        orderMap.AuctionIds.ToList().Add(auct.AuctionId);
+            //    orderMap.AuctionIds = new List<int>();
+            //    orderMap.EndTimes = new List<DateTime>();
+            //    orderMap.Products = new List<ProductVM>();
+            //    foreach (var auct in order.OrderAuctions)
+            //    {
+            //        orderMap.AuctionIds.Add(auct.AuctionId);
             //        orderMap.EndTimes.ToList().Add(auct.EndTime);
             //        orderMap.Products.ToList().Add(mapper.Map<ProductVM>(auct.Product));
             //    }

@@ -113,7 +113,7 @@
                             <td class="hidden product-id" data-i=@i data-j=@m>@product.Id</td>
                             <td class="col-lg-1">@Html.DisplayFor(modelItem => product.Title)</td>
                             <td class="col-lg-2">
-                                <img style='width: 100%' , src="@product.Image.URI" />
+                                <img style='width: 200px' , src="@product.Image.URI" />
                             </td>
                             <td>
                                 @if (User.IsInRole("admin"))

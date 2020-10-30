@@ -26,6 +26,9 @@ namespace DataLayer.Repository
         private BaseRepository<Role> roles;
         private BaseRepository<RoleAccountLink> roleAccountLinks;
         private BaseRepository<UserHub> userHubs;
+        private BaseRepository<ImageProductLink> imageProductLinks;
+        public BaseRepository<Category> categories;
+
         private Model1 db;
         
 
@@ -167,6 +170,24 @@ namespace DataLayer.Repository
                 if (userHubs == null)
                     userHubs = new BaseRepository<UserHub>();
                 return userHubs;
+            }
+        }
+        public BaseRepository<ImageProductLink> ImageProductLinks
+        {
+            get
+            {
+                if (imageProductLinks == null)
+                    imageProductLinks = new BaseRepository<ImageProductLink>();
+                return imageProductLinks;
+            }
+        }
+        public BaseRepository<Category> Categories
+        {
+            get
+            {
+                if (categories == null)
+                    categories = new BaseRepository<Category>();
+                return categories;
             }
         }
     }
