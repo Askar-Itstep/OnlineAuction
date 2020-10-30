@@ -1,5 +1,4 @@
-﻿@*@model IEnumerable<DataLayer.Entities.Auction>*@
-@model IEnumerable<OnlineAuction.ViewModels.AuctionVM>
+﻿@model IEnumerable<OnlineAuction.ViewModels.AuctionVM>
 
 @{
     ViewBag.Title = "Аукционы";
@@ -13,8 +12,8 @@
                 e.preventDefault()
                 e.stopPropagation()
                 $(this).css({
-                    'max-width': '202px',
-                    'max-height': '302px',
+                    'max-width': '192px',
+                    'max-height': '252px',
                     'width': '+=2px',
                     'height': '+=2px',
                     'box-shadow': '10px 4px 10px 3px #888'
@@ -22,8 +21,8 @@
             })
             .mouseout(function (e) {
                 $(this).css({
-                    'min-width': '200px',
-                    'min-height': '300px',
+                    'min-width': '190px',
+                    'min-height': '250px',
                     'width': '-=2px',
                     'height': '-=2px',
                     'box-shadow': '0px 0px 0px 0px '
@@ -94,25 +93,39 @@
             $(location).attr('href', '/Auctions/Details/?auctionId=' + @ViewBag.BestAuction.Id);
         })
     });
+
+    //----------------фильтр по категориям----------------
+    $(function () {
+        $('#sidebar').click((e) => {
+            var category = $(e.target).val();
+            $.get({ url: "/Auctions/Index?category=" + category, async: false })
+        })
+    })
 </script>
 
 <h2>@ViewBag.Title</h2>
 <div class="hidden my-alert">@ViewBag.Alert</div>
+
+
 @{
-    <div class="jumbotron  alert-info  container-fluid main-card">
-        <h3>Главный экспонат</h3>
+    <div class="jumbotron  alert-info  container-fluid main-card" >
+
         <div class="col-md-5">
-            @*@Html.Raw("<img  style='width: 300px',  src=\"data:image/jpeg;base64," + Convert.ToBase64String(ViewBag.BestAuction.Product.Image.ImageData) + "\" />")*@
-            <img style='width: 300px',  src="@ViewBag.BestAuction.Product.Image.URI"/>
+            <h3>Главный экспонат</h3>
+            <img style='width: 300px' , src="@ViewBag.BestAuction.Product.Image.URI" />
         </div>
         <div class="hidden auctionId">
             ViewBag.BestAuction.Id
         </div>
-        <div class="col-md-5">
+        <div class="col-md-5" style="margin-top:55px">
             <table class="table">
                 <tr>
                     <th><h4>Title</h4></th>
                     <td><h4>@ViewBag.BestAuction.Product.Title</h4></td>
+                </tr>
+                <tr>
+                    <th><h4>Title</h4></th>
+                    <td><h4>@ViewBag.BestAuction.Description</h4></td>
                 </tr>
                 <tr>
                     <th><h4>Price</h4></th>
@@ -122,32 +135,51 @@
         </div>
     </div>
 
-    if (Model.Count() != 0) {
-        <div class="jumbotron  alert-success container-fluid">
 
-            @foreach (var auction in Model.ToList()) {
-                var product = auction.Product;
-                <div class="card table-bordered col-md-4" style="height:300px; width: 200px; margin:10px; padding-left:0px">
-                    <div class="hidden auctionId">@auction.Id</div>
-                    @*@Html.Raw("<img  style='width: 90%; height: 130px',  src=\"data:image/jpeg;base64," + Convert.ToBase64String(product.Image.ImageData) + "\" />")*@
-                    <img  style='width: 90%; height: 130px', src="@auction.Product.Image.URI"/>
-                    <table class="table">
-                        <tr>
-                            <th>Title</th>
-                            <td>@product.Title</td>
-                        </tr>
-                        <tr>
-                            <th>Price</th>
-                            <td>@product.Price</td>
-                        </tr>
-                    </table>
-                </div>
-                <div style="width: 10px"></div>
+    
+    if (Model != null && Model.Count() != 0)
+    {
+    <div class="jumbotron  alert-success container-fluid" id="box-auction">
+
+        <div id="sidebar" class="">
+            @{
+                if (ViewBag.Categories != null)
+                {
+                    <div class="form-group category-id">
+                        @Html.Label("Фильтр по категориям", htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8">
+                            @Html.DropDownList("CategoryId", ViewBag.Categories as SelectList)
+                            @Html.ValidationMessage("Duration", "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                }
             }
         </div>
 
+        @foreach (var auction in Model.ToList())
+        {
+            var product = auction.Product;
+            <div class="card table-bordered col-md-4" style="height:250px; width: 190px; margin:10px;">
+                <div class="hidden auctionId">@auction.Id</div>
+                <img style='width: 90%; height: 130px' , src="@auction.Product.Image.URI" />
+                <table class="table">
+                    <tr>
+                        <th>Title</th>
+                        <td>@product.Title</td>
+                    </tr>
+                    <tr>
+                        <th>Price</th>
+                        <td>@product.Price</td>
+                    </tr>
+                </table>
+            </div>
+            <div style="width: 10px"></div>
+        }
+    </div>
+
     }
-    else {
+    else
+    {
         <div>
             <h4>Желаете выставить товар? Тогда нажмите "Создать аукцион"</h4>
             <p>Как видно из яндекс-диска загрузка медленее!))</p>
