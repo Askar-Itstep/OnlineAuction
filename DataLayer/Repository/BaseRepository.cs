@@ -1,4 +1,5 @@
 ﻿using OnlineAuction.Entities;
+using System;
 using System.Data.Entity;
 using System.Data.Entity.Validation;
 using System.Linq;
@@ -9,15 +10,16 @@ namespace DataLayer.Repository
     {
         private Model1 db;
         private DbSet<T> dbSet;
+        private Model2 db2;
         public BaseRepository()
         {
-            db = new Model1();
+            db = new Model1();  //Azure
             dbSet = db.Set<T>();
         }
-        public BaseRepository(Model1 db)
+        public BaseRepository(Model2 db2)    //AWS
         {
-            this.db = db;
-            dbSet = db.Set<T>();
+            this.db2 = db2;
+            dbSet = db2.Set<T>();
         }
         public void Create(T item)
         {
@@ -37,7 +39,8 @@ namespace DataLayer.Repository
 
         public T GetById(int? id)
         {
-            if (id == null) {
+            if (id == null)
+            {
                 return null;
             }
 
@@ -50,7 +53,8 @@ namespace DataLayer.Repository
         public IQueryable<T> Include(params string[] navigationProperty)
         {
             var query = GetAll();
-            foreach (var item in navigationProperty) {
+            foreach (var item in navigationProperty)
+            {
                 query.Include(item);
             }
 
@@ -59,14 +63,18 @@ namespace DataLayer.Repository
 
         public void Save()
         {
-            try {
+            try
+            {
                 db.SaveChanges();
             }
-            catch (DbEntityValidationException ex) {
-                foreach (DbEntityValidationResult validationError in ex.EntityValidationErrors) {
+            catch (DbEntityValidationException ex)
+            {
+                foreach (DbEntityValidationResult validationError in ex.EntityValidationErrors)
+                {
                     System.Diagnostics.Debug.WriteLine("Object: " + validationError.Entry.Entity.ToString());
 
-                    foreach (DbValidationError err in validationError.ValidationErrors) {
+                    foreach (DbValidationError err in validationError.ValidationErrors)
+                    {
                         System.Diagnostics.Debug.WriteLine(err.ErrorMessage + "");
                     }
                 }
@@ -75,7 +83,15 @@ namespace DataLayer.Repository
 
         public void Update(T item)
         {
-            dbSet.Attach(item);
+            try
+            {
+                dbSet.Attach(item);
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine("Error: ", e.Message);
+            }
+
             db.Entry(item).State = EntityState.Modified;
         }
 

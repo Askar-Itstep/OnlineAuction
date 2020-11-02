@@ -1,6 +1,8 @@
 ﻿@model OnlineAuction.ViewModels.AuctionVM
 
 @{
+    /**/
+
     ViewBag.Title = "Details";
     ViewBag.OfferNextBet = ViewBag.TopBet.Bet + Model.Step;
 }
@@ -10,9 +12,9 @@
     $(function () {
         $('footer').css("clear", "both")
     })
-    //===================================================<Сделать ставку>========================================================
+    //===================================================Сделать ставку========================================================
     $(function () {
-    //1) Проверить ставку-----------------------
+        //1) Проверить ставку-----------------------
         function checkBet(currBet, yourBet) {
             if (yourBet == null || yourBet == undefined || yourBet == "") {
                 alert("Ставка не может быть null!");
@@ -25,17 +27,18 @@
             return true;
         }
 
-    //2)------Ajax------------
+        //2)------Ajax------------
         var myForm1 = document.form1;
         $(myForm1).submit(function (e) {
             e.preventDefault();
+
             //провер. свой аукцион или нет (запрет автоучастия, кроме 1-ой ставки)
-            if (parseInt(@ViewBag.Client.Id) == parseInt(@Model.ActorId)) {
+            if (parseInt($('.div-client')) == parseInt(@Model.ActorId)) {
                 alert("Организатор аукциона не может быть его участником!")
                 return;
             }
 
-             //ajax-----------------------------
+            //ajax-----------------------------
             var currBet = parseFloat($('div.curr_bet').html())
             var yourBet = parseFloat($('input#bet').val())
 
@@ -65,19 +68,20 @@
                 }
             })
         })
-    });
-    //---------коррекц. знач. выкупн цены если в БД установ. 0
+    })
+            //---------коррекц. знач. выкупн цены если в БД установ. 0
     $(function () {
         if (parseFloat($('div.redemption').html()) == 0) {
             $('.redemption').html(parseFloat($('.curr_bet').html()) * 3.0)
         }
     })
-//------------------------------------к редактированию аукциона ------------------------------------------------------------------------------------
+ //-------------------------к редактированию аукциона -----------------------------------------------------
     $(function () {
         $('a#editLink').click(function (e) {
             e.preventDefault();
             //1)проверка: право на редактир.
-            if (parseInt(@ViewBag.Client.Id) != parseInt(@Model.ActorId)) {
+
+            if (parseInt($('.div-client')) == parseInt(@Model.ActorId)) {
                 alert("У вас нет прав для редактирования!")
                 return;
             }
@@ -97,8 +101,8 @@
                 return;
             }
             if (date > dateEndFormatDatetimeJS) {
-                 alert("Аукцион уже завершен. Изменение не возможно!")
-                 return;
+                alert("Аукцион уже завершен. Изменение не возможно!")
+                return;
             }
             //3) надо не просто перейти, но еще и передать все знач. и имена значим. полей
             var price = parseFloat($('.div-price').html())
@@ -131,9 +135,9 @@
                 accept: 'application/json',
                 data: data,
                 success: function (data) {
-                    console.log(data)
-                    alert(data)
-                    $(location).attr('href', "/Auctions/Create")
+                    alert(data.alert)
+                    if (data.success == true)
+                        $(location).attr('href', "/Auctions/Create")
                 },
                 error: function (e, msg) {
                     console.log(msg)
@@ -141,16 +145,18 @@
                 }
             })
         })
-    });
+    })
 
-  //============================================== Покупки ==================================================
+            //============================================== Покупки ==================================================
     $(function () {
-        //а)  Обработ. <Купить сейчас> - т.е. перейти к оплате немедленно
+        //а)  Обработ. <Купить сейчас>
+        //- т.е. перейти к оплате немедленно
         //(цена = RedemptionPrice, аукцион - закрыв., опред.Победитель, победителю отправл.письмо со ссылкой на стр.оформ.Заказа)
         $('#buy-now-btn').click(function (e) {
             AddToCart(true);
         });
-        //б) положить в Корзину т.е. начать оформление Заказа, но не ставить отметку <isAproved>---------------------------------
+        //б) положить в Корзину т.е. начать оформление Заказа, но не ставить отметку <isAproved>
+        //---------------------------------
         //сохр. его в сессии и добавл. в Корзмнц нов. продукты
         $('#btn_add_to_cart').click(function (e) {
             AddToCart(false);
@@ -211,8 +217,6 @@
 <h2>Details</h2>
 <h4>Auction</h4>
 <hr />
-<div class="hidden div-client">@ViewBag.Client.Id</div>
-<div class="hidden div-account">@ViewBag.Client.AccountId</div>
 <div class="hidden div-auction">@Model.Id</div>
 <div class="hidden div-prod-id">@Model.Product.Id</div>
 <div class="hidden div-price">@Model.Product.Price</div>
@@ -221,7 +225,14 @@
 <div class="hidden div-begin-time">@Model.BeginTime</div>
 <div class="hidden div-end-time">@Model.EndTime</div>
 <div class=" div-img">@ViewBag.editImg</div>
+@{
+    if (@ViewBag.Client != null)
+    {
+        <div class=" div-client">@ViewBag.Client.Id</div>
+        <div class="hidden div-account">@ViewBag.Client.AccountId</div>
 
+    }
+}
 <div style="display:flex">
     <div class="col-md-6">
         <div class="big-slide">

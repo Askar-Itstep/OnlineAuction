@@ -1,10 +1,6 @@
-﻿using DataLayer.Entities;
-using OnlineAuction.Entities;
+﻿using OnlineAuction.Entities;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web.Security;
 
 namespace DataLayer.Providers
@@ -42,10 +38,14 @@ namespace DataLayer.Providers
         {
             string[] roles = new string[] { };
             if (username.Contains('@'))
+            {
                 username = username.Split('@')[0];
-            using (Model1 db = new Model1()) {
+            }
+
+            using (Model1 db = new Model1())
+            {
                 var userRoles = db.RoleAccountLinks.Include("Role").Include("Account").Where(u => u.Account.Email.Contains(username)).
-                    Select(u=>u.Role.RoleName).ToList();
+                    Select(u => u.Role.RoleName).ToList();
                 return userRoles.ToArray();
             }
         }
@@ -57,14 +57,19 @@ namespace DataLayer.Providers
 
         public override bool IsUserInRole(string username, string roleName)
         {
-            using (Model1 db = new Model1()) {
+            using (Model1 db = new Model1())
+            {
                 // Получаем пользователя          
                 var userRoles = db.RoleAccountLinks.Include("Role").Include("Account")
-                    .Where(u => u.Account.FullName == username).Where(u=>u.Role.RoleName == roleName).ToList();
+                    .Where(u => u.Account.FullName == username).Where(u => u.Role.RoleName == roleName).ToList();
                 if (userRoles != null)
+                {
                     return true;
+                }
                 else
+                {
                     return false;
+                }
             }
         }
 

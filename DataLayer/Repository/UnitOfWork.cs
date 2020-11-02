@@ -1,10 +1,5 @@
 ﻿using DataLayer.Entities;
 using OnlineAuction.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataLayer.Repository
 {
@@ -30,18 +25,26 @@ namespace DataLayer.Repository
         public BaseRepository<Category> categories;
 
         private Model1 db;
-        
+        private Model2 db2;
 
         public UnitOfWork()
         {
             db = new Model1();
+            db2 = new Model2();
         }
         public BaseRepository<Account> Accounts
         {
             get
             {
                 if (accounts == null)
+                {
                     accounts = new BaseRepository<Account>();
+                }
+
+                if (accounts is null)
+                {
+                    accounts = new BaseRepository<Account>();
+                }
                 return accounts;
             }
         }
@@ -51,7 +54,10 @@ namespace DataLayer.Repository
             get
             {
                 if (auctions == null)
+                {
                     auctions = new BaseRepository<Auction>();
+                }
+
                 return auctions;
             }
         }
@@ -60,7 +66,10 @@ namespace DataLayer.Repository
             get
             {
                 if (addresses == null)
+                {
                     addresses = new BaseRepository<Address>();
+                }
+
                 return addresses;
             }
         }
@@ -69,7 +78,10 @@ namespace DataLayer.Repository
             get
             {
                 if (auctionClientsLinks == null)
+                {
                     auctionClientsLinks = new BaseRepository<AuctionClientsLink>();
+                }
+
                 return auctionClientsLinks;
             }
         }
@@ -80,7 +92,10 @@ namespace DataLayer.Repository
             get
             {
                 if (betAuctions == null)
-                    betAuctions = new BaseRepository<BetAuction > ();
+                {
+                    betAuctions = new BaseRepository<BetAuction>();
+                }
+
                 return betAuctions;
             }
         }
@@ -90,7 +105,10 @@ namespace DataLayer.Repository
             get
             {
                 if (clients == null)
+                {
                     clients = new BaseRepository<Client>();
+                }
+
                 return clients;
             }
         }
@@ -100,7 +118,10 @@ namespace DataLayer.Repository
             get
             {
                 if (images == null)
+                {
                     images = new BaseRepository<Image>();
+                }
+
                 return images;
             }
         }
@@ -110,7 +131,10 @@ namespace DataLayer.Repository
             get
             {
                 if (items == null)
+                {
                     items = new BaseRepository<Item>();
+                }
+
                 return items;
             }
         }
@@ -120,7 +144,10 @@ namespace DataLayer.Repository
             get
             {
                 if (messages == null)
+                {
                     messages = new BaseRepository<Message>();
+                }
+
                 return messages;
             }
         }
@@ -130,7 +157,10 @@ namespace DataLayer.Repository
             get
             {
                 if (orders == null)
+                {
                     orders = new BaseRepository<Order>();
+                }
+
                 return orders;
             }
         }
@@ -140,7 +170,10 @@ namespace DataLayer.Repository
             get
             {
                 if (products == null)
+                {
                     products = new BaseRepository<Product>();
+                }
+
                 return products;
             }
         }
@@ -149,26 +182,36 @@ namespace DataLayer.Repository
             get
             {
                 if (roles == null)
+                {
                     roles = new BaseRepository<Role>();
+                }
+
                 return roles;
             }
         }
 
-        public BaseRepository<RoleAccountLink> RoleAccountLinks {
+        public BaseRepository<RoleAccountLink> RoleAccountLinks
+        {
             get
             {
                 if (roleAccountLinks == null)
+                {
                     roleAccountLinks = new BaseRepository<RoleAccountLink>();
+                }
+
                 return roleAccountLinks;
             }
         }
-        
+
         public BaseRepository<UserHub> UserHubs
         {
             get
             {
                 if (userHubs == null)
+                {
                     userHubs = new BaseRepository<UserHub>();
+                }
+
                 return userHubs;
             }
         }
@@ -177,7 +220,10 @@ namespace DataLayer.Repository
             get
             {
                 if (imageProductLinks == null)
+                {
                     imageProductLinks = new BaseRepository<ImageProductLink>();
+                }
+
                 return imageProductLinks;
             }
         }
@@ -186,7 +232,10 @@ namespace DataLayer.Repository
             get
             {
                 if (categories == null)
+                {
                     categories = new BaseRepository<Category>();
+                }
+
                 return categories;
             }
         }

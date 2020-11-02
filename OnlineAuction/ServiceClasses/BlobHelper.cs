@@ -71,17 +71,6 @@ namespace OnlineAuction.ServiceClasses
             }
         }
 
-        public static List<string> DowloadUriBackground()
-        {
-            string storageKey = ConfigurationManager.ConnectionStrings["blobBoxBackground"].ConnectionString;
-            CloudStorageAccount cloud = CloudStorageAccount.Parse(storageKey);
-            CloudBlobClient blobClient = cloud.CreateCloudBlobClient();
-            CloudBlobContainer container = blobClient.GetContainerReference("backgrounds");
-            container.SetPermissions(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Blob });
-            List<string> uriList = new List<string>();
 
-            var res = container.ListBlobs().Where(b => b.GetType() == typeof(CloudBlockBlob)).Select(b => b.Uri.ToString());
-            return res.ToList();
-        }
     }
 }

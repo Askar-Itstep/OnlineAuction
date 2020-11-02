@@ -104,13 +104,19 @@ namespace OnlineAuction.Entities
                 Image image = new Image { FileName = filename, URI = uriStr };
                 context.Images.Add(image);
             }
-           
+
             //3)Account
             Address address = new Address { Region = "Akmola", City = "Nur-Sultan", Street = "Imanova", House = "22" };
-            var defaultImageUser = context.Images.FirstOrDefaultAsync(i=>i.FileName.Contains("men"));
-            Account account = new Account { FullName = "admin", Email = "admin@mail.ru", Password = "admin", Address = address, ImageId=defaultImageUser.Id };
+            context.Addresses.Add(address);
+
+            var defaultImageUser = context.Images.FirstOrDefaultAsync(i => i.FileName.Contains("men"));
+
+            Account account = new Account { FullName = "admin", Email = "admin@mail.ru", Password = "admin", Address = address, ImageId = defaultImageUser.Id };
             context.Account.Add(account);
 
+            //4)Categories
+            List<Category> categories = new List<Category> { new Category { Title = "electronic" }, new Category { Title = "book" }, new Category { Title = "DVD" }, new Category { Title = "Digital product" } };
+            context.Categories.AddRange(categories);
 
             context.SaveChanges();
             base.Seed(context);

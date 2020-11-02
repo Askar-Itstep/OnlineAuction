@@ -35,8 +35,9 @@ namespace OnlineAuction.Controllers
             //2)
             //получить заказы с датами (только по связям с item, Product, Auction)
             HelperOrderCreate.mapper = mapper;
-            IEnumerable<OrderFullMapVM> syntetic = HelperOrderCreate.GetSynteticVM(orders);
-
+            IEnumerable<OrderFullMapVM> syntetic = HelperOrderCreate.GetSynteticVM(orders.FindAll(o => o.IsApproved)); //оплач.
+            IEnumerable<OrderFullMapVM> synteticBad = HelperOrderCreate.GetSynteticVM(orders.FindAll(o=>!o.IsApproved));  //не оплач. заказы
+            ViewBag.BadOrders = synteticBad;
             return View(syntetic);
         }
 
