@@ -96,14 +96,13 @@ namespace OnlineAuction.ServiceClasses
         {
             if (businessObject is AuctionBO auctionBO)
             {
+                //Auction----------
                 editVM = (AuctionEditVM)editVM;
-
                 var editBO = mapper.Map<AuctionBO>(editVM); //1)из формы    
-                EditEntity(auctionBO, editBO, 0);   //-> listTypes[0]   //
-                                                    //2)Product-----------------
+                EditEntity(auctionBO, editBO, 0);   //)Product--> listTypes[0]   
+
+                //Product------------
                 ProductBO productBO = DependencyResolver.Current.GetService<ProductBO>();
-                //--------надо менять - не по названию!--либо добав. в Product ссылку на Auction либо наоборот------------
-                //productBO = productBO.LoadAll().FirstOrDefault(p => p.Title == ((AuctionEditVM)editVM).Title);
                 productBO = productBO.Load(editBO.ProductId);
                 ProductBO productEdit = mapper.Map<ProductBO>(editVM);
                 EditEntity(productBO, productEdit, 1);
@@ -163,6 +162,7 @@ namespace OnlineAuction.ServiceClasses
 
         private static List<string> simpleList = new List<string>() { "int32", "nullable", "decimal", "float", "string", "byte[]", "double", "bool", "Uri" };
 
+        //key - ключ соотв. из listTypes
         private static void EditEntity(BaseBusinessObject modelBO, BaseBusinessObject editBO, int key)
         {
             foreach (PropertyInfo prop in listTypes[key].GetProperties())
@@ -173,7 +173,6 @@ namespace OnlineAuction.ServiceClasses
                     { //выбрать простые типы
                         if (simpleList.Where(s => prop.PropertyType.Name.ToLower().Contains(s)).Count() != 0)
                         {
-
                             if (prop.PropertyType.Name.ToLower() == "string" && prop.GetValue(editBO) != "")
                             {
                                 System.Diagnostics.Debug.WriteLine(prop.Name + ": " + prop.GetValue(editBO));
@@ -206,6 +205,7 @@ namespace OnlineAuction.ServiceClasses
                             }
                         }
                     }
+                    //+Datetime, Timespan
                     if (prop.PropertyType.Name.Contains("DateTime") || prop.PropertyType.Name.Contains("TimeSpan"))
                     {
                         prop.SetValue(modelBO, prop.GetValue(editBO));
@@ -216,9 +216,7 @@ namespace OnlineAuction.ServiceClasses
                 {
                     System.Diagnostics.Debug.WriteLine(e.Message);
                 }
-                //}
             }
-
         }
     }
 }

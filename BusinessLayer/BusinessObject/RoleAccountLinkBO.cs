@@ -1,22 +1,19 @@
 ﻿using AutoMapper;
 using DataLayer.Entities;
 using DataLayer.Repository;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Unity;
 
 namespace BusinessLayer.BusinessObject
 {
-    public class RoleAccountLinkBO: BaseBusinessObject
+    public class RoleAccountLinkBO : BaseBusinessObject
     {
         public int Id { get; set; }
-        
+
         public int RoleId { get; set; }
         public virtual RoleBO Role { get; set; }
-        
+
         public int AccountId { get; set; }
         public virtual AccountBO Account { get; set; }
 
@@ -29,8 +26,8 @@ namespace BusinessLayer.BusinessObject
         }
         public IEnumerable<RoleAccountLinkBO> LoadAll()  //из DataObj в BusinessObj
         {
-            var accounts = unitOfWork.RoleAccountLinks.GetAll().ToList();
-            var res = accounts.AsEnumerable().Select(a => mapper.Map<RoleAccountLinkBO>(a)).ToList();
+            var roleAccounts = unitOfWork.RoleAccountLinks.GetAll().ToList();
+            var res = roleAccounts.AsEnumerable().Select(a => mapper.Map<RoleAccountLinkBO>(a)).ToList();
             return res;
         }
         public IEnumerable<RoleAccountLinkBO> LoadAllNoTracking()  //из DataObj в BusinessObj
@@ -53,10 +50,12 @@ namespace BusinessLayer.BusinessObject
         public void Save(RoleAccountLinkBO roleAccountLinkBO)
         {
             var roleAccountLink = mapper.Map<RoleAccountLink>(roleAccountLinkBO);
-            if (roleAccountLink.Id == 0) {
+            if (roleAccountLink.Id == 0)
+            {
                 Add(roleAccountLink);
             }
-            else {
+            else
+            {
                 Update(roleAccountLink);
             }
             unitOfWork.RoleAccountLinks.Save();

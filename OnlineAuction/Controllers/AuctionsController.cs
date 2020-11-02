@@ -24,45 +24,56 @@ namespace OnlineAuction.Controllers
             this.mapper = mapper;
         }
 
-        //alert - из методов Auctions/Create(), Orders/Confirm()..
         //isActor - только из _Layout.html (опред. по клику "мои аукц.")
-        public ActionResult Index(int? isActor, int? category, string alert = null)
+        //CategoryId - параметр из формы для фильтр.
+        public ActionResult Index(int? isActor, int? CategoryId, string alert = null)
         {
-            var accountId = Session["accountId"] ?? 0; //надо обязат. выйти из аккаунта
-            var auctionBO = DependencyResolver.Current.GetService<AuctionBO>();
-            List<AuctionBO> auctionsBO = auctionBO.LoadAll().Where(a => a.IsActive).ToList();
-            var prodBO = DependencyResolver.Current.GetService<ProductBO>();
-            List<ProductBO> productsBO = prodBO.LoadAll().ToList();
-            decimal maxPrice = productsBO.Max(p => p.Price);
-
-            //------могут быть 2 вида запроса: все аукционы; мои аукционы (актор)- при этом попытка не-клиента должна пресек---------
             ViewBag.Alert = "";
             if (alert != null && alert != "")
             {
-                ViewBag.Alert = alert;
+                ViewBag.Alert = alert;  //alert - из методов Auctions/Create(), Orders/Confirm()..
+            }
+            var auctionBO = DependencyResolver.Current.GetService<AuctionBO>();
+
+            //------могут быть 2 вида запроса: все аукционы; мои аукционы (актор)----------  
+            var accountId = Session["accountId"] ?? 0; //re-sign!
+            var isAdmin = Session["isAdmin"] ?? false;
+            List<AuctionBO> auctionsBO = auctionBO.LoadAll().ToList();
+            if (isAdmin != null)
+            {
+                var activeAuctions = auctionsBO.Where(a => a.IsActive);
             }
             var auctionsVM = auctionsBO.Select(a => mapper.Map<AuctionVM>(a)).ToList();
+            //т.е. для "мои аукционы"
             if (accountId != null && (int)accountId != 0 && isActor != null)
-            {    //т.е. для "мои аукционы"
+            {   
                 auctionsVM = auctionsVM.Where(a => a.Actor.AccountId == (int)accountId).ToList();
             }
             //--------на главн. разворот -------------------------
+            ViewBag.BestAuction = 0;
+
+            var prodBO = DependencyResolver.Current.GetService<ProductBO>();
+            List<ProductBO> productsBO = prodBO.LoadAll().ToList();
+            decimal maxPrice = productsBO.Max(p => p.Price);
             var bestAuctionBO = auctionsBO.Where(a => a.Product.Price >= maxPrice).FirstOrDefault();
             var bestAuctionVM = mapper.Map<AuctionVM>(bestAuctionBO);
             ViewBag.BestAuction = bestAuctionVM;
-
             //------изъять глав аукц. из общего списка 
             var selectBest = auctionsVM.FirstOrDefault(a => a.Id == bestAuctionVM.Id);
             auctionsVM.Remove(selectBest);
-            //-----Categories-------------
+
+            //--------- --Categories-------------
             var categoriesBO = DependencyResolver.Current.GetService<CategoryBO>().LoadAll();
-            var categoriesVM = categoriesBO.Select(c => mapper.Map<CategoryVM>(c));
-            var emptyCategory = new CategoryVM { Id = 1000, Title = "All" };
-            categoriesVM.ToList().Add(emptyCategory);
+            var categoriesVM = categoriesBO.Select(c => mapper.Map<CategoryVM>(c)).ToList();
+            var emptyCategory = new CategoryVM { Id = 0, Title = "All" };
+            categoriesVM.Add(emptyCategory);
             ViewBag.Categories = new SelectList(categoriesVM, "Id", "Title");
-            if(category != null)
+            if (CategoryId != null)
             {
-                auctionsVM = auctionsVM.Where(a => a.Product.CategoryId == category).ToList();
+                if (CategoryId != 0)
+                {
+                    auctionsVM = auctionsVM.Where(a => a.Product.CategoryId == CategoryId).ToList();
+                }
             }
             return View(auctionsVM);
         }
@@ -78,7 +89,7 @@ namespace OnlineAuction.Controllers
             if ((int)accountId == 0)
             {
                 return RedirectToAction("Index", new { alert = "Время сессии истекло. Выйдите и зайдите снова!" });
-            }            
+            }
             var auctionBO = DependencyResolver.Current.GetService<AuctionBO>();
             var auction = auctionBO.Load((int)auctionId);
             if (auction == null)
@@ -94,7 +105,7 @@ namespace OnlineAuction.Controllers
             var imageProductLinkBO = DependencyResolver.Current.GetService<ImageProductLinkBO>();
             IEnumerable<ImageProductLinkBO> imageProductLinkBOs = imageProductLinkBO.LoadAll().Where(i => i.ProductId == auction.ProductId);
             IEnumerable<ImageBO> images = imageProductLinkBOs.Select(i => i.Image);
-            ViewBag.ListImg = images.Select(i=> mapper.Map<ImageVM>(i));
+            ViewBag.ListImg = images.Select(i => mapper.Map<ImageVM>(i));
 
 
             //нужно для запроса в представл. Details.html  на созд. ставки, ajax->BetAuction/Create()
@@ -116,20 +127,23 @@ namespace OnlineAuction.Controllers
             var roleAccountLinks = db.RoleAccountLinks.Where(r => r.AccountId == (int)accountId && r.Role.RoleName.Contains("moder")).ToList();
             if (roleAccountLinks == null || roleAccountLinks.Count() == 0)
             {
-                return RedirectToAction("Index", new { alert = "Вы пока не можете создать лот. Проверте ваш баланс!" });
+                return new JsonResult { Data = new { success = false, alert = "You don't have editing permissions. Сheck your balance!" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
             }
             //------------ Create -вернуть пуст. форму-----------------------
-            if (flagCreate != null) { 
+            if (flagCreate != null)
+            {
                 var categoriesBO = DependencyResolver.Current.GetService<CategoryBO>().LoadAll();
-                var categoriesVM =  categoriesBO.Select(c => mapper.Map<CategoryVM>(c));
+                var categoriesVM = categoriesBO.Select(c => mapper.Map<CategoryVM>(c));
                 ViewBag.Categories = new SelectList(categoriesVM, "Id", "Title");
                 return View(new AuctionEditVM());
             }
             //------Edit---------------------------------------------
-            else if (data != null && data.Id != 0) {      
+            else if (data != null && data.Id != 0)
+            {
                 var imageBO = DependencyResolver.Current.GetService<ImageBO>();
                 ImageVM imageVM = null;
-                if (imageId != null) {
+                if (imageId != null)
+                {
                     ImageBO image = imageBO.Load((int)imageId);
                     imageVM = mapper.Map<ImageVM>(image);
                 }
@@ -153,11 +167,13 @@ namespace OnlineAuction.Controllers
             var userId = Session["accountId"] ?? 0;
             string message = "";
             //------------------------Create---------------------------------------
-            if (id == 0) { 
+            if (id == 0)
+            {
                 AuctionBO auction = DependencyResolver.Current.GetService<AuctionBO>();
                 if (ModelState.IsValid) //AuctionVM         
                 {
-                    if ((int)userId != 0) {
+                    if ((int)userId != 0)
+                    {
                         BuilderSynteticModels.mapper = mapper;
                         auction = await BuilderSynteticModels.CreateEntity(editVM, auction, userId, upload);
                         message = "Данные записаны!";
@@ -168,7 +184,8 @@ namespace OnlineAuction.Controllers
                         BetAuctionScheduler.mapper = mapper;
                         BetAuctionScheduler.Start();
                     }
-                    else {
+                    else
+                    {
                         message = "Ошибка. Данные не записаны. Время сессии истекло!";
                     }
                     return new JsonResult { Data = message, JsonRequestBehavior = JsonRequestBehavior.DenyGet };
@@ -176,10 +193,12 @@ namespace OnlineAuction.Controllers
                 return View(auction);
             }
             //------------------------Edit-------------------------------
-            else if (id != null && id > 0) {
+            else if (id != null && id > 0)
+            {
                 AuctionBO auctionBO = DependencyResolver.Current.GetService<AuctionBO>();
                 auctionBO = auctionBO.LoadAsNoTracking((int)id);
-                if (auctionBO == null) {
+                if (auctionBO == null)
+                {
                     message = "Аукцион не найден. Попробуйте изменить запрос";
                     return new JsonResult { Data = message, JsonRequestBehavior = JsonRequestBehavior.DenyGet };
                 }
@@ -188,7 +207,8 @@ namespace OnlineAuction.Controllers
                 await BuilderSynteticModels.EditEntityAsync(editVM, auctionBO, upload);
                 return new JsonResult { Data = message, JsonRequestBehavior = JsonRequestBehavior.DenyGet };
             }
-            else {
+            else
+            {
                 message = "Неизвестная ошибка. Обратитесь позднее";
                 return new JsonResult { Data = message, JsonRequestBehavior = JsonRequestBehavior.DenyGet };
             }
@@ -262,10 +282,12 @@ namespace OnlineAuction.Controllers
         public async Task<ActionResult> ChatAsync(int? auctionId, string connectionId, string message)//1-ый парам. по 1-му заходу, 2-ой по 2-му
         {
             var accountId = Session["accountId"] ?? 0;
-            if ((int)accountId == 0) {
+            if ((int)accountId == 0)
+            {
                 return RedirectToAction("Login", "Accounts");
             }
-            else {
+            else
+            {
                 //----------------sender-------------------
                 ViewBag.User = null;
                 var sender = PushSender.InstanceClient;
@@ -273,32 +295,37 @@ namespace OnlineAuction.Controllers
                 List<RoleAccountLinkBO> rolesAccount = DependencyResolver.Current.GetService<RoleAccountLinkBO>()
                     .LoadAll().Where(r => r.AccountId == (int)accountId).ToList();
                 var roleAdmin = rolesAccount.FirstOrDefault(r => r.Role.RoleName.Contains("admin"));
-                if (accountBO != null && roleAdmin == null) {
+                if (accountBO != null && roleAdmin == null)
+                {
                     UserHub = DependencyResolver.Current.GetService<UserHubBO>().Load((int)accountId);
-                    if (UserHub == null) {
+                    if (UserHub == null)
+                    {
                         var userHubVM = new UserHubVM { AccountId = (int)accountId, ConnectionId = "" };
                         UserHub = mapper.Map<UserHubBO>(userHubVM);
                         UserHub.Save(UserHub);
                     }
-                    UserHub.Account = accountBO; 
+                    UserHub.Account = accountBO;
                     sender.User = UserHub;
                     ViewBag.User = UserHub.Account;
                 }
-                if (connectionId == "" || connectionId is null) {
+                if (connectionId == "" || connectionId is null)
+                {
                     return View("Partial/_ChatAuctionView");
                 }
                 //----------------addresser-------------------
                 AuctionBO auctionBO = DependencyResolver.Current.GetService<AuctionBO>().Load((int)auctionId);
                 ViewBag.Actor = null;
                 string alert = "";
-                if (auctionBO != null) {
+                if (auctionBO != null)
+                {
                     var actorBO = auctionBO.Actor;
                     var actorAccountBO = actorBO.Account;
                     var actorAccountVM = mapper.Map<AccountVM>(actorAccountBO);
                     ViewBag.Actor = actorAccountVM;
-                    var users = db.UserHubs.ToList(); 
+                    var users = db.UserHubs.ToList();
                     var actor = users.FirstOrDefault(u => u.AccountId == actorAccountVM.Id);
-                    if (actor != null) {
+                    if (actor != null)
+                    {
                         message = message.Equals("") ? "Hello author!" : message;
                         sender.mapper = mapper;
                         await sender.CommunicationWIthAuthor(message, connectionId, actor.ConnectionId);
@@ -307,12 +334,15 @@ namespace OnlineAuction.Controllers
 
                         alert = "It's good";
                     }
-                    else alert = "Actor is Null!";
+                    else
+                    {
+                        alert = "Actor is Null!";
+                    }
                 }
                 return new JsonResult { Data = alert, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
             }
         }
-        
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)

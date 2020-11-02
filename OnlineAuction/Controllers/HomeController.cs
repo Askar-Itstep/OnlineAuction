@@ -1,7 +1,5 @@
 ﻿using AutoMapper;
 using BusinessLayer.BusinessObject;
-using DataLayer.Entities;
-using OnlineAuction.Entities;
 using OnlineAuction.ServiceClasses;
 using OnlineAuction.ViewModels;
 using System.Collections.Generic;
@@ -13,7 +11,7 @@ namespace OnlineAuction.Controllers
 {
     public class HomeController : Controller
     {
-        private Model1 db = new Model1();
+        //private Model1 db = new Model1();
         private IMapper mapper;
         private static UserHubBO UserHub { get; set; }
 
@@ -24,15 +22,18 @@ namespace OnlineAuction.Controllers
         public async Task<ActionResult> Index()
         {
             var accountId = Session["accountId"] ?? 0;
-            if ((int)accountId != 0) {
+            if ((int)accountId != 0)
+            {
                 AccountBO accountBO = DependencyResolver.Current.GetService<AccountBO>().Load((int)accountId);
                 List<RoleAccountLinkBO> rolesAccount = DependencyResolver.Current.GetService<RoleAccountLinkBO>()
                                                                                 .LoadAll().Where(r => r.AccountId == (int)accountId).ToList();
                 var roleAdmin = rolesAccount.FirstOrDefault(r => r.Role.RoleName.Contains("admin"));
-                if (accountBO != null && roleAdmin == null) {
-                    UserHub = DependencyResolver.Current.GetService<UserHubBO>().LoadAll().Where(u=>u.AccountId ==(int)accountId).FirstOrDefault();
-                    if(UserHub == null) {
-                        UserHubVM userHubVM = new UserHubVM { AccountId=(int)accountId, ConnectionId="" };
+                if (accountBO != null && roleAdmin == null)
+                {
+                    UserHub = DependencyResolver.Current.GetService<UserHubBO>().LoadAll().Where(u => u.AccountId == (int)accountId).FirstOrDefault();
+                    if (UserHub == null)
+                    {
+                        UserHubVM userHubVM = new UserHubVM { AccountId = (int)accountId, ConnectionId = "" };
                         UserHub = mapper.Map<UserHubBO>(userHubVM);
                         UserHub.Save(UserHub);
                     }
@@ -48,7 +49,8 @@ namespace OnlineAuction.Controllers
         public ActionResult Chat()
         {
             var accountId = Session["accountId"] ?? 0;
-            if ((int)accountId == 0) {
+            if ((int)accountId == 0)
+            {
                 return RedirectToAction("Login", "Accounts");
             }
             ViewBag.User = UserHub.Account;
@@ -59,30 +61,36 @@ namespace OnlineAuction.Controllers
             string alert = "";
             //sender
             var accountId = Session["accountId"] ?? 0;
-            if ((int)accountId == 0) {
+            if ((int)accountId == 0)
+            {
                 return RedirectToAction("Login", "Accounts");
             }
-            else {
+            else
+            {
                 ViewBag.User = null;
                 var sender = PushSender.InstanceClient;
                 AccountBO accountBO = DependencyResolver.Current.GetService<AccountBO>().Load((int)accountId);
-                if (accountBO != null) {
+                if (accountBO != null)
+                {
                     UserHub.Account = accountBO;
                     sender.User.Account = UserHub.Account;
                     ViewBag.User = UserHub.Account;
                 }
-                if (connectionId == "" || connectionId is null) {
+                if (connectionId == "" || connectionId is null)
+                {
                     return View("Partial/_ChatAuctionView");
                 }
                 ViewBag.Actor = null;
-                message = message == "" ? "Hello!": message;
+                message = message == "" ? "Hello!" : message;
                 //addresser
-                if (friendConnectId != null && friendConnectId != "") {
+                if (friendConnectId != null && friendConnectId != "")
+                {
                     await sender.CommunicationWIthAuthor(message, connectionId, friendConnectId);
                 }
-                else {
+                else
+                {
                     await sender.SendMessage(message, true); //+key SignIn
-                }                
+                }
                 return new JsonResult { Data = alert, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
             }
         }

@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web.Mvc;
-using AutoMapper;
+﻿using AutoMapper;
 using BusinessLayer.BusinessObject;
 using DataLayer.Entities;
 using OnlineAuction.ServiceClasses;
 using OnlineAuction.ViewModels;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web.Mvc;
 using Unity;
 
 namespace OnlineAuction
@@ -34,16 +34,17 @@ namespace OnlineAuction
 
                 mpr.CreateMap<AccountBO, AccountVM>()
              .ConstructUsing(c => DependencyResolver.Current.GetService<AccountVM>());
-             //.ForMember(dist=>dist.ConnectionId, opt=>opt.MapFrom(src=>0));
+                //.ForMember(dist=>dist.ConnectionId, opt=>opt.MapFrom(src=>0));
 
                 //-------------------RegisterVM ------------------------------
                 mpr.CreateMap<RegisterModel, AccountBO>()
                 .ConstructUsing(c => DependencyResolver.Current.GetService<AccountBO>())
-                .ForMember(dist => dist.Address, opt => opt.MapFrom(src => new AddressVM { City = src.City, Region=src.Region, Street=src.Street, House=src.House}))
-                .ForMember(dist=>dist.Balance, opt=>opt.MapFrom(src=>0))
+                .ForMember(dist => dist.Address, opt => opt.MapFrom(src => new AddressVM { City = src.City, Region = src.Region, Street = src.Street, House = src.House }))
+                .ForMember(dist => dist.Balance, opt => opt.MapFrom(src => 0))
                 .ForMember(dist => dist.Email, opt => opt.MapFrom(src => src.Email))
                 .ForMember(dist => dist.FullName, opt => opt.MapFrom(src => src.FullName))
                 .ForMember(dist => dist.Password, opt => opt.MapFrom(src => src.Password))
+                .ForMember(dist => dist.Gender, opt => opt.MapFrom(src => src.Gender))
                 ;
 
 
@@ -57,7 +58,7 @@ namespace OnlineAuction
                 // mpr.CreateMap<RoleVM, Role>()
                 //.ConstructUsing(c => DependencyResolver.Current.GetService<Role>());
 
-   //------------------Client ----------------------------------
+                //------------------Client ----------------------------------
                 mpr.CreateMap<Client, ClientBO>()
                 .ConstructUsing(c => DependencyResolver.Current.GetService<ClientBO>());
 
@@ -96,8 +97,8 @@ namespace OnlineAuction
                 mpr.CreateMap<AuctionVM, AuctionBO>()
                .ConstructUsing(c => DependencyResolver.Current.GetService<AuctionBO>());
                 //--------------------------------------Category ---------------------------------------
-                mpr.CreateMap<Category, CategoryBO> ()
-                                .ConstructUsing(c => DependencyResolver.Current.GetService <CategoryBO > ());
+                mpr.CreateMap<Category, CategoryBO>()
+                                .ConstructUsing(c => DependencyResolver.Current.GetService<CategoryBO>());
 
                 mpr.CreateMap<CategoryBO, Category>()
                .ConstructUsing(c => DependencyResolver.Current.GetService<Category>());
@@ -115,7 +116,7 @@ namespace OnlineAuction
                 mpr.CreateMap<ProductVM, ProductBO>()
                .ConstructUsing(c => DependencyResolver.Current.GetService<ProductBO>()).ReverseMap();
 
-      //--------------------------------------Image -------------------------------------------
+                //--------------------------------------Image -------------------------------------------
                 mpr.CreateMap<Image, ImageBO>()
                                 .ConstructUsing(c => DependencyResolver.Current.GetService<ImageBO>());
 
@@ -150,7 +151,7 @@ namespace OnlineAuction
 
                 mpr.CreateMap<AddressBO, AddressVM>()
                  .ConstructUsing(c => DependencyResolver.Current.GetService<AddressVM>());
-      //--------------------------------------BetAuctions ---------------------------------------
+                //--------------------------------------BetAuctions ---------------------------------------
                 mpr.CreateMap<BetAuction, BetAuctionBO>()
                                 .ConstructUsing(c => DependencyResolver.Current.GetService<BetAuctionBO>());
 
@@ -167,7 +168,7 @@ namespace OnlineAuction
 
                 mpr.CreateMap<AuctionBO, AuctionEditVM>()
                 .ConstructUsing(c => DependencyResolver.Current.GetService<AuctionEditVM>())
-                .ForMember(dest=>dest.Title, opt=>opt.MapFrom(src=>src.Product.Title))
+                .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Product.Title))
                 .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Product.Price))
                 .ForMember(dest => dest.DayBegin, opt => opt.MapFrom(src => src.BeginTime))
                 .ForMember(dest => dest.TimeBegin, opt => opt.MapFrom(src => new TimeSpan(src.BeginTime.Hour, src.BeginTime.Minute, src.BeginTime.Second)))
@@ -177,7 +178,7 @@ namespace OnlineAuction
                 .ConstructUsing(c => DependencyResolver.Current.GetService<AuctionBO>())
                 //.ForMember(dest => dest.RedemptionPrice, opt => opt.MapFrom(src => src.RedemptionPrice))
                 .ForMember(dest => dest.BeginTime, opt => opt.MapFrom(src => src.DayBegin + src.TimeBegin))
-                .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => src.DayBegin+src.TimeBegin + TimeSpan.FromHours(src.Duration)));
+                .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => src.DayBegin + src.TimeBegin + TimeSpan.FromHours(src.Duration)));
 
                 //----------------------
                 mpr.CreateMap<AuctionEditVM, ProductBO>()
@@ -240,8 +241,8 @@ namespace OnlineAuction
                 //.ForMember(dest => dest.IsApproved, opt => opt.MapFrom(src => src.IsApproved))
                 .ForMember(dest => dest.AuctionIds, opt => opt.MapFrom(src => new List<int>()))
                 .ForMember(dest => dest.ProductIds, opt => opt.MapFrom(src => new List<int>()))
-                .ForMember(dest => dest.Products, opt => opt.MapFrom(src => src.Items.Select(s=>s.Product)))
-                .ForMember(dest => dest.EndTimes, opt => opt.MapFrom(src => new List<DateTime> ()));
+                .ForMember(dest => dest.Products, opt => opt.MapFrom(src => src.Items.Select(s => s.Product)))
+                .ForMember(dest => dest.EndTimes, opt => opt.MapFrom(src => new List<DateTime>()));
 
                 mpr.CreateMap<OrderFullMapVM, OrderVM>()
                .ConstructUsing(c => DependencyResolver.Current.GetService<OrderVM>())
@@ -258,8 +259,8 @@ namespace OnlineAuction
                .ForMember(dest => dest.ClientId, opt => opt.MapFrom(src => src.WinnerId))
                .ForMember(dest => dest.Client, opt => opt.MapFrom(src => src.Winner))
                .ForMember(dest => dest.IsApproved, opt => opt.MapFrom(src => false))
-               .ForMember(dest => dest.AuctionIds, opt => opt.MapFrom(src => new List<AuctionVM>() { new AuctionVM { Id=src.Id } }))
-               .ForMember(dest => dest.EndTimes, opt => opt.MapFrom(src => new List<DateTime>() { src.EndTime}))
+               .ForMember(dest => dest.AuctionIds, opt => opt.MapFrom(src => new List<AuctionVM>() { new AuctionVM { Id = src.Id } }))
+               .ForMember(dest => dest.EndTimes, opt => opt.MapFrom(src => new List<DateTime>() { src.EndTime }))
                .ForMember(dest => dest.ProductIds, opt => opt.MapFrom(src => new List<int>() { src.ProductId }))
                .ForMember(dest => dest.Products, opt => opt.MapFrom(src => new List<ProductVM>() { src.Product }));
 
@@ -293,6 +294,6 @@ namespace OnlineAuction
                  .ConstructUsing(c => DependencyResolver.Current.GetService<UserHubVM>());
 
             });
-         }
+        }
     }
 }
