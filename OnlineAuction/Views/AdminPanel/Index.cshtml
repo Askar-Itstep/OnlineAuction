@@ -1,0 +1,191 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+<script>
+    //-----обработ. переключ. AWS - Azure--------------------
+    $(function () {
+        var key = 1;
+        var flag = true;
+        $('input[name=switchOption]').click(function (e) {
+            key *= -1;
+            flag = key < 0 ? false : true;
+            $(this).attr('checked', flag)
+            if (flag == true) {
+                $(this).val('Azur')
+            }
+            else {
+                $(this).val('AWS');
+            }
+            $.ajax({
+                url: "/AdminPanel/SwitchContainer",
+                method: "GET",
+                data: { nameContainer: $(this).val() },    //AWS - Azure
+                success: function (data) {
+                    alert("It's good!")
+                },
+                error: function (e, msg) {
+                    alert(msg)
+                }
+            })
+        })
+    })
+
+    $(function () {
+        $('#link-statistics')
+            .css({ "font-size": "24px", "margin-left": "10px", "margin-top": "40px" })
+            .click(e => {
+                e.preventDefault()
+                $.get({
+                    url: "/AdminPanel/Statistic",
+                    success: function (data) {
+                        alert(data.message)
+                        console.log(data.seq)
+                        //sessionStorage.setItem("data", JSON.stringify(data.seq))
+                        $("img", "div.gallery").attr('src', '/Files/podarok.png')
+                        //$(location).attr('href', '/AdminPanel/Index')
+                    },
+                    error(xhr, msg) {
+                        alert(msg)
+                    }
+                }).then(
+                    $("img", "div.gallery").each((i, val) => {
+                        $(val).mouseover((e) => {
+                            $(val).attr('src', '/Files/graphic.png');
+                            val.style.cursor = "pointer";
+
+                            //if (i == 0) {
+                            //    $(val).parent().append('<p>Распределение категорий выбранных товаров по полу</p>')
+                            //    return
+                            //}
+                            //else if (i == 1) {
+                            //    $(val).parent().append('<p>Распределение категорий выбранных товаров по территории</p>')
+                            //    return
+                            //}
+                            //else if (i == 2) {
+                            //    $(val).parent().append('<p>Распределение пользователей по времени регистрации</p>')
+                            //    return
+                            //}
+                            //else if (i == 3) {
+                            //    $(val).parent().append('<p>Популярность категорий общая</p>')
+                            //    return
+                            //}
+                            //else if (i == 4) {
+                            //    $(val).parent().append('<p>Популярность категорий по возрастам</p>')
+                            //    return
+                            //}
+                            //else if (i == 5) {
+                            //    $(val).parent().append('<p>Средняя стоимость товара по категориям</p>')
+                            //    return
+                            //}
+                            AddParagraph(i, val)
+                        }).mouseout((e) => {
+                            $(val).attr('src', '/Files/podarok.png');
+                            $(val).parent().children('p').remove()
+                        })
+                    })
+
+                )
+            })
+    })
+    //добав. график
+    $(function () {
+        $('a#repeat').click((e) => {
+            e.preventDefault()
+            if ($('div.gallery img').length >= 6) {
+                alert("Извините, в настоящий момент количество графиков ограничено!")
+                return
+            }
+            var firstImg = $('div.gallery img').first();
+            //console.log(firstImg)           
+            var clonImg = $(firstImg).clone();
+            var len = $('div.gallery img').length;
+            $('div.gallery').append(clonImg)
+
+            $("img", "div.gallery").each((i, val) => {
+                if (i >= len) {
+                    $(val).mouseover((e) => {
+                        $(val).attr('src', '/Files/graphic.png');
+                        val.style.cursor = "pointer";
+                        AddParagraph(i, val)
+                    }).mouseout((e) => {
+                        $(val).attr('src', '/Files/podarok.png');
+                        $(val).parent().children('p').remove()
+                    })
+                }
+                
+            })
+        })
+    })
+    //удалить послед. график
+    $(function () {
+        $('#remove').click((e) => {
+            $('div.gallery img').last().remove()
+        })
+    })
+    function AddParagraph(i, val) {
+        if (i == 0) {
+            $(val).parent().append('<p>Распределение категорий выбранных товаров по полу</p>')
+            return
+        }
+        else if (i == 1) {
+            $(val).parent().append('<p>Распределение категорий выбранных товаров по территории</p>')
+            return
+        }
+        else if (i == 2) {
+            $(val).parent().append('<p>Распределение пользователей по времени регистрации</p>')
+            return
+        }
+        else if (i == 3) {
+            $(val).parent().append('<p>Популярность категорий общая</p>')
+            return
+        }
+        else if (i == 4) {
+            $(val).parent().append('<p>Популярность категорий по возрастам</p>')
+            return
+        }
+        else if (i == 5) {
+            $(val).parent().append('<p>Средняя стоимость товара по категориям</p>')
+            return
+        }
+    }
+</script>
+<h2>Administrator Panel</h2>
+
+<div class="jumbotron">
+    <div style="display:flex">
+        <div class="list-group-item col-lg-6" id="switch-blobcontainer" style="width:300px">
+            AWS container
+            <div class="material-switch pull-right">
+                <input id="switchOptionContainer" name="switchOption" type="checkbox" checked="checked" />
+                <label for="switchOptionContainer" class="label-default"></label>
+                Azure container
+            </div>
+        </div>
+        <div class="col-lg-6">
+            @Html.ActionLink("Подготовить статистику", "Index", "AdminPanel", null, new { id = "link-statistics" })
+        </div>
+    </div>
+    <div style="display:flex; margin:20px">
+        <div style="margin:20px">
+            <a class="btn btn-success" href="#" id="repeat">
+                <i class="fa fa-flag-o fa-lg"></i> Еще
+            </a>
+        </div>
+        <div style="margin:20px">
+            <a class="btn btn-danger" href="#" id="remove">
+                <i class="fa fa-trash fa-lg"></i> Удалить
+            </a>
+        </div>
+
+    </div>
+
+    <div class="gallery" style="display:flex; margin:30px; flex-wrap:wrap">
+        <img src="~/Files/no_image.png" style="width:30%; margin: 30px auto" />
+        <img src="~/Files/no_image.png" style="width:30%; margin: 30px auto" />
+        @*<img src="~/Files/no_image.png" style="width:30%; margin: 30px auto" />
+        <img src="~/Files/no_image.png" style="width:30%; margin: 30px auto" />
+        <img src="~/Files/no_image.png" style="width:30%; margin: 30px auto" />*@
+    </div>
+
+</div>

@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataLayer.Entities
 {
-    public enum Gender { MEN, WOMEN, UNDEFINED}
+    public enum Gender { MEN, WOMEN, UNDEFINED }
     public class Account
     {
         [Key]
@@ -13,7 +14,7 @@ namespace DataLayer.Entities
         [Required, Display(Name = "Full Name")]
         [StringLength(255)]
         public string FullName { get; set; }
-
+        public int Age { get; set; }
         [ForeignKey("Image")]
         public int ImageId { get; set; }
         public virtual Image Image { get; set; }
@@ -30,6 +31,8 @@ namespace DataLayer.Entities
         [StringLength(255)]
         public string Password { get; set; }
 
+        public DateTime CreateAt { get; set; }
+        public DateTime RemoveAt { get; set; }
         private ICollection<Role> Roles { get; set; }   //-> RoleAccountLinks
 
         public void SetRoles(List<Role> roles)
@@ -37,7 +40,7 @@ namespace DataLayer.Entities
             Roles = roles;
         }
 
-        public bool IsActive  { get; set; }
+        public bool IsActive { get; set; }
         public decimal Balance { get; set; } = 0;
 
         public Gender Gender { get; set; }
@@ -50,7 +53,8 @@ namespace DataLayer.Entities
 
         public void AddRole(Role role)
         {
-            if (Roles.Contains(role)) {
+            if (Roles.Contains(role))
+            {
                 return;
             }
 
@@ -58,12 +62,14 @@ namespace DataLayer.Entities
         }
         public void RemoveRole(Role role)
         {
-            if (!role.RoleName.Contains("admin") && Roles != null) {
-                if (Roles.Contains(role)) {
+            if (!role.RoleName.Contains("admin") && Roles != null)
+            {
+                if (Roles.Contains(role))
+                {
                     Roles.Remove(role);
                 }
-            }            
-            return;            
+            }
+            return;
         }
 
     }

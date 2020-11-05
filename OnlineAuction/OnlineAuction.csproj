@@ -243,9 +243,11 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\AdminPanelController.cs" />
     <Compile Include="ServiceClasses\BlobHelper.cs" />
     <Compile Include="App_Start\StringToUriConverter.cs" />
     <Compile Include="App_Start\UriToStringConverter.cs" />
+    <Compile Include="ServiceClasses\ServiceStatistics.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="App_Start\UnityConfig.cs" />
     <Compile Include="Controllers\AccountsController.cs" />
@@ -263,16 +265,16 @@
     <Compile Include="ServiceClasses\ISyntetic.cs" />
     <Compile Include="ViewModels\CategoryVM.cs" />
     <Compile Include="ViewModels\ImageProductLinkVM.cs" />
-    <Compile Include="ViewModels\JsonRequestCreateBet.cs" />
+    <Compile Include="ViewModels\Sintetic\JsonRequestCreateBet.cs" />
     <Compile Include="ViewModels\AccountVM.cs" />
     <Compile Include="ViewModels\AddressVM.cs" />
-    <Compile Include="ViewModels\AuctionEditVM.cs" />
+    <Compile Include="ViewModels\Sintetic\AuctionEditVM.cs" />
     <Compile Include="ViewModels\AuctionVM.cs" />
     <Compile Include="ViewModels\BetAuctionVM.cs" />
     <Compile Include="ViewModels\ClientVM.cs" />
     <Compile Include="ViewModels\ImageVM.cs" />
     <Compile Include="ViewModels\ItemVM.cs" />
-    <Compile Include="ViewModels\OrderFullMapVM.cs" />
+    <Compile Include="ViewModels\Sintetic\OrderFullMapVM.cs" />
     <Compile Include="ViewModels\OrderVM.cs" />
     <Compile Include="ViewModels\ProductVM.cs" />
     <Compile Include="ViewModels\RegisterModel.cs" />
@@ -283,6 +285,7 @@
     <Compile Include="ViewModels\LoginModel.cs" />
     <Compile Include="ViewModels\RoleAccountLinkVM.cs" />
     <Compile Include="ViewModels\RoleVM.cs" />
+    <Compile Include="ViewModels\Statistic\StatisticViewModel.cs" />
     <Compile Include="ViewModels\UserHubVM.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -290,6 +293,7 @@
     <Content Include="Content\font-awesome.min.css" />
     <Content Include="Content\myGalleryStyle.css" />
     <Content Include="Content\myStyle.css" />
+    <Content Include="Files\graphic.png" />
     <Content Include="Files\create.png" />
     <Content Include="Files\default.jpg" />
     <Content Include="Files\men.png" />
@@ -451,6 +455,7 @@
     <Content Include="Views\Orders\Edit.cshtml" />
     <Content Include="Views\Home\Partial\_ChatPartialView.cshtml" />
     <Content Include="Views\Auctions\Partial\_ChatAuctionView.cshtml" />
+    <Content Include="Views\AdminPanel\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

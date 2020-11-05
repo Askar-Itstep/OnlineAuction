@@ -2,11 +2,11 @@
 
 @{
     ViewBag.Title = "Index";
-    var model2 =ViewBag.DelAccounts;
+    var model2 = ViewBag.DelAccounts;
 }
 <script>
-            //это страница только для админа
-                    ////переход на "Пополнить баланс" реализован в _Layout.html
+                    //это страница только для админа
+                            ////переход на "Пополнить баланс" реализован в _Layout.html
 </script>
 
 
@@ -32,7 +32,8 @@
         <th></th>
     </tr>
 
-    @foreach (var item in Model) {
+    @foreach (var item in Model)
+    {
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.FullName)
@@ -74,7 +75,8 @@
         <th></th>
     </tr>
 
-    @foreach (var item in ViewBag.DelAccounts) {
+    @foreach (var item in ViewBag.DelAccounts)
+    {
         <tr>
             <td>
                 @item.FullName
@@ -89,7 +91,12 @@
                 @item.IsActive
             </td>
             <td>
-                @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+                @{
+                    if (!item.RemoveAt.GetDateTimeFormats('d')[0].Contains("3000"))
+                    {
+                        @Html.ActionLink("Edit", "Edit", new { id = item.Id }) 
+}
+                }
                 @Html.ActionLink("Details", "Details", new { id = item.Id }) |
                 @Html.ActionLink("Delete", "Delete", new { id = item.Id })
             </td>

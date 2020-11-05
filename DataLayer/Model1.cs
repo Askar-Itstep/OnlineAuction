@@ -111,11 +111,23 @@ namespace OnlineAuction.Entities
 
             var defaultImageUser = context.Images.FirstOrDefaultAsync(i => i.FileName.Contains("men"));
 
-            Account account = new Account { FullName = "admin", Email = "admin@mail.ru", Password = "admin", Address = address, ImageId = defaultImageUser.Id };
+            Account account = new Account
+            {
+                FullName = "admin",
+                Email = "admin@mail.ru",
+                Password = "admin",
+                Address = address,
+                ImageId = defaultImageUser.Id,
+                Age = 0,
+                CreateAt = DateTime.Parse("2017-01-01 12:00:00")
+            };
             context.Account.Add(account);
 
             //4)Categories
-            List<Category> categories = new List<Category> { new Category { Title = "electronic" }, new Category { Title = "book" }, new Category { Title = "DVD" }, new Category { Title = "Digital product" } };
+            List<Category> categories = new List<Category> {
+                new Category {
+                    Title = "electronic" }, new Category { Title = "book" }, new Category { Title = "DVD" }, new Category { Title = "Digital product" }
+            };
             context.Categories.AddRange(categories);
 
             context.SaveChanges();

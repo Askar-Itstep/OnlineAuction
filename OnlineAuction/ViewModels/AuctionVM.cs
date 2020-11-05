@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 
 namespace OnlineAuction.ViewModels
 {
-    public class AuctionVM
+    public class AuctionVM 
     {
         public int Id { get; set; }
 
@@ -34,5 +32,6 @@ namespace OnlineAuction.ViewModels
         }
 
         public bool IsActive { get; set; }
+
     }
 }

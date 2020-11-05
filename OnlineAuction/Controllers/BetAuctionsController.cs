@@ -1,6 +1,5 @@
 ﻿using DataLayer.Entities;
 using OnlineAuction.Entities;
-using OnlineAuction.ServiceClasses;
 using OnlineAuction.ViewModels;
 using System;
 using System.Data.Entity;
@@ -10,7 +9,8 @@ using System.Web.Mvc;
 
 namespace OnlineAuction.Controllers
 {
-    public class BetAuctionsController : Controller
+    [Authorize(Roles = "admin")]
+    public class BetAuctionsController : Controller //не использ.
     {
         private Model1 db = new Model1();
 
@@ -24,11 +24,13 @@ namespace OnlineAuction.Controllers
         // GET: BetAuctions/Details/5
         public async Task<ActionResult> Details(int? id)
         {
-            if (id == null) {
+            if (id == null)
+            {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             BetAuction betAuction = await db.BetAuction.FindAsync(id);
-            if (betAuction == null) {
+            if (betAuction == null)
+            {
                 return HttpNotFound();
             }
             return View(betAuction);
@@ -46,20 +48,24 @@ namespace OnlineAuction.Controllers
         //[ValidateAntiForgeryToken] //не приним. JsonRequest??????
         public async Task<ActionResult> Create(BetAuction betAuction, JsonRequestCreateBet data)
         {
-            if (ModelState.IsValid && betAuction.AuctionId != 0) {
+            if (ModelState.IsValid && betAuction.AuctionId != 0)
+            {
                 db.BetAuction.Add(betAuction);
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
-            else {      //возвр. Json в Details.html
+            else
+            {      //возвр. Json в Details.html
                 string messageError = "";
                 int auctionId = int.Parse(data.AuctionId);
                 int clientId = int.Parse(data.ClientId);
                 decimal bet = decimal.Parse(data.Bet);
-                try {
-                    var myBetAuction = new BetAuction { AuctionId = auctionId, ClientId = clientId,  Bet = bet };
+                try
+                {
+                    var myBetAuction = new BetAuction { AuctionId = auctionId, ClientId = clientId, Bet = bet };
                     var repeatBet = await db.BetAuction.FirstOrDefaultAsync(b => b.AuctionId == auctionId && b.ClientId == clientId && b.Bet == bet);
-                    if(repeatBet != null) {
+                    if (repeatBet != null)
+                    {
                         messageError = "Такая ставка уже есть. Попробуйте снова!";
                         return new JsonResult { Data = messageError, JsonRequestBehavior = JsonRequestBehavior.DenyGet };
                     }
@@ -67,7 +73,8 @@ namespace OnlineAuction.Controllers
                     await db.SaveChangesAsync();
                     messageError = "Ставка сделана. Данные добавлены!";
                 }
-                catch (Exception e) {
+                catch (Exception e)
+                {
                     messageError = string.Format("Произошла ошибка: {0}. Данные не были добавлены!", e.Message);
                 }
                 return new JsonResult { Data = messageError, JsonRequestBehavior = JsonRequestBehavior.DenyGet };
@@ -77,11 +84,13 @@ namespace OnlineAuction.Controllers
 
         public async Task<ActionResult> Edit(int? id)
         {
-            if (id == null) {
+            if (id == null)
+            {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             BetAuction betAuction = await db.BetAuction.FindAsync(id);
-            if (betAuction == null) {
+            if (betAuction == null)
+            {
                 return HttpNotFound();
             }
             ViewBag.AuctionId = new SelectList(db.Auctions, "Id", "Description", betAuction.AuctionId);
@@ -94,7 +103,8 @@ namespace OnlineAuction.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Edit([Bind(Include = "Id,AuctionId,ClientId,Bet")] BetAuction betAuction)
         {
-            if (ModelState.IsValid) {
+            if (ModelState.IsValid)
+            {
                 db.Entry(betAuction).State = EntityState.Modified;
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
@@ -107,11 +117,13 @@ namespace OnlineAuction.Controllers
 
         public async Task<ActionResult> Delete(int? id)
         {
-            if (id == null) {
+            if (id == null)
+            {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             BetAuction betAuction = await db.BetAuction.FindAsync(id);
-            if (betAuction == null) {
+            if (betAuction == null)
+            {
                 return HttpNotFound();
             }
             return View(betAuction);
@@ -130,7 +142,8 @@ namespace OnlineAuction.Controllers
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing) {
+            if (disposing)
+            {
                 db.Dispose();
             }
             base.Dispose(disposing);

@@ -1,22 +1,19 @@
 ﻿using AutoMapper;
 using DataLayer.Entities;
 using DataLayer.Repository;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Unity;
 
 namespace BusinessLayer.BusinessObject
 {
-    public class ItemBO: BaseBusinessObject
+    public class ItemBO : BaseBusinessObject
     {
         public int Id { get; set; }
 
         //в кажд. аукц. продукты униальны (даже с идентич. характерист.)
         public int ProductId { get; set; }
-        public  ProductBO Product { get; set; }
+        public ProductBO Product { get; set; }
         public decimal EndPrice { get; set; }
 
         public int? OrderId { get; set; }
@@ -44,10 +41,12 @@ namespace BusinessLayer.BusinessObject
         public void Save(ItemBO ItemBO)
         {
             var item = mapper.Map<Item>(ItemBO);
-            if (ItemBO.Id == 0) {
+            if (ItemBO.Id == 0)
+            {
                 Add(item);
             }
-            else {
+            else
+            {
                 Update(item);
             }
             unitOfWork.Items.Save();
@@ -65,6 +64,13 @@ namespace BusinessLayer.BusinessObject
             var item = mapper.Map<Item>(itemBO);
             unitOfWork.Items.Delete(item.Id);
             unitOfWork.Items.Save();
+        }
+
+        public IEnumerable<ItemBO> LoadAllWithInclude(params string[] keys)
+        {
+            var items = unitOfWork.Items.Include(keys);
+            var res = items.AsEnumerable().Select(a => mapper.Map<ItemBO>(a)).ToList();
+            return res;
         }
     }
 }

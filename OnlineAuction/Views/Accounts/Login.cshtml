@@ -19,13 +19,22 @@
                         sessionStorage.setItem("accountId", JSON.stringify(data.accountId));
                         sessionStorage.setItem("myRoles", JSON.stringify(data.myRoles));
                         sessionStorage.setItem("myURI", data.myURI);
-                        $(location).attr('href', '/Home/Index');
+                        
+                        $(data.myRoles).each((i, val) => {
+                            if (val == "admin") {
+                                console.log("roles: " + val)
+                                $(location).attr('href', '/AdminPanel/Index');
+                            }
+                            else {
+                                $(location).attr('href', '/Home/Index');
+                            }
+                        })          
                     }
                     else {
                         alert(data.message);
                         $(location).attr('href', '/Home/Index');
                     }
-                       
+
                     $('input[type= submit]').attr('disabled', false);
                 },
                 error: function (xhr, status) {
@@ -38,14 +47,15 @@
 </script>
 <h2>Аутентификация</h2>
 
-@using (Html.BeginForm()) {
+@using (Html.BeginForm())
+{
     @Html.AntiForgeryToken()
 
     <div class="form-horizontal">
         @Html.ValidationSummary(true)
 
         <div class="form-group">
-            @Html.LabelFor(model => model.Login, new { @class = "control-label col-md-4"  })
+            @Html.LabelFor(model => model.Login, new { @class = "control-label col-md-4" })
             <div class="col-md-8">
                 @Html.EditorFor(model => model.Login, new { htmlAttributes = new { @placeholder = "e-mail", @class = "input input-lg" } })
                 @Html.ValidationMessageFor(model => model.Login)
