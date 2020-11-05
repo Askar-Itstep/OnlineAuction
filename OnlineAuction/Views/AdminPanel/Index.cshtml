@@ -39,11 +39,8 @@
                 $.get({
                     url: "/AdminPanel/Statistic",
                     success: function (data) {
-                        alert(data.message)
-                        console.log(data.seq)
-                        //sessionStorage.setItem("data", JSON.stringify(data.seq))
+                        alert(data)
                         $("img", "div.gallery").attr('src', '/Files/podarok.png')
-                        //$(location).attr('href', '/AdminPanel/Index')
                     },
                     error(xhr, msg) {
                         alert(msg)
@@ -54,42 +51,23 @@
                             $(val).attr('src', '/Files/graphic.png');
                             val.style.cursor = "pointer";
 
-                            //if (i == 0) {
-                            //    $(val).parent().append('<p>Распределение категорий выбранных товаров по полу</p>')
-                            //    return
-                            //}
-                            //else if (i == 1) {
-                            //    $(val).parent().append('<p>Распределение категорий выбранных товаров по территории</p>')
-                            //    return
-                            //}
-                            //else if (i == 2) {
-                            //    $(val).parent().append('<p>Распределение пользователей по времени регистрации</p>')
-                            //    return
-                            //}
-                            //else if (i == 3) {
-                            //    $(val).parent().append('<p>Популярность категорий общая</p>')
-                            //    return
-                            //}
-                            //else if (i == 4) {
-                            //    $(val).parent().append('<p>Популярность категорий по возрастам</p>')
-                            //    return
-                            //}
-                            //else if (i == 5) {
-                            //    $(val).parent().append('<p>Средняя стоимость товара по категориям</p>')
-                            //    return
-                            //}
                             AddParagraph(i, val)
-                        }).mouseout((e) => {
-                            $(val).attr('src', '/Files/podarok.png');
-                            $(val).parent().children('p').remove()
                         })
-                    })
-
+                            .mouseout((e) => {
+                                $(val).attr('src', '/Files/podarok.png');
+                                $(val).parent().children('p').remove()
+                            })
+                    }),
+                    $('a#repeat').removeClass("disabled"),
+                    $('a#remove').removeClass("disabled"),
+                    ImgClick(),
+                    RepeatClick(),
+                    RemoveClick()
                 )
             })
     })
-    //добав. график
-    $(function () {
+    //добав. картинку, пронумер. картинки
+    function RepeatClick() {
         $('a#repeat').click((e) => {
             e.preventDefault()
             if ($('div.gallery img').length >= 6) {
@@ -97,32 +75,40 @@
                 return
             }
             var firstImg = $('div.gallery img').first();
-            //console.log(firstImg)           
+            //console.log(firstImg)
             var clonImg = $(firstImg).clone();
             var len = $('div.gallery img').length;
+
             $('div.gallery').append(clonImg)
 
             $("img", "div.gallery").each((i, val) => {
-                if (i >= len) {
+                console.log("i: ", i)
+
+                if (i >= len) { //старые не трогать!
+                    $(val).attr("data-num", i)
+                    //console.log($(val).attr("data-num"))
+
                     $(val).mouseover((e) => {
                         $(val).attr('src', '/Files/graphic.png');
                         val.style.cursor = "pointer";
                         AddParagraph(i, val)
-                    }).mouseout((e) => {
-                        $(val).attr('src', '/Files/podarok.png');
-                        $(val).parent().children('p').remove()
                     })
+                        .mouseout((e) => {
+                            $(val).attr('src', '/Files/podarok.png');
+                            $(val).parent().children('p').remove()
+                        })
                 }
-                
+
             })
+            ImgClick()
         })
-    })
+    }
     //удалить послед. график
-    $(function () {
+    function RemoveClick() {
         $('#remove').click((e) => {
             $('div.gallery img').last().remove()
         })
-    })
+    }
     function AddParagraph(i, val) {
         if (i == 0) {
             $(val).parent().append('<p>Распределение категорий выбранных товаров по полу</p>')
@@ -137,17 +123,83 @@
             return
         }
         else if (i == 3) {
-            $(val).parent().append('<p>Популярность категорий общая</p>')
+            $(val).parent().append('<p>Распределение популярности категорий (общая совокупность)</p>')
             return
         }
         else if (i == 4) {
-            $(val).parent().append('<p>Популярность категорий по возрастам</p>')
+            $(val).parent().append('<p>Распределение популярностипо возрастам</p>')
             return
         }
         else if (i == 5) {
-            $(val).parent().append('<p>Средняя стоимость товара по категориям</p>')
+            $(val).parent().append('<p>Распределение средней стоимости товара по категориям</p>')
             return
         }
+    }
+    function ImgClick() {
+        $('.gallery img').unbind("click")
+            .click((e) => {
+                var numQuery = $(e.target).attr("data-num");
+                $.get({
+                    url: "/AdminPanel/BeginHandler?key=" + numQuery,
+                    success: function (obj) {
+                        //console.log(obj.data)
+                        //console.log(obj.data.arr)
+                        CreateGraphic(obj.data)
+                    },
+                    error(xhr, message) {
+                        alert(message)
+                    }
+                })
+            })
+    }
+    function CreateGraphic(data) {
+        $('div.sandbox').removeClass('hidden')
+        var ctx = document.getElementById('myChart').getContext('2d');
+        //var x = $(data.arr.countOnCategoriesForMan).map(function () {
+        //    return this.Count
+        //})
+        //console.log((Array.from(x)))
+        var chart = new Chart(ctx, {
+            type: 'bar',
+
+            data: {
+                labels: data.labels, //["заяц", "eж", "волк"],
+                datasets: [
+
+                    {
+                        label: data.label,
+                        backgroundColor: ['bisque', 'orange', 'green'],
+                        borderColor: 'rgb(255, 99, 132)',
+                        //[5, 2, 20],
+                        data: Array.from($(data.arr.countOnCategoriesForMan).map(function () {
+                            return this.Count
+                        }))
+
+                    },
+                    {
+                        label: data.label,
+                        backgroundColor: ['azure', 'yellow', 'darkkhaki'],
+                        borderColor: 'rgb(255, 99, 132)',
+                        data: Array.from($(data.arr.countOnCategoriesForWomen).map(function () {
+                            return this.Count
+                        }))
+                    },
+                    {
+                        label: data.label,
+                        backgroundColor: ['aqua', 'gold', 'khaki'],
+                        borderColor: 'rgb(255, 99, 132)',
+                        data: Array.from($(data.arr.countOnCategoriesForX).map(function () {
+                            return this.Count
+                        }))
+
+                    }
+                ]
+
+            },
+
+            // Configuration options go here
+            options: {}
+        });
     }
 </script>
 <h2>Administrator Panel</h2>
@@ -166,14 +218,15 @@
             @Html.ActionLink("Подготовить статистику", "Index", "AdminPanel", null, new { id = "link-statistics" })
         </div>
     </div>
+
     <div style="display:flex; margin:20px">
         <div style="margin:20px">
-            <a class="btn btn-success" href="#" id="repeat">
+            <a class="btn btn-success disabled" href="#" id="repeat">
                 <i class="fa fa-flag-o fa-lg"></i> Еще
             </a>
         </div>
         <div style="margin:20px">
-            <a class="btn btn-danger" href="#" id="remove">
+            <a class="btn btn-danger disabled" href="#" id="remove">
                 <i class="fa fa-trash fa-lg"></i> Удалить
             </a>
         </div>
@@ -181,11 +234,13 @@
     </div>
 
     <div class="gallery" style="display:flex; margin:30px; flex-wrap:wrap">
-        <img src="~/Files/no_image.png" style="width:30%; margin: 30px auto" />
-        <img src="~/Files/no_image.png" style="width:30%; margin: 30px auto" />
-        @*<img src="~/Files/no_image.png" style="width:30%; margin: 30px auto" />
-        <img src="~/Files/no_image.png" style="width:30%; margin: 30px auto" />
-        <img src="~/Files/no_image.png" style="width:30%; margin: 30px auto" />*@
+        <img src="~/Files/no_image.png" style="width:30%; margin: 30px 10px" data-num="0" />
+        <img src="~/Files/no_image.png" style="width:30%; margin: 30px 10px" data-num="1" />
     </div>
-
 </div>
+
+<div class="jumbotron alert-info hidden sandbox">
+    <canvas id="myChart"></canvas>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.js"></script>

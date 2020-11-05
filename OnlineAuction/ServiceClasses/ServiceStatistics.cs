@@ -36,7 +36,7 @@ namespace OnlineAuction.ServiceClasses
                 ProductId = i.ProductId,
                 Product = i.Product
             }).ToList();
-
+            //2) left outer join
             var modelPartOne = from leftItem in auctions
                                join rightItem in modelPartZero
                                on leftItem.ProductId equals rightItem.ProductId
@@ -57,7 +57,7 @@ namespace OnlineAuction.ServiceClasses
             //}
             #endregion
 
-            //2)все аукционы,вкл. с неоформл. заказами, +sum, max
+            //3)все аукционы,вкл. с неоформл. заказами, +sum, max
             List<BetAuctionBO> betAuctionsBO = DependencyResolver.Current.GetService<BetAuctionBO>().LoadAll().ToList();
             var betAuctions = betAuctionsBO.Select(b => mapper.Map<BetAuctionVM>(b));
             var modelPartTwo = from row in betAuctions
@@ -88,7 +88,7 @@ namespace OnlineAuction.ServiceClasses
             //         item.AuctionId, item.AccountId, item.ProductId, item.CountBet, item.MaxBet);
             //}
             #endregion
-            //3) 1-JOIN-2
+            //3) 2-3 LEFT OUTER JOIN
             return from leftItem in modelPartTwo
                    join rightItem in modelPartOne
                    on leftItem.AuctionId equals rightItem.AuctionId
