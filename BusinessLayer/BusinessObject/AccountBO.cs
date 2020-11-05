@@ -4,8 +4,6 @@ using DataLayer.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Unity;
 
 namespace BusinessLayer.BusinessObject
@@ -16,6 +14,7 @@ namespace BusinessLayer.BusinessObject
         #region simple fields
         public int? Id { get; set; }
         public string FullName { get; set; }
+        public int Age { get; set; }
 
         public int ImageId { get; set; }
         public virtual ImageBO Image { get; set; }
@@ -24,13 +23,16 @@ namespace BusinessLayer.BusinessObject
         public string Password { get; set; }
 
         public int AddressId { get; set; }
-        public virtual AddressBO Address  {  get; set;  }
+        public virtual AddressBO Address { get; set; }
 
         public ICollection<RoleBO> RolesBO { get; set; }
 
         public Gender Gender { get; set; }
         public bool IsActive { get; set; }
         public decimal Balance { get; private set; } = 0;
+
+        public DateTime CreateAt { get; set; }
+        public DateTime RemoveAt { get; set; }
         public void AddBalance(decimal value)
         {
             Balance += value;
@@ -38,14 +40,18 @@ namespace BusinessLayer.BusinessObject
         public void AddRole(RoleBO roleBO)
         {
             if (RolesBO.Contains(roleBO))
+            {
                 return;
+            }
 
             RolesBO.Add(roleBO);
         }
         public void RemoveRole(RoleBO role)
         {
-            if (!role.RoleName.Contains("admin") && RolesBO != null) {
-                if (RolesBO.Contains(role)) {
+            if (!role.RoleName.Contains("admin") && RolesBO != null)
+            {
+                if (RolesBO.Contains(role))
+                {
                     RolesBO.Remove(role);
                 }
             }
@@ -86,10 +92,12 @@ namespace BusinessLayer.BusinessObject
         public void Save(AccountBO accountBO)
         {
             var account = mapper.Map<Account>(accountBO);
-            if (accountBO.Id == 0 || account.Id == null) {    //почему Null??????????????
+            if (accountBO.Id == 0 || account.Id == null)
+            {    //почему Null??????????????
                 Add(account);
             }
-            else {
+            else
+            {
                 Update(account);
             }
             unitOfWork.Accounts.Save();

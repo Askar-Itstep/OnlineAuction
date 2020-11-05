@@ -18,9 +18,34 @@
             <dt>
                 @Html.DisplayNameFor(model => model.FullName)
             </dt>
-
             <dd>
                 @Html.DisplayFor(model => model.FullName)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Age)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Age)
+            </dd>
+
+            <dt>
+                @Html.DisplayName("Зарегистрирован")
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.CreateAt.GetDateTimeFormats('d')[0])
+            </dd>
+
+            <dt>
+                @Html.DisplayName("Удален")
+            </dt>
+            <dd>
+                @{
+                    if (ViewBag.DateNull == 0)
+                    {
+                        @Html.DisplayFor(model => model.RemoveAt.GetDateTimeFormats('d')[0])
+                    }
+                }
             </dd>
 
             <dt>

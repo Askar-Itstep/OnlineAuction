@@ -46,23 +46,20 @@ namespace OnlineAuction.Controllers
             var auctionsVM = auctionsBO.Select(a => mapper.Map<AuctionVM>(a)).ToList();
             //т.е. для "мои аукционы"
             if (accountId != null && (int)accountId != 0 && isActor != null)
-            {   
+            {
                 auctionsVM = auctionsVM.Where(a => a.Actor.AccountId == (int)accountId).ToList();
             }
             //--------на главн. разворот -------------------------
             ViewBag.BestAuction = 0;
-
-            var prodBO = DependencyResolver.Current.GetService<ProductBO>();
-            List<ProductBO> productsBO = prodBO.LoadAll().ToList();
-            decimal maxPrice = productsBO.Max(p => p.Price);
-            var bestAuctionBO = auctionsBO.Where(a => a.Product.Price >= maxPrice).FirstOrDefault();
-            var bestAuctionVM = mapper.Map<AuctionVM>(bestAuctionBO);
-            ViewBag.BestAuction = bestAuctionVM;
-            //------изъять глав аукц. из общего списка 
-            var selectBest = auctionsVM.FirstOrDefault(a => a.Id == bestAuctionVM.Id);
-            auctionsVM.Remove(selectBest);
+            GetMainLot(auctionsBO, auctionsVM);
 
             //--------- --Categories-------------
+            auctionsVM = GetCategories(CategoryId, auctionsVM);
+            return View(auctionsVM);
+        }
+
+        private List<AuctionVM> GetCategories(int? CategoryId, List<AuctionVM> auctionsVM)
+        {
             var categoriesBO = DependencyResolver.Current.GetService<CategoryBO>().LoadAll();
             var categoriesVM = categoriesBO.Select(c => mapper.Map<CategoryVM>(c)).ToList();
             var emptyCategory = new CategoryVM { Id = 0, Title = "All" };
@@ -75,7 +72,21 @@ namespace OnlineAuction.Controllers
                     auctionsVM = auctionsVM.Where(a => a.Product.CategoryId == CategoryId).ToList();
                 }
             }
-            return View(auctionsVM);
+
+            return auctionsVM;
+        }
+
+        private void GetMainLot(List<AuctionBO> auctionsBO, List<AuctionVM> auctionsVM)
+        {
+            var prodBO = DependencyResolver.Current.GetService<ProductBO>();
+            List<ProductBO> productsBO = prodBO.LoadAll().ToList();
+            decimal maxPrice = productsBO.Max(p => p.Price);
+            var bestAuctionBO = auctionsBO.Where(a => a.Product.Price >= maxPrice).FirstOrDefault();
+            var bestAuctionVM = mapper.Map<AuctionVM>(bestAuctionBO);
+            ViewBag.BestAuction = bestAuctionVM;
+            //------изъять глав аукц. из общего списка 
+            var selectBest = auctionsVM.FirstOrDefault(a => a.Id == bestAuctionVM.Id);
+            auctionsVM.Remove(selectBest);
         }
 
         //при клике  "сделать ставку" - для хозяина лота будет блокировка! (контроль в клиенте)

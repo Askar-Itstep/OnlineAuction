@@ -25,12 +25,12 @@ namespace DataLayer.Repository
         public BaseRepository<Category> categories;
 
         private Model1 db;
-        private Model2 db2;
+        //private Model2 db2;
 
         public UnitOfWork()
         {
             db = new Model1();
-            db2 = new Model2();
+            //db2 = new Model2();
         }
         public BaseRepository<Account> Accounts
         {

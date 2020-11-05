@@ -4,23 +4,21 @@ using DataLayer.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Unity;
 
 namespace BusinessLayer.BusinessObject
 {
-    public class AuctionBO: BaseBusinessObject
+    public class AuctionBO : BaseBusinessObject
     {
         public int Id { get; set; }
-        
+
         public int ActorId { get; set; }
         public virtual ClientBO Actor { get; set; }
 
         public DateTime BeginTime { get; set; }
 
         public DateTime EndTime { get; set; }
-        
+
         public int ProductId { get; set; }
         public virtual ProductBO Product { get; set; }
 
@@ -28,7 +26,7 @@ namespace BusinessLayer.BusinessObject
         public decimal RedemptionPrice { get; set; }
         public string Description { get; set; }
         public ICollection<BetAuctionBO> BetAuctions { get; set; }
-        
+
         public int WinnerId { get; set; }
         public ClientBO Winner { get; set; }
 
@@ -65,16 +63,18 @@ namespace BusinessLayer.BusinessObject
         //---------------------------------------------
         public AuctionBO LoadAsNoTracking(int id)
         {
-            var auction = unitOfWork.Auctions.GetAllNoTracking().FirstOrDefault(a=>a.Id == id);
+            var auction = unitOfWork.Auctions.GetAllNoTracking().FirstOrDefault(a => a.Id == id);
             return mapper.Map(auction, this);
         }
         public void Save(AuctionBO auctionBO)
         {
             var auction = mapper.Map<Auction>(auctionBO);
-            if (auctionBO.Id == 0) {
+            if (auctionBO.Id == 0)
+            {
                 Add(auction);
             }
-            else {
+            else
+            {
                 Update(auction);
             }
             unitOfWork.Auctions.Save();
@@ -93,6 +93,12 @@ namespace BusinessLayer.BusinessObject
             unitOfWork.Auctions.Delete(auction.Id);
             unitOfWork.Auctions.Save();
         }
-        
+
+        public IEnumerable<AuctionBO> LoadAllWithInclude(params string[] keys)
+        {
+            var auctions = unitOfWork.Auctions.Include(keys);
+            var res = auctions.AsEnumerable().Select(a => mapper.Map<AuctionBO>(a)).ToList();
+            return res;
+        }
     }
 }

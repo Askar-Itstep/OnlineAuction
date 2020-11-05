@@ -4,6 +4,7 @@ using DataLayer.Entities;
 using OnlineAuction.Entities;
 using OnlineAuction.ServiceClasses;
 using OnlineAuction.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -50,6 +51,11 @@ namespace OnlineAuction.Controllers
             if (account == null)
             {
                 return HttpNotFound();
+            }
+            ViewBag.DateNull = 0;
+            if (account.RemoveAt.ToString("d").Contains("3000"))   //GetDateTimeFormats("d"))
+            {
+                ViewBag.DateNull = 1;
             }
             return View(account);
         }
@@ -155,12 +161,13 @@ namespace OnlineAuction.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> DeleteConfirmed(int id)
+        public ActionResult DeleteConfirmed(int id)
         {
-            Account account = await db.Account.FindAsync(id);
-            //db.Account.Remove(account); //нужно не удалять, а помечать как удаленный!
-            account.IsActive = false;
-            await db.SaveChangesAsync();
+            AccountBO accountBO = DependencyResolver.Current.GetService<AccountBO>().Load(id);
+            //нужно не удалять, а помечать как удаленный!
+            accountBO.IsActive = false;
+            accountBO.RemoveAt = DateTime.Now;
+            accountBO.Save(accountBO);
             return RedirectToAction("Index");
         }
         //------------------------------------L.O.G.I.N.-----------------------------------------------------------------------
@@ -193,7 +200,6 @@ namespace OnlineAuction.Controllers
                 RoleAccountLinkBO linkRoleClientAccount = roleAccountBOList.Where(r => r.Role.RoleName.Contains("moder")).FirstOrDefault();    //client
                 if (accountBO.Balance <= 0)
                 {
-
                     if (linkRoleClientAccount != null)
                     {
                         roleAccountBOList.Where(r => r.Role.RoleName.Contains("moder")).FirstOrDefault().DeleteSave(linkRoleClientAccount);
@@ -211,7 +217,7 @@ namespace OnlineAuction.Controllers
                 }
                 FormsAuthentication.SetAuthCookie(model.Login, true);
 
-                //далее accountId,  будут храниться в КЛИЕНТЕ и на СЕРВЕРЕ
+                //далее accountId,  myURI, myRoles отправл.по ajax в КЛИЕНТ
                 var accountId = accountBO.Id;
                 var myURI = accountBO.Image.URI;
                 var isAdmin = roleAccountBOList.Select(r => r.Role.RoleName.ToLower().Contains("admin")).FirstOrDefault();
@@ -275,17 +281,19 @@ namespace OnlineAuction.Controllers
             accountBO.AddressId = (int)addressBO.Id;
             //3
             accountBO.IsActive = true;
+            accountBO.CreateAt = DateTime.Now;
+            accountBO.RemoveAt = DateTime.Parse("3000-01-01 00:00:00");
             accountBO.Save(accountBO);
 
             int accountLastId = accountBO.GetLastId();
             accountBO = accountBO.Load(accountLastId);
 
-            //3)теперь сохр. client
+            //4)теперь сохр. client
             var clientBO = DependencyResolver.Current.GetService<ClientBO>();
-            clientBO.AccountId = (int)accountBO.Id;  //accountLastId;
+            clientBO.AccountId = (int)accountBO.Id;
             clientBO.Save(clientBO);
 
-            //4)роль юзера добавл. -  внес. изм. в табл. связей
+            //4=5)роль юзера добавл. -  внес. изм. в табл. связей
             var roleAccountLinksBO = DependencyResolver.Current.GetService<RoleAccountLinkBO>();
             roleAccountLinksBO.RoleId = roleBO.Id;
             roleAccountLinksBO.AccountId = (int)accountBO.Id; //   

@@ -27,6 +27,7 @@ namespace OnlineAuction.Controllers
                 AccountBO accountBO = DependencyResolver.Current.GetService<AccountBO>().Load((int)accountId);
                 List<RoleAccountLinkBO> rolesAccount = DependencyResolver.Current.GetService<RoleAccountLinkBO>()
                                                                                 .LoadAll().Where(r => r.AccountId == (int)accountId).ToList();
+                //админ - не участв. в чате!
                 var roleAdmin = rolesAccount.FirstOrDefault(r => r.Role.RoleName.Contains("admin"));
                 if (accountBO != null && roleAdmin == null)
                 {
@@ -94,14 +95,13 @@ namespace OnlineAuction.Controllers
                 return new JsonResult { Data = alert, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
             }
         }
-        public ActionResult SwitchContainer(string nameContainer)
-        {
-            if (nameContainer.ToUpper().Contains("AWS"))
-            {
 
-            }
-            return RedirectToAction("Index");
-        }
+        //public ActionResult SwitchContainer(string platform)
+        //{
+        //    //db.Platform->INSERT INTO Platform values(azure, GETDATE()) 
+        //    return RedirectToAction("Index");
+        //}
+
         public ActionResult About()
         {
             ViewBag.Message = "Your application description page.";
@@ -111,8 +111,29 @@ namespace OnlineAuction.Controllers
         public ActionResult Contact()
         {
             ViewBag.Message = "Your contact page.";
-
             return View();
         }
+        ////===================================S.T.A.T.I.S.T.I.C.S.=====================================
+        //public static IEnumerable<StatisticViewModel> StatisticModels { get; set; }
+        //public ActionResult Statistic()
+        //{
+        //    ServiceStatistics.mapper = mapper;
+        //    StatisticModels = ServiceStatistics.CreateStatisticModel();
+        //    #region Print
+        //    //foreach (var item in StatisticModels)
+        //    //{
+        //    //    System.Diagnostics.Debug.WriteLine("auctID: {0}, Fullname: {1}, prodTitle: {2}, countBet: {3}, maxBet{4}, isBuy: {5}", item.AuctionId,
+        //    //        item.Account.FullName, item.Product.Title, item.CountBet, item.MaxBet, item.IsBuy);
+        //    //}
+        //    #endregion
+
+        //    return new JsonResult { Data = "Данные статистики подготовлены!", JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+        //}
+        //public ActionResult CategoriesOnGenderStatistic()
+        //{
+        //    var seq = StatisticModels.Select(s => new { Gender = s.Account.Gender, CategoryId = s.Product.Category.Id, CategoryName = s.Product.Category.Title });
+        //    ViewBag.Seq = seq;
+        //    return PartialView("Partial/_CategoriessOnGender");
+        //}
     }
 }

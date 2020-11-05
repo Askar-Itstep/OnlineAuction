@@ -10,16 +10,16 @@ namespace DataLayer.Repository
     {
         private Model1 db;
         private DbSet<T> dbSet;
-        private Model2 db2;
+        //private Model2 db2;
         public BaseRepository()
         {
             db = new Model1();  //Azure
             dbSet = db.Set<T>();
         }
-        public BaseRepository(Model2 db2)    //AWS
+        public BaseRepository(Model1 db)    //AWS
         {
-            this.db2 = db2;
-            dbSet = db2.Set<T>();
+            this.db = db;
+            dbSet = db.Set<T>();
         }
         public void Create(T item)
         {
