@@ -406,6 +406,7 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
     <Content Include="Scripts\MyGalleryScript\myGalleyScript.js" />
+    <Content Include="Scripts\MyShareScripts\CircularQueue.js" />
     <Content Include="Scripts\MyShareScripts\ShareScripts.js" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
