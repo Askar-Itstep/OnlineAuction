@@ -30,7 +30,7 @@
             })
         })
     })
-
+    //--------------- S.T.A.T.I.S.T.I.C. ---------------------------------
     $(function () {
         $('#link-statistics')
             .css({ "font-size": "24px", "margin-left": "10px", "margin-top": "40px" })
@@ -46,28 +46,31 @@
                         alert(msg)
                     }
                 }).then(
-                    $("img", "div.gallery").each((i, val) => {
-                        $(val).mouseover((e) => {
-                            $(val).attr('src', '/Files/graphic.png');
-                            val.style.cursor = "pointer";
-
-                            AddParagraph(i, val)
-                        })
-                            .mouseout((e) => {
-                                $(val).attr('src', '/Files/podarok.png');
-                                $(val).parent().children('p').remove()
-                            })
-                    }),
-                    $('a#repeat').removeClass("disabled"),
-                    $('a#remove').removeClass("disabled"),
-                    ImgClick(),
-                    RepeatClick(),
-                    RemoveClick()
+                    $("img", "div.gallery").each(
+                        (i, val) => {
+                            setIconHover(i, val)    //mouseover..addParagraph
+                        }),
+                    $('a#repeat').removeClass("disabled"),  //актвир. обработч. клонир.
+                    $('a#remove').removeClass("disabled"),  //тоже но удален.
+                    imgClick(),//->ajaxImgClick()
+                    repeatImg(),  //активир. клонир. изобр.+установ. data-num = numQuery
+                    removeImg()//активир. удал. изобр.
                 )
             })
     })
-    //добав. картинку, пронумер. картинки
-    function RepeatClick() {
+    //Коллекция сопоставлений  index - Tema
+    const arrTems = ["Categories by gender", "Registration by year", "Product by area", "Statistic by all categories", "Products by age", "AVG Prices by category"];
+
+    function setImgGraphic(item) {
+        $(item).attr('src', '/Files/graphic.png');
+        item.style.cursor = "pointer";
+    }
+    function setImgPodarok(item) {
+        $(item).attr('src', '/Files/podarok.png');
+        $(item).parent().children('p').remove()
+    }
+    //обраб. клика - добав. картинку, пронумер. картинки
+    function repeatImg() {
         $('a#repeat').click((e) => {
             e.preventDefault()
             if ($('div.gallery img').length >= 6) {
@@ -77,127 +80,185 @@
             var firstImg = $('div.gallery img').first();
             //console.log(firstImg)
             var clonImg = $(firstImg).clone();
-            var len = $('div.gallery img').length;
+            var lenOld = $('div.gallery img').length;
 
             $('div.gallery').append(clonImg)
 
             $("img", "div.gallery").each((i, val) => {
-                console.log("i: ", i)
+                //console.log("i: ", i)
 
-                if (i >= len) { //старые не трогать!
+                if (i >= lenOld) { //старые не трогать!
                     $(val).attr("data-num", i)
-                    //console.log($(val).attr("data-num"))
-
-                    $(val).mouseover((e) => {
-                        $(val).attr('src', '/Files/graphic.png');
-                        val.style.cursor = "pointer";
-                        AddParagraph(i, val)
-                    })
-                        .mouseout((e) => {
-                            $(val).attr('src', '/Files/podarok.png');
-                            $(val).parent().children('p').remove()
-                        })
+                    setIconHover(i, val)
                 }
-
             })
-            ImgClick()
+            imgClick()  //переустанов.  обраб. клика
         })
     }
     //удалить послед. график
-    function RemoveClick() {
+    function removeImg() {
         $('#remove').click((e) => {
-            $('div.gallery img').last().remove()
+            if ($('div.gallery img').length != 1) {
+                $('div.gallery img').last().remove()
+            }
+            else alert("Error.!")
         })
     }
-    function AddParagraph(i, val) {
-        if (i == 0) {
-            $(val).parent().append('<p>Распределение категорий выбранных товаров по полу</p>')
-            return
-        }
-        else if (i == 1) {
-            $(val).parent().append('<p>Распределение категорий выбранных товаров по территории</p>')
-            return
-        }
-        else if (i == 2) {
-            $(val).parent().append('<p>Распределение пользователей по времени регистрации</p>')
-            return
-        }
-        else if (i == 3) {
-            $(val).parent().append('<p>Распределение популярности категорий (общая совокупность)</p>')
-            return
-        }
-        else if (i == 4) {
-            $(val).parent().append('<p>Распределение популярностипо возрастам</p>')
-            return
-        }
-        else if (i == 5) {
-            $(val).parent().append('<p>Распределение средней стоимости товара по категориям</p>')
-            return
-        }
+    function addParagraph(i, val) {
+        $(val).parent().append('<p>' + arrTems[i] + '</p>')
     }
-    function ImgClick() {
+
+    function setIconHover(i, val) {
+        $(val).mouseover((e) => {
+            setImgGraphic(val);
+            if (arguments[2] == null || arguments[2] == undefined)
+                addParagraph(i, val);
+        }).mouseout((e) => {
+            setImgPodarok(val)
+        })
+    }
+    var tempImgId = sessionStorage.getItem("tempImgId")
+    function imgClick() {    //активир. клик по изобр.
         $('.gallery img').unbind("click")
             .click((e) => {
-                var numQuery = $(e.target).attr("data-num");
-                $.get({
-                    url: "/AdminPanel/BeginHandler?key=" + numQuery,
-                    success: function (obj) {
-                        //console.log(obj.data)
-                        //console.log(obj.data.arr)
-                        CreateGraphic(obj.data)
-                    },
-                    error(xhr, message) {
-                        alert(message)
-                    }
-                })
+                ajaxAfterClickImg(e)
             })
     }
-    function CreateGraphic(data) {
+    function ajaxAfterClickImg(e) {
+        var numQuery = $(e.target).attr("data-num");
+        $.get({
+            url: "/AdminPanel/BeginHandler?key=" + numQuery,
+            success: function (obj) {
+                if (obj.success == true) {
+                    //console.log(obj.data)
+                    //console.log(obj.data.arrData)
+                    CreateGraphic(obj.data, numQuery);
+
+                    $(e.target).unbind()    //на текущ. откл. все событ
+                    addParagraph(parseInt(numQuery), e.target)
+                    //console.log("temp: ",tempImgId)
+                    //console.log("numQuery: ", numQuery)
+
+                    if (numQuery != tempImgId) {//восстанов.  изобр+событ.
+                        $('.gallery img').each((i, item) => {
+                            if ($(item).attr("data-num") == tempImgId) {
+                                setImgPodarok(item)
+                                setIconHover(tempImgId, item)   //+addParagraph
+                                imgClick()  //+addParagraph()
+                            }
+                        })
+                    }
+                    tempImgId = numQuery;
+                    sessionStorage.setItem("tempImgId:", tempImgId)
+                }
+                else {
+                    alert("Error handler data!");
+                }
+            },
+            error(xhr, message) {
+                alert(message)
+            }
+        })
+    }
+    //------------data.arrLabel - array obj---------------------------------------
+    function getNamePropObj(obj) {
+        arr = []
+        for (item of obj) { //iterat array
+            //console.log("item.obj: ", item)
+            inner(item, arr);   //decompos. inner obj
+        }
+        return arr;
+    }
+    function inner(obj, arr) {
+        for (key in obj) {
+            //console.log("obj.key: ", obj[key]);
+            //console.log("key: ", key)
+            if (key != 'color') {
+                arr.push(obj[key])
+            }
+            if (typeof (obj[key]) == "object") {
+                getNamePropObj(obj[key])
+                break;
+            }
+        }
+        return arr;
+    }
+
+    function getLabels(dataLabels, numQuery) {
+        //console.log("dataLabes: ", dataLabels)
+        switch (numQuery) {
+            case 0: return dataLabels
+                break
+            case 1: return parseDate(dataLabels).get();
+                break
+            case 2: return 1;
+                break
+        }
+    }
+    function parseDate(param) {
+        nameLabel = $(param).map((i, val) => {
+            //console.log(val)            //['/Date(100500100500)/',..]
+            var reg = /\d+/gi;
+            res = val.match(reg)
+            res = parseInt(res[0])   //=> 100500100500
+            res = new Date(res)      //17 june 2018 17:00:00
+            res = res.getFullYear()  //2018
+            //console.log(res)
+            return res;
+        })
+        return nameLabel;
+    }
+
+    function createDataSet(nameLabels, numQuery, ringQueue, arrData) {
+        var set = []
+        console.log(nameLabels)
+        $(nameLabels).each((i, item) => {
+            console.log("i: ", i)
+            var _data = Array.from($(arrData[i]).map(function () {
+                return this.Count
+            }))
+            var _label = undefined;
+            switch (parseInt(numQuery)) {
+                case 0: _label = item    // nameLabels[i]
+                    break;
+                case 1: _label = parseDate(nameLabels)[i]
+                    break;
+            }
+            console.log("label: ", _label)
+            var obj = {
+                label: _label,
+                backgroundColor: ringQueue.pop(),
+                borderColor: 'rgb(255, 99, 132)',
+                data: _data
+            };
+            set.push(obj);
+        })
+        return set;
+    }
+    //===============================       CHART.JS         ===============================
+    function CreateGraphic(data, numQuery) {
         $('div.sandbox').removeClass('hidden')
+        //1)-----------массив ярлыков-легенд-------------------------
+        //console.log("arrLabes: ",data.arrLabel);              //[{year: "/Date(100500)"}, {color: "/Date.."}]
+        var nameLabel = getNamePropObj(data.arrLabel);  //["/Date(100500)","/.."]
+        //console.log("nameLabels: ", nameLabel)
+        //2)-----------------массив цветов-------------
+        var arrColor = (data.arrLabel).map(function (i, val) {
+            return i.color;
+        })
+        var ringQueue = new CircularQueue(arrColor.length); //набор цветов долж. быть тот же..
+        ringQueue.addRange(arrColor);                               //..но с разным  порядком
+        var dataSets = createDataSet(nameLabel, numQuery, ringQueue, data.arrData);
+
+        //---------------------chart.js----------------------------
         var ctx = document.getElementById('myChart').getContext('2d');
-        //var x = $(data.arr.countOnCategoriesForMan).map(function () {
-        //    return this.Count
-        //})
-        //console.log((Array.from(x)))
         var chart = new Chart(ctx, {
             type: 'bar',
-
-            data: {
-                labels: data.labels, //["заяц", "eж", "волк"],
-                datasets: [
-
-                    {
-                        label: data.label,
-                        backgroundColor: ['bisque', 'orange', 'green'],
-                        borderColor: 'rgb(255, 99, 132)',
-                        //[5, 2, 20],
-                        data: Array.from($(data.arr.countOnCategoriesForMan).map(function () {
-                            return this.Count
-                        }))
-
-                    },
-                    {
-                        label: data.label,
-                        backgroundColor: ['azure', 'yellow', 'darkkhaki'],
-                        borderColor: 'rgb(255, 99, 132)',
-                        data: Array.from($(data.arr.countOnCategoriesForWomen).map(function () {
-                            return this.Count
-                        }))
-                    },
-                    {
-                        label: data.label,
-                        backgroundColor: ['aqua', 'gold', 'khaki'],
-                        borderColor: 'rgb(255, 99, 132)',
-                        data: Array.from($(data.arr.countOnCategoriesForX).map(function () {
-                            return this.Count
-                        }))
-
-                    }
-                ]
-
+            //отрис.  граф. для наборов из 3 групп
+            data: {                                     //(men, women, X)  //(2017, 2018, 2019)
+                labels: getLabels(data.labels, parseInt(numQuery)),
+                datasets: dataSets              
             },
-
-            // Configuration options go here
             options: {}
         });
     }
@@ -230,7 +291,6 @@
                 <i class="fa fa-trash fa-lg"></i> Удалить
             </a>
         </div>
-
     </div>
 
     <div class="gallery" style="display:flex; margin:30px; flex-wrap:wrap">
@@ -244,3 +304,4 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.js"></script>
+<script src="~/Scripts/MyShareScripts/CircularQueue.js"></script>
