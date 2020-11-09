@@ -132,6 +132,7 @@
                 if (obj.success == true) {
                     //console.log(obj.data)
                     //console.log(obj.data.arrData)
+                    //console.log(obj.data.labels)
                     CreateGraphic(obj.data, numQuery);
 
                     $(e.target).unbind()    //на текущ. откл. все событ
@@ -185,35 +186,37 @@
     }
 
     function getLabels(dataLabels, numQuery) {
-        //console.log("dataLabes: ", dataLabels)
+        console.log("dataLabes: ", dataLabels)       //['/Date(100500100500)/',..]
         switch (numQuery) {
             case 0: return dataLabels
                 break
-            case 1: return parseDate(dataLabels).get();
+            case 1: return parseDate(dataLabels).get(); //['/Date(100500100500)/',..]
                 break
-            case 2: return 1;
+            case 2: return dataLabels;
                 break
         }
     }
-    function parseDate(param) {
+//теперь вызыв. только в getLabels() 
+    function parseDate(param) { 
         nameLabel = $(param).map((i, val) => {
-            //console.log(val)            //['/Date(100500100500)/',..]
+            //console.log("param: ", param)                                                                           
+            //console.log("parseDate val: ", val)            //['/Date(100500100500)/',..]
             var reg = /\d+/gi;
             res = val.match(reg)
             res = parseInt(res[0])   //=> 100500100500
             res = new Date(res)      //17 june 2018 17:00:00
             res = res.getFullYear()  //2018
-            //console.log(res)
+            //console.log("parseDate res: ", res)
             return res;
         })
         return nameLabel;
     }
 
     function createDataSet(nameLabels, numQuery, ringQueue, arrData) {
-        var set = []
-        console.log(nameLabels)
+        var set = []        
+        //console.log("namelabels: ", nameLabels) //['Men','Women', 'X']
         $(nameLabels).each((i, item) => {
-            console.log("i: ", i)
+            //console.log("i: ", i)
             var _data = Array.from($(arrData[i]).map(function () {
                 return this.Count
             }))
@@ -221,10 +224,11 @@
             switch (parseInt(numQuery)) {
                 case 0: _label = item    // nameLabels[i]
                     break;
-                case 1: _label = parseDate(nameLabels)[i]
+                case 1: _label = item//parseDate(nameLabels)[i]
                     break;
+                case 2: _label = item
             }
-            console.log("label: ", _label)
+            //console.log("label: ", _label)
             var obj = {
                 label: _label,
                 backgroundColor: ringQueue.pop(),
@@ -235,19 +239,22 @@
         })
         return set;
     }
-    //===============================       CHART.JS         ===============================
+    //===================       CHART.JS         ===============================
     function CreateGraphic(data, numQuery) {
         $('div.sandbox').removeClass('hidden')
         //1)-----------массив ярлыков-легенд-------------------------
-        //console.log("arrLabes: ",data.arrLabel);              //[{year: "/Date(100500)"}, {color: "/Date.."}]
+        console.log("arrLabes: ", data.arrLabel);              //[{year: "/Date(100500)"}, {color: "/Date.."}]
+        
         var nameLabel = getNamePropObj(data.arrLabel);  //["/Date(100500)","/.."]
-        //console.log("nameLabels: ", nameLabel)
+        //console.log("nameLabels: ", nameLabel)  //[0,1]
         //2)-----------------массив цветов-------------
         var arrColor = (data.arrLabel).map(function (i, val) {
             return i.color;
         })
         var ringQueue = new CircularQueue(arrColor.length); //набор цветов долж. быть тот же..
         ringQueue.addRange(arrColor);                               //..но с разным  порядком
+        var _labels = getLabels(data.labels, parseInt(numQuery))
+        //console.log("labels: ", _labels)
         var dataSets = createDataSet(nameLabel, numQuery, ringQueue, data.arrData);
 
         //---------------------chart.js----------------------------
@@ -255,9 +262,9 @@
         var chart = new Chart(ctx, {
             type: 'bar',
             //отрис.  граф. для наборов из 3 групп
-            data: {                                     //(men, women, X)  //(2017, 2018, 2019)
-                labels: getLabels(data.labels, parseInt(numQuery)),
-                datasets: dataSets              
+            data: {               //[men, women, X]  //[2017, 2018, 2019] //[Nur-Sultan, Almaty, Pavlodar]
+                labels: _labels,
+                datasets: dataSets
             },
             options: {}
         });
