@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using OnlineAuction.ServiceClasses;
 using OnlineAuction.ViewModels;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -76,13 +75,91 @@ namespace OnlineAuction.Controllers
                         res = StatisticByAllCategories();
                         return new JsonResult { Data = new { success = true, data = res }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
                     }
+                case 4:
+                    {
+                        res = CategoriesByAge();
+                        return new JsonResult { Data = new { success = true, data = res }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                    }
+                case 5:
+                    {
+                        res = AvgPriceByCategory();
+                        return new JsonResult { Data = new { success = true, data = res }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                    }
             }
             return new JsonResult { Data = new { success = false, bundle = "Error. Key isNull" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
         }
+        //5
+        private object AvgPriceByCategory()
+        {
+            var seq = StatisticModels.Select(s => new { CategoryTitle = s.Product.Category.Title, Prcies = s.Product.Price });
+            var labelsOx = seq.GroupBy(s => s.CategoryTitle).Select(s => s.First()).Select(s => s.CategoryTitle);//DVD, Book, ..
+            //2
+            var titleAvgPrices = labelsOx.Select(s => "AVG price " + s);
+            var arrLabel = new ArrayList();
+            for (int i = 0; i < titleAvgPrices.Count(); i++)
+            {
+                arrLabel.Add(new { avgPrice = titleAvgPrices.ToList()[i], color = colors[i] });
+            }
+            //3-сред. цены по категориям
 
+            var arrData = new ArrayList();
+            foreach (var category in labelsOx)
+            {
+                var avgPriceCurrCategory = seq.Where(s => s.CategoryTitle == category).GroupBy(c => c.CategoryTitle).Select(s => new
+                {
+                    Category = s.Key,
+                    Count = s.Average(a => a.Prcies)
+                });
+                //System.Diagnostics.Debug.WriteLine("category: {0}, avg: {1}" + avgPriceCurrCategory.Ca);
+                arrData.Add(avgPriceCurrCategory);
+            }
+
+            return new { labels = labelsOx, arrLabel, arrData };
+        }
+
+        //4
+        private object CategoriesByAge()
+        {
+            //юзеров сгруппиров. по 10-летн. группам
+            var seq = StatisticModels.Select(s => new { s.Product.CategoryId, CategoryTitle = s.Product.Category.Title, s.Account.Age });
+            var labelsOx = seq.GroupBy(s => s.Age).Select(s => s.First()).Select(s => s.Age);   //23,30,40..
+            var labels = seq.GroupBy(s => s.CategoryTitle).Select(s => s.First()).Select(s => s.CategoryTitle); //DVD, Book, ..
+
+            var arrLabel = new ArrayList();
+            for (int i = 0; i < labels.Count(); i++)
+            {
+                arrLabel.Add(new { category = labels.ToList()[i], color = colors[i] });
+            }
+            var arrData = new ArrayList();
+
+            foreach (var age in labelsOx)
+            {
+                var countCategoriesByAge = seq.Where(s => s.Age == age).GroupBy(s => s.CategoryTitle).Select(s => new { Category = s.Key, Count = s.Count() });
+                arrData.Add(countCategoriesByAge);
+            }
+            return new { labels = labelsOx, arrLabel, arrData };
+        }
+        //3
         private object StatisticByAllCategories()   //популярность категорий
         {
-            throw new NotImplementedException();
+            var seq = StatisticModels.Select(s => new { CategorId = s.Product.CategoryId, CategoryTitle = s.Product.Category.Title });
+
+            var labelsOx = seq.GroupBy(s => s.CategoryTitle).Select(s => s.First()).Select(s => s.CategoryTitle); //DVD, Electronic..
+
+            var arrData = new ArrayList();
+            var categories = seq.GroupBy(s => s.CategoryTitle).Select(s => new { Category = s.Key, Count = s.Count() });
+            foreach (var categoryWIthCount in categories)
+            {
+                arrData.Add(categoryWIthCount);
+            }
+            var labels = labelsOx;
+            var arrLabel = new ArrayList();
+            for (int i = 0; i < labels.Count(); i++)
+            {
+                var item = arrLabel.Add(new { category = labels.ToList()[i], color = colors[i] });
+            }
+            var res = new { labels = labelsOx, arrLabel, arrData };
+            return res;
         }
 
         //2
@@ -91,20 +168,36 @@ namespace OnlineAuction.Controllers
             var seq = StatisticModels.Select(s => new { CategorId = s.Product.CategoryId, CategoryTitle = s.Product.Category.Title, s.Account.Address.City, s.Account.Address.Street });
             var labels = seq.GroupBy(s => s.City).Select(s => s.First()).Select(s => s.City); //Almaty, Karagandy, Almaty...
             var labelsOx = seq.GroupBy(s => s.CategoryTitle).Select(s => s.First()).Select(s => s.CategoryTitle); //DVD, Electronic..
-            ////var countDVD = seq.Where(s => s.CategoryTitle.Contains("DVD")).GroupBy(s => s.CategoryTitle).Select(s => new { Year = s.Key, Count = s.Count() });
-            var arrData = new ArrayList();
-            //цикл категорий - var countDVD больше не нужен!
-            var categories = seq.GroupBy(s => s.CategoryTitle).Select(s => new { Category = s.Key, Count = s.Count() });
-            foreach (var categoryWIthCount in categories)
-            {
-                System.Diagnostics.Debug.WriteLine("category: " + categoryWIthCount);   //{DVD, 12}, {Elecronic, 4}..
-                arrData.Add(categoryWIthCount);
 
+            #region ExampleAlmaty
+            //var countCategoriasByAlmaty = seq.Where(s => s.City.ToUpper().Contains("ALMATY")).GroupBy(d => d.CategoryTitle).Select(s => new { s.Key, Count = s.Count() });
+            //foreach (var item in countCategoriasByAlmaty)
+            //{
+            //    System.Diagnostics.Debug.WriteLine(item);   //{DVD, 8}, {Book, 2}..
+            //}
+            #endregion
+            //a) foreach
+            var arrData = new ArrayList();
+            foreach (var item in labels)
+            {
+                //System.Diagnostics.Debug.WriteLine(item);
+                var countCategoriasByCity = seq.Where(s => s.City == item).GroupBy(s => s.CategoryTitle).Select(s => new { s.Key, Count = s.Count() });
+                arrData.Add(countCategoriasByCity);
             }
+
+            #region Error path
+            //var categories = seq.GroupBy(s => s.CategoryTitle).Select(s => new { Category = s.Key, Count = s.Count(), Area = s.Select(a => a.City) });
+            //foreach (var categoryWIthCount in categories)
+            //{
+            //    System.Diagnostics.Debug.WriteLine("category: " + categoryWIthCount);   //{DVD, 12}, {Elecronic, 4}..
+            //    arrData.Add(categoryWIthCount);
+            //}
+            #endregion
+
             var arrLabel = new ArrayList();
             for (int i = 0; i < labels.Count(); i++)
             {
-                var item = arrLabel.Add(new { area = labels.ToList()[i], color = colors[i] });//Error
+                var item = arrLabel.Add(new { area = labels.ToList()[i], color = colors[i] });
                 //var item2 = arrLabel.Add(new { category = categories.ToList()[i].Category, color = colors[i] });
             }
             var res = new { labels = labelsOx, arrLabel, arrData };
@@ -135,7 +228,7 @@ namespace OnlineAuction.Controllers
             var res = new { labels = labelsOx, arrLabel, arrData };
             return res;
         }
-        //0
+        //0------------------------------------------
         private object CategoriesByGenderStatistic()
         {
             var seq = StatisticModels.Select(s => new { s.Account.Gender, CategoryId = s.Product.Category.Id, CategoryName = s.Product.Category.Title });
@@ -147,9 +240,9 @@ namespace OnlineAuction.Controllers
             #endregion
             var labels = seq.GroupBy(s => s.CategoryId).Select(s => s.First()).Select(s => s.CategoryName); //DVD, Electronic..
 
-            var countOnCategoriesForMan = seq.Where(s => s.Gender == Gender.MEN).GroupBy(s => s.CategoryId).Select(s => new { CategoryId = s.Key, Count = s.Count() });
-            var countOnCategoriesForWomen = seq.Where(s => s.Gender == Gender.WOMEN).GroupBy(s => s.CategoryId).Select(s => new { CategoryId = s.Key, Count = s.Count() });
-            var countOnCategoriesForX = seq.Where(s => s.Gender == Gender.UNDEFINED).GroupBy(
+            var countByCategoriesForMan = seq.Where(s => s.Gender == Gender.MEN).GroupBy(s => s.CategoryId).Select(s => new { CategoryId = s.Key, Count = s.Count() });
+            var countByCategoriesForWomen = seq.Where(s => s.Gender == Gender.WOMEN).GroupBy(s => s.CategoryId).Select(s => new { CategoryId = s.Key, Count = s.Count() });
+            var countByCategoriesForX = seq.Where(s => s.Gender == Gender.UNDEFINED).GroupBy(
                                                                                                  s => s.CategoryId).Select(s => new { CategoryId = s.Key, Count = s.Count() });
             #region Print
             //foreach (var item in countOnCategoriesForMan)
@@ -158,7 +251,7 @@ namespace OnlineAuction.Controllers
             //}
             #endregion
             var arrLabel = new ArrayList { new { gender = "Mens", color = "bisque" }, new { gender = "Womens", color = "orange" }, new { gender = "X", color = "green" } };
-            var arrData = new ArrayList { countOnCategoriesForMan, countOnCategoriesForWomen, countOnCategoriesForX };//new {  };
+            var arrData = new ArrayList { countByCategoriesForMan, countByCategoriesForWomen, countByCategoriesForX };
             //-------
             var res = new { labels, arrLabel, arrData };
             return res;
