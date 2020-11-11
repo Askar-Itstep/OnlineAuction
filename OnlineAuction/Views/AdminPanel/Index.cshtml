@@ -192,14 +192,22 @@
                 break
             case 1: return parseDate(dataLabels).get(); //['/Date(100500100500)/',..]
                 break
-            case 2: return dataLabels;
-                break
+                {
+                    //case 2: return dataLabels;
+                    //    break
+                    //case 3: return dataLabels;
+                    //    break
+
+                    //case 4: return dataLabels;
+                    //    break
+                }
+            default: return dataLabels;
         }
     }
-//теперь вызыв. только в getLabels() 
-    function parseDate(param) { 
+    //теперь вызыв. только в getLabels()
+    function parseDate(param) {
         nameLabel = $(param).map((i, val) => {
-            //console.log("param: ", param)                                                                           
+            //console.log("param: ", param)
             //console.log("parseDate val: ", val)            //['/Date(100500100500)/',..]
             var reg = /\d+/gi;
             res = val.match(reg)
@@ -213,24 +221,29 @@
     }
 
     function createDataSet(nameLabels, numQuery, ringQueue, arrData) {
-        var set = []        
+        var set = []
         //console.log("namelabels: ", nameLabels) //['Men','Women', 'X']
         $(nameLabels).each((i, item) => {
             //console.log("i: ", i)
             var _data = Array.from($(arrData[i]).map(function () {
                 return this.Count
             }))
-            var _label = undefined;
-            switch (parseInt(numQuery)) {
-                case 0: _label = item    // nameLabels[i]
-                    break;
-                case 1: _label = item//parseDate(nameLabels)[i]
-                    break;
-                case 2: _label = item
+            {
+                //var _label = undefined;
+                //switch (parseInt(numQuery)) {
+                //    case 0: _label = item    // nameLabels[i]
+                //        break;
+                //    case 1: _label = item//parseDate(nameLabels)[i]
+                //        break;
+                //    case 2: _label = item
+                //        break;
+                //    case 3: _label = item
+                //        break;
+                //}
             }
             //console.log("label: ", _label)
             var obj = {
-                label: _label,
+                label: item, //_label,
                 backgroundColor: ringQueue.pop(),
                 borderColor: 'rgb(255, 99, 132)',
                 data: _data
@@ -244,7 +257,7 @@
         $('div.sandbox').removeClass('hidden')
         //1)-----------массив ярлыков-легенд-------------------------
         console.log("arrLabes: ", data.arrLabel);              //[{year: "/Date(100500)"}, {color: "/Date.."}]
-        
+
         var nameLabel = getNamePropObj(data.arrLabel);  //["/Date(100500)","/.."]
         //console.log("nameLabels: ", nameLabel)  //[0,1]
         //2)-----------------массив цветов-------------
