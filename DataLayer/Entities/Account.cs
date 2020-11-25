@@ -31,8 +31,8 @@ namespace DataLayer.Entities
         [StringLength(255)]
         public string Password { get; set; }
 
-        public DateTime CreateAt { get; set; }
-        public DateTime RemoveAt { get; set; }
+        public DateTime? CreateAt { get; set; }
+        public DateTime? RemoveAt { get; set; }
         private ICollection<Role> Roles { get; set; }   //-> RoleAccountLinks
 
         public void SetRoles(List<Role> roles)

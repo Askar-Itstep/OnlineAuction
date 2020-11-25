@@ -1,4 +1,9 @@
-﻿using AutoMapper;
+﻿using Amazon;
+using Amazon.Runtime;
+using Amazon.Runtime.CredentialManagement;
+using Amazon.S3;
+using Amazon.S3.Model;
+using AutoMapper;
 using BusinessLayer.BusinessObject;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
@@ -14,6 +19,7 @@ using System.Web.Mvc;
 
 namespace OnlineAuction.ServiceClasses
 {
+    //--------AZURE------------------------
     public class BlobHelper
     {
         const string blobContainerName = "blobcontainer";
@@ -45,7 +51,7 @@ namespace OnlineAuction.ServiceClasses
             }
             return imageBase;
         }
-
+        //запись в AzureBlobContainer-----------------
         public static async Task<bool> UploadFile(HttpPostedFileBase upload)
         {
             try
@@ -70,7 +76,48 @@ namespace OnlineAuction.ServiceClasses
                 return false;
             }
         }
+        //---------------------------- AWS-----------------------------------
 
+        public static async Task<bool> UploadJsonAWSbucket(string filepath)
+        {
+            bool flagGoodRequest = true;
+            try
+            {
+                var options = new CredentialProfileOptions
+                {
+                    AccessKey = "AKIA4LDGGJIMCE3BJE3C",     //надо еще спрятать!
+                    SecretKey = "FVTXKbTJzcQo0onZ2H0vUrQESFAcx71nsmKiuG+A"
+                };
+                var profile = new CredentialProfile("dotnet-tutorials", options);
+                profile.Region = RegionEndpoint.EUWest1;         //.USWest2;
+                var sharedFile = new SharedCredentialsFile(); 
+                sharedFile.RegisterProfile(profile);
 
+                if (sharedFile.TryGetProfile("dotnet-tutorials", out profile) 
+                    && AWSCredentialsFactory.TryGetAWSCredentials(profile, sharedFile, out AWSCredentials awsCredentials))
+                {
+                    using (var client = new AmazonS3Client(awsCredentials, profile.Region))
+                    {
+                        //a) Create a PutObject request
+                        PutObjectRequest request = new PutObjectRequest
+                        {
+                            BucketName = "auction-predict-bucket",
+                            Key = "json.txt",
+                            FilePath = filepath     //@"C:\Users\Askar\OneDrive\Pictures\ASP.Net\podarok.png"
+                        };
+
+                        //b) Put object
+                        PutObjectResponse response = await client.PutObjectAsync(request);
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+                flagGoodRequest = false;
+                System.Diagnostics.Debug.WriteLine("Error: " + e.Message);
+            }
+            if (flagGoodRequest) return true;
+            else return false;
+        }
     }
 }

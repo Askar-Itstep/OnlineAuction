@@ -30,33 +30,34 @@
             })
         })
     })
+    //CSS for Links
+    $(function () {
+        $('a').css({ "font-size": "18px", "margin-left": "10px", "margin-top": "40px" })
+    })
     //--------------- S.T.A.T.I.S.T.I.C. ---------------------------------
     $(function () {
-        $('#link-statistics')
-            .css({ "font-size": "24px", "margin-left": "10px", "margin-top": "40px" })
-            .click(e => {
-                e.preventDefault()
-                $.get({
-                    url: "/AdminPanel/Statistic",
-                    success: function (data) {
-                        alert(data)
-                        $("img", "div.gallery").attr('src', '/Files/podarok.png')
-                    },
-                    error(xhr, msg) {
-                        alert(msg)
-                    }
-                }).then(
-                    $("img", "div.gallery").each(
-                        (i, val) => {
-                            setIconHover(i, val)    //mouseover..addParagraph
-                        }),
-                    $('a#repeat').removeClass("disabled"),  //актвир. обработч. клонир.
-                    $('a#remove').removeClass("disabled"),  //тоже но удален.
-                    imgClick(),//->ajaxImgClick()
-                    repeatImg(),  //активир. клонир. изобр.+установ. data-num = numQuery
-                    removeImg()//активир. удал. изобр.
-                )
-            })
+        $('#link-statistics').click(e => {
+            e.preventDefault()
+            $.get({
+                url: "/AdminPanel/Statistic",
+                success: function (data) {
+                    alert(data)  //здесь нет набора данных, только извещение -  данные сохр. на сервере
+                    $("img", "div.gallery").attr('src', '/Files/podarok.png')
+                },
+                error(xhr, msg) {
+                    alert(msg)
+                }
+            }).then(
+                $("img", "div.gallery").each(
+                    (i, val) => {
+                        setIconHover(i, val)    //mouseover..addParagraph
+                    }),
+
+                imgClick(),//->ajaxImgClick()
+                repeatImg(),  //активир. клонир. изобр.+установ. data-num = numQuery
+                removeImg()//активир. удал. изобр.
+            )
+        })
     })
     //Коллекция сопоставлений  index - Tema
     const arrTems = ["Categories by gender", "Registration by year", "Product by area", "Statistic by all categories", "Products by age", "AVG Prices by category"];
@@ -128,7 +129,7 @@
         var numQuery = $(e.target).attr("data-num");
         $.get({
             url: "/AdminPanel/BeginHandler?key=" + numQuery,
-            success: function (obj) {
+            success: function (obj) {   //server-response
                 if (obj.success == true) {
                     //console.log(obj.data)
                     //console.log(obj.data.arrData)
@@ -151,6 +152,9 @@
                     }
                     tempImgId = numQuery;
                     sessionStorage.setItem("tempImgId:", tempImgId)
+                    $('a#repeat').removeClass("disabled")  //актвир. обработч. клонир.
+                    $('a#remove').removeClass("disabled")  //тоже но удален.
+                    $('a#link-predictor').removeClass("disabled")
                 }
                 else {
                     alert("Error handler data!");
@@ -161,7 +165,7 @@
             }
         })
     }
-    //------------data.arrLabel - array obj---------------------------------------
+    //-----------------------------------------data.arrLabel - array obj----------------------------------------------
     function getNamePropObj(obj) {
         arr = []
         for (item of obj) { //iterat array
@@ -186,7 +190,7 @@
     }
 
     function getLabels(dataLabels, numQuery) {
-        console.log("dataLabes: ", dataLabels)       //['/Date(100500100500)/',..]
+        //console.log("dataLabes: ", dataLabels)       //['/Date(100500100500)/',..]
         switch (numQuery) {
             case 0: return dataLabels
                 break
@@ -242,6 +246,7 @@
                 //}
             }
             //console.log("label: ", _label)
+            //console.log("_data: ", _data)
             var obj = {
                 label: item, //_label,
                 backgroundColor: ringQueue.pop(),
@@ -256,7 +261,7 @@
     function CreateGraphic(data, numQuery) {
         $('div.sandbox').removeClass('hidden')
         //1)-----------массив ярлыков-легенд-------------------------
-        console.log("arrLabes: ", data.arrLabel);              //[{year: "/Date(100500)"}, {color: "/Date.."}]
+        //console.log("arrLabes: ", data.arrLabel);              //[{year: "/Date(100500)"}, {color: "/Date.."}]
 
         var nameLabel = getNamePropObj(data.arrLabel);  //["/Date(100500)","/.."]
         //console.log("nameLabels: ", nameLabel)  //[0,1]
@@ -266,22 +271,68 @@
         })
         var ringQueue = new CircularQueue(arrColor.length); //набор цветов долж. быть тот же..
         ringQueue.addRange(arrColor);                               //..но с разным  порядком
-        var _labels = getLabels(data.labels, parseInt(numQuery))
-        //console.log("labels: ", _labels)
-        var dataSets = createDataSet(nameLabel, numQuery, ringQueue, data.arrData);
+        _labels = getLabels(data.labels, parseInt(numQuery))
 
+        dataSets = createDataSet(nameLabel, numQuery, ringQueue, data.arrData);
+
+        //console.log("labels: ", _labels)
+        //console.log("dataSets: ", dataSets)
         //---------------------chart.js----------------------------
         var ctx = document.getElementById('myChart').getContext('2d');
         var chart = new Chart(ctx, {
             type: 'bar',
             //отрис.  граф. для наборов из 3 групп
-            data: {               //[men, women, X]  //[2017, 2018, 2019] //[Nur-Sultan, Almaty, Pavlodar]
-                labels: _labels,
+            data: {
+                labels: _labels,    //[DVD, Books, Electronic] ;[2017, 2018, 2019] - oX
                 datasets: dataSets
             },
             options: {}
         });
     }
+    var _labels = []
+    var dataSets = []
+    //=================AWS Lambda-Predict ================================
+    //Отправить json-dataframe в AWS-bucket
+    $(function () {
+        $('#link-predictor').click((e) => {
+            e.preventDefault();
+            $.ajax({
+                method: 'GET',
+                url: "/AdminPanel/Index?keyPython=1",
+                success: function (data) {
+                    if (data.success) {
+                        alert(data.message)
+                        $('#link-predict-json').removeClass('disabled')
+                    }
+                    else alert(data.message)
+                },
+                error(xhr, msg) {
+                    alert(msg)
+                }
+            })
+        })
+        //вызвать  AWS-lambda  по keyOne, keyTwo
+        $('#link-predict-json').click((e) => {
+            e.preventDefault();
+            console.log("labels[0]: ", _labels[0])
+            console.log("dataSets[0].label: ", dataSets[0].label)
+        
+            $.ajax({
+            url: "https://nzz4kopwfc.execute-api.us-west-2.amazonaws.com/dev2",
+            data: { keyOne: _labels[0], keyTwo: dataSets[0].label },
+            method: 'Get',
+            success: function (data) {
+                //alert(data)
+                console.log("data: ", data.body)
+            },
+            error(xhr, msg) {
+                alert(msg)
+            }
+        })
+        })
+
+
+    })
 </script>
 <h2>Administrator Panel</h2>
 
@@ -295,8 +346,12 @@
                 Azure container
             </div>
         </div>
-        <div class="col-lg-6">
+        <div class="col-lg-3">
             @Html.ActionLink("Подготовить статистику", "Index", "AdminPanel", null, new { id = "link-statistics" })
+        </div>
+        <div class="col-lg-3">
+            @Html.ActionLink("Отправить json-dataframe в AWS-bucket для подготовки прогноза", "Index", 
+                                                                                            "AdminPanel", new { keyPython = 1 }, new { id = "link-predictor", @class = "disabled" })
         </div>
     </div>
 
@@ -320,6 +375,10 @@
 </div>
 
 <div class="jumbotron alert-info hidden sandbox">
+    <p>Распределние статистики по выборкам</p>
+    <div class="col-lg-3">
+        <p><a class="btn btn-link disabled" href="https://nzz4kopwfc.execute-api.us-west-2.amazonaws.com/dev2" id="link-predict-json">Расчитать прогноз &raquo;</a></p>
+    </div>
     <canvas id="myChart"></canvas>
 </div>
 

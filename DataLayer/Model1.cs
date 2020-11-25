@@ -45,6 +45,8 @@ namespace OnlineAuction.Entities
         private string connectName = "blobContainer";
         private string uripath = "https://storageauction.blob.core.windows.net/blobcontainer";
         private string blobContainerName = "blobcontainer";    //именя контейнеров в Azure
+
+        
         public static bool UploadFile(FileStream fileStream, string connectName, string boxName)
         {
             try
@@ -69,7 +71,7 @@ namespace OnlineAuction.Entities
                 return false;
             }
         }
-        protected override void Seed(Model1 context)
+        protected override async void Seed(Model1 context)
         {
             //1) Roles
             Role adminRole = new Role { RoleName = "admin" };
@@ -82,8 +84,8 @@ namespace OnlineAuction.Entities
             context.Roles.Add(clientRole);
 
             //2) Images            
-            //----------нужно загрузить из папки File: 1-ый файл для лиц; 2-ой для фона---------------
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Files"); //../Sportclub/Sportclub/Files
+            //----------нужно загрузить из папки File: 
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Files"); 
             DirectoryInfo dir = new DirectoryInfo(path);
             List<string> filenames = new List<string>();
             foreach (var item in dir.GetFiles())
@@ -130,7 +132,7 @@ namespace OnlineAuction.Entities
             };
             context.Categories.AddRange(categories);
 
-            context.SaveChanges();
+            await context.SaveChangesAsync();
             base.Seed(context);
         }
     }

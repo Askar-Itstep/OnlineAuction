@@ -57,7 +57,7 @@ namespace OnlineAuction.ServiceClasses
             //}
             #endregion
 
-            //3)все аукционы,вкл. с неоформл. заказами, +sum, max
+            //3)все аукционы, вкл. с неоформл. заказами, +sum, max
             List<BetAuctionBO> betAuctionsBO = DependencyResolver.Current.GetService<BetAuctionBO>().LoadAll().ToList();
             var betAuctions = betAuctionsBO.Select(b => mapper.Map<BetAuctionVM>(b));
             var modelPartTwo = from row in betAuctions
@@ -73,6 +73,7 @@ namespace OnlineAuction.ServiceClasses
                                select new StatisticViewModel
                                {
                                    AuctionId = grouping.Key.Auction.Id,
+                                   DateOrder = grouping.Key.Auction.EndTime,
                                    AccountId = grouping.Key.AccountId,
                                    Account = grouping.Key.Account,
                                    ProductId = grouping.Key.Auction.ProductId,
@@ -98,6 +99,7 @@ namespace OnlineAuction.ServiceClasses
                    {
                        AuctionId = leftItem.AuctionId,
                        AccountId = leftItem.AccountId,
+                       DateOrder = leftItem.DateOrder,
                        Account = leftItem.Account,
                        ProductId = leftItem.ProductId,
                        Product = leftItem.Product,

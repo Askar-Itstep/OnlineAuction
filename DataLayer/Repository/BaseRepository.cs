@@ -1,6 +1,7 @@
 ﻿using OnlineAuction.Entities;
 using System;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Validation;
 using System.Linq;
 
@@ -78,6 +79,16 @@ namespace DataLayer.Repository
                         System.Diagnostics.Debug.WriteLine(err.ErrorMessage + "");
                     }
                 }
+            }
+            catch (DbUpdateException exc)
+            {   //
+                System.Diagnostics.Debug.WriteLine( $"db update error: {exc.InnerException.Message}");
+                throw;
+            }
+            catch (Exception exc)
+            {
+                System.Diagnostics.Debug.WriteLine($"generic error: {exc.Message}");
+                throw;
             }
         }
 

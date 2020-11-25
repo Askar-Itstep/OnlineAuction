@@ -173,6 +173,10 @@
     <Compile Include="Migrations\202011021732588_Add-DateTimeFields.designer.cs">
       <DependentUpon>202011021732588_Add-DateTimeFields.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202011241209253_UpdateAccount-DateTime_isNullable.cs" />
+    <Compile Include="Migrations\202011241209253_UpdateAccount-DateTime_isNullable.designer.cs">
+      <DependentUpon>202011241209253_UpdateAccount-DateTime_isNullable.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -245,6 +249,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202011021732588_Add-DateTimeFields.resx">
       <DependentUpon>202011021732588_Add-DateTimeFields.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202011241209253_UpdateAccount-DateTime_isNullable.resx">
+      <DependentUpon>202011241209253_UpdateAccount-DateTime_isNullable.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

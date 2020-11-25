@@ -87,7 +87,7 @@ namespace OnlineAuction.Controllers
                 if (flagBuyNow == true) {
 
                     //-------------закрыть аукцион!-----------------------------------------
-                    BetAuctionBO winnBet = HelperOrderCreate.CloseAuction(auctionBO, endPrice, orderBO);    //auctionId, 
+                    BetAuctionBO winnBet = HelperOrderCreate.CloseAuction(auctionBO, endPrice, orderBO);    //победная ставка  +изм. дату закрытия             
                     
                     //------------отправить письма участникам о заверш. аукц.-----------------
                     EmailScheduler.AuctionId = auctionBO.Id;
