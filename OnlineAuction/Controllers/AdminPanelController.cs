@@ -1,9 +1,15 @@
 ﻿using AutoMapper;
+using IronPython.Hosting;
+using Microsoft.Scripting.Hosting;
 using OnlineAuction.ServiceClasses;
 using OnlineAuction.ViewModels;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 
 namespace OnlineAuction.Controllers
@@ -16,14 +22,61 @@ namespace OnlineAuction.Controllers
         {
             this.mapper = mapper;
         }
-        public ActionResult Index(int? statistic)
+        public async Task<ActionResult> Index(int? keyPython)
         {
+            if (keyPython != null)
+            {
+                //1)sequens ->Json
+                string json = JsonSerializer.Serialize(StatisticModels);
+                //System.Diagnostics.Debug.WriteLine("json: ", json);
+                #region IronPython - не работ.!
+                ////2)отправить в Python json-data
+                //ScriptEngine engine = Python.CreateEngine();
+                //ScriptScope scope = engine.CreateScope();
+                ////3-------------------------------------
+                //var scriptPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PythonScript/factorial.py");//HttpRuntime.
+                //engine.ExecuteFile(scriptPath, scope);
+                //dynamic function = scope.GetVariable("factorial");
+                //int x = 7;
+                //dynamic res = function(x);
+                //System.Diagnostics.Debug.WriteLine("res: " + (int)res);
+                ////4----------------------------
+                //scope.SetVariable("json", json);
+                //var scriptPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PythonScript/pandora.py");
+                //engine.ExecuteFile(scriptPath, scope);
+                //var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PythonScript/json.txt");
+                //System.IO.File.WriteAllText(filePath, json);
+                ////4а)дополнить текущ. модель нов. данными
+                ////4б)отправ. расшир .данн. в HTML в соотв. метод
+                #endregion 
+
+                ////надо инскапсулир. python-code в AWS-lambda  или   исп. библ. keras.net
+                ////1)-снчала запись файла json     
+                ////-----на сервере из-за этого ошибка- надо сразу писать в AWS --------------
+                var filePath = "";
+                try
+                {
+                    filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PythonScript/json.txt");
+                    System.IO.File.WriteAllText(filePath, json);
+                }
+                catch(Exception e)
+                {
+                    return new JsonResult { Data = new { success = false, message = e.Message }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                }
+
+                //2)-json ->save AWS S3Bucket, s3Bucket->lambda AWS
+                var flagWrite = await BlobHelper.UploadJsonAWSbucket(filePath);
+                if (flagWrite == true)
+                    return new JsonResult { Data = new { success = true, message = "Файл отправлен в AWS" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                else
+                    return new JsonResult { Data = new { success = false, message = "Error2" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+            }
             return View();
         }
 
         public ActionResult SwitchContainer(string platform)
         {
-            //db.Platform->INSERT INTO Platform values(azure, GETDATE()) 
+            //db.Platform->INSERT INTO Platform values(azure, GETDATE()) ?? - или надо делать свой Dependensy Rsolver??
             return RedirectToAction("Index");
         }
         //===================================S.T.A.T.I.S.T.I.C.S.=====================================
@@ -34,11 +87,11 @@ namespace OnlineAuction.Controllers
             ServiceStatistics.mapper = mapper;
             StatisticModels = ServiceStatistics.CreateStatisticModel();
             #region Print
-            //foreach (var item in StatisticModels)
-            //{
-            //    System.Diagnostics.Debug.WriteLine("auctID: {0}, Fullname: {1}, prodTitle: {2}, countBet: {3}, maxBet{4}, isBuy: {5}", item.AuctionId,
-            //        item.Account.FullName, item.Product.Title, item.CountBet, item.MaxBet, item.IsBuy);
-            //}
+            foreach (var item in StatisticModels)
+            {
+                System.Diagnostics.Debug.WriteLine("auctID: {0}, Fullname: {1}, prodTitle: {2}, countBet: {3}, maxBet{4}, isBuy: {5}", item.AuctionId,
+                    item.Account.FullName, item.Product.Title, item.CountBet, item.MaxBet, item.IsBuy);
+            }
             #endregion
 
             return new JsonResult { Data = "Данные статистики подготовлены!", JsonRequestBehavior = JsonRequestBehavior.AllowGet };
@@ -46,13 +99,6 @@ namespace OnlineAuction.Controllers
         public ActionResult BeginHandler(int? key)
         {
             object res = null;
-            #region Remove
-            //if (key == null)
-            //{
-            //    return new JsonResult { Data = new { success = false, bundle = "Error. Key isNull" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
-            //}
-            //else 
-            #endregion
             switch (key)
             {
                 case 0:

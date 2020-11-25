@@ -1,8 +1,11 @@
-﻿namespace OnlineAuction.ViewModels
+﻿using System;
+
+namespace OnlineAuction.ViewModels
 {
     public class StatisticViewModel
     {
         public int AuctionId { get; set; }
+        public DateTime DateOrder { get; set; }
 
         public int AccountId { get; set; }
         public virtual AccountVM Account { get; set; }

@@ -110,18 +110,27 @@ namespace OnlineAuction.Controllers
             { //при простом изм. аккаунта
                 if (ModelState.IsValid)
                 {
+                    //CreateAt, RemoveAt - здесь const!
+                    var accountId = (int)Session["accountId"];
+                    AccountBO accountBaseBO = DependencyResolver.Current.GetService<AccountBO>().Load(accountId);
+                    DateTime dateCreate = accountBaseBO.CreateAt;
+                    DateTime dateRemove = accountBaseBO.RemoveAt;
+
                     //при изм.адр. -адр. не добвал. в БД, а измен.
                     AddressVM address = account.Address;
                     AddressBO addressBO = mapper.Map<AddressBO>(address);
                     addressBO.Save(addressBO);
 
                     AccountBO accountBO = mapper.Map<AccountBO>(account);
-                    if (upload != null)
+                    accountBO.CreateAt = dateCreate;
+                    accountBO.RemoveAt = dateRemove;
+                    //изображение
+                    if (upload != null) 
                     {
                         ImageVM imageVM = DependencyResolver.Current.GetService<ImageVM>();
                         ImageBO imageBase = DependencyResolver.Current.GetService<ImageBO>();
                         var imgBase = await BlobHelper.SetImageAsync(upload, imageVM, imageBase, mapper, accountBO);//если такого нет - записать в БД и вернуть! 
-                    }
+                    }                  
                     accountBO.Save(accountBO);  //address -> cascade?
                     return new JsonResult { Data = "Данные записаны", JsonRequestBehavior = JsonRequestBehavior.DenyGet };
                 }
@@ -185,7 +194,8 @@ namespace OnlineAuction.Controllers
                 var accountBO = DependencyResolver.Current.GetService<AccountBO>();
                 var roleAccountBO = DependencyResolver.Current.GetService<RoleAccountLinkBO>();
 
-                var accountBOList = accountBO.LoadAll().Where(a => a.IsActive); //только действующие аккаунты
+                var accountBOList = accountBO.LoadAll().ToList();
+                var findAccount =accountBOList.Where(a => a.IsActive); //только действующие аккаунты
                 accountBO = accountBOList.FirstOrDefault(u =>
                             (u.Email.Contains(model.Login) || u.Email.Contains(model.Login)) && u.Password.Equals(model.Password));
                 if (accountBO is null)
