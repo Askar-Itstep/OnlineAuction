@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -51,7 +52,7 @@ namespace OnlineAuction.ServiceClasses
             }
             return imageBase;
         }
-        //запись в AzureBlobContainer-----------------
+        //----------------запись в AzureBlobContainer-------------------------------
         public static async Task<bool> UploadFile(HttpPostedFileBase upload)
         {
             try
@@ -60,7 +61,7 @@ namespace OnlineAuction.ServiceClasses
                 string storagekey = ConfigurationManager.ConnectionStrings["blobContainer"].ConnectionString;
                 CloudStorageAccount storageAccount = CloudStorageAccount.Parse(storagekey);
                 CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
-                CloudBlobContainer container = blobClient.GetContainerReference(blobContainerName); //.. .windows.net/containerblob";
+                CloudBlobContainer container = blobClient.GetContainerReference(blobContainerName);             //.. .windows.net/containerblob";
                 container.SetPermissions(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Blob });
                 CloudBlockBlob blockBlob = container.GetBlockBlobReference(filename);
 
@@ -76,7 +77,8 @@ namespace OnlineAuction.ServiceClasses
                 return false;
             }
         }
-        //---------------------------- AWS-----------------------------------
+
+        //--------------------------------------- AWS-------------------------------------------------------
 
         public static async Task<bool> UploadJsonAWSbucket(string filepath)
         {
@@ -85,15 +87,15 @@ namespace OnlineAuction.ServiceClasses
             {
                 var options = new CredentialProfileOptions
                 {
-                    AccessKey = "AKIA4LDGGJIMCE3BJE3C",     //надо еще спрятать!
+                    AccessKey = "AKIA4LDGGJIMCE3BJE3C",
                     SecretKey = "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"
                 };
                 var profile = new CredentialProfile("dotnet-tutorials", options);
                 profile.Region = RegionEndpoint.EUWest1;         //.USWest2;
-                var sharedFile = new SharedCredentialsFile(); 
+                var sharedFile = new SharedCredentialsFile();
                 sharedFile.RegisterProfile(profile);
 
-                if (sharedFile.TryGetProfile("dotnet-tutorials", out profile) 
+                if (sharedFile.TryGetProfile("dotnet-tutorials", out profile)
                     && AWSCredentialsFactory.TryGetAWSCredentials(profile, sharedFile, out AWSCredentials awsCredentials))
                 {
                     using (var client = new AmazonS3Client(awsCredentials, profile.Region))
@@ -102,8 +104,8 @@ namespace OnlineAuction.ServiceClasses
                         PutObjectRequest request = new PutObjectRequest
                         {
                             BucketName = "auction-predict-bucket",
-                            Key = "json.txt",
-                            FilePath = filepath     //@"C:\Users\Askar\OneDrive\Pictures\ASP.Net\podarok.png"
+                            Key = "json.json",
+                            FilePath = filepath
                         };
 
                         //b) Put object
@@ -111,7 +113,7 @@ namespace OnlineAuction.ServiceClasses
                     }
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 flagGoodRequest = false;
                 System.Diagnostics.Debug.WriteLine("Error: " + e.Message);
@@ -119,5 +121,65 @@ namespace OnlineAuction.ServiceClasses
             if (flagGoodRequest) return true;
             else return false;
         }
+
+        internal static async Task<Tuple<bool, string>> PutFileToS3Async(string bucketname, string keyname, string json)
+        {
+            // Create file in memory
+            UnicodeEncoding uniEncoding = new UnicodeEncoding();
+
+            // Create the data to write to the stream.
+            byte[] memstring = uniEncoding.GetBytes(json);
+
+
+            try
+            {
+                var options = new CredentialProfileOptions
+                {
+                    AccessKey = "AKIA4LDGGJIMCE3BJE3C",
+                    SecretKey = "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"
+                };
+                var profile = new CredentialProfile("dotnet-tutorials", options);
+                profile.Region = RegionEndpoint.EUWest1;         //.USWest2;
+                var sharedFile = new SharedCredentialsFile();
+                sharedFile.RegisterProfile(profile);  //access denied!???????????????????????????????????????
+                
+                if (AWSCredentialsFactory.TryGetAWSCredentials(profile, sharedFile, out AWSCredentials awsCredentials))
+                {
+                    using (MemoryStream memStream = new MemoryStream(1024))
+                    {
+                        memStream.Write(memstring, 0, memstring.Length);
+                        try
+                        {
+                            AmazonS3Client s3 = new AmazonS3Client(awsCredentials, profile.Region);
+                            using (Amazon.S3.Transfer.TransferUtility tranUtility = new Amazon.S3.Transfer.TransferUtility(s3))
+                            {
+                                await tranUtility.UploadAsync(memStream, bucketname, keyname);
+                                string message = "Good";
+                                return new Tuple<bool, string>(true, message);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            string message = "Error: " + ex.Message; ;
+                            return new Tuple<bool, string>(false, message);
+                        }
+                    }
+
+                }
+                else
+                {
+                    return new Tuple<bool, string>(false, "Unknown error!");
+                }
+            }
+            catch (Exception e)
+            {
+                string message = "Error2: " + e.Message; ;
+                return new Tuple<bool, string>(false, message);
+            }
+        }
     }
+
+
+
+
 }

@@ -291,8 +291,8 @@
     }
     var _labels = []
     var dataSets = []
-    //=================AWS Lambda-Predict ================================
-    //Отправить json-dataframe в AWS-bucket
+    //=========================AWS Lambda-Predict ================================
+    //Отправить json-dataframe в AWS-bucket через запрос в контроллере
     $(function () {
         $('#link-predictor').click((e) => {
             e.preventDefault();
@@ -302,6 +302,7 @@
                 success: function (data) {
                     if (data.success) {
                         alert(data.message)
+                        console.log("url: ", data.data)
                         $('#link-predict-json').removeClass('disabled')
                     }
                     else alert(data.message)
@@ -314,24 +315,22 @@
         //вызвать  AWS-lambda  по keyOne, keyTwo
         $('#link-predict-json').click((e) => {
             e.preventDefault();
-            console.log("labels[0]: ", _labels[0])
-            console.log("dataSets[0].label: ", dataSets[0].label)
-        
+            //console.log("labels[0]: ", _labels[0])
+            //console.log("dataSets[0].label: ", dataSets[0].label)
+
             $.ajax({
-            url: "https://nzz4kopwfc.execute-api.us-west-2.amazonaws.com/dev2",
-            data: { keyOne: _labels[0], keyTwo: dataSets[0].label },
-            method: 'Get',
-            success: function (data) {
-                //alert(data)
-                console.log("data: ", data.body)
-            },
-            error(xhr, msg) {
-                alert(msg)
-            }
+                url: "https://nzz4kopwfc.execute-api.us-west-2.amazonaws.com/dev2",
+                data: { keyOne: _labels[0], keyTwo: dataSets[0].label },
+                method: 'Get',
+                success: function (data) {
+                    //alert(data)
+                    console.log("data: ", data.body)
+                },
+                error(xhr, msg) {
+                    alert(msg)
+                }
+            })
         })
-        })
-
-
     })
 </script>
 <h2>Administrator Panel</h2>
@@ -350,7 +349,7 @@
             @Html.ActionLink("Подготовить статистику", "Index", "AdminPanel", null, new { id = "link-statistics" })
         </div>
         <div class="col-lg-3">
-            @Html.ActionLink("Отправить json-dataframe в AWS-bucket для подготовки прогноза", "Index", 
+            @Html.ActionLink("Отправить json-dataframe в AWS-bucket для подготовки прогноза", "Index",
                                                                                             "AdminPanel", new { keyPython = 1 }, new { id = "link-predictor", @class = "disabled" })
         </div>
     </div>

@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using Amazon;
+using Amazon.S3;
+using AutoMapper;
 using IronPython.Hosting;
 using Microsoft.Scripting.Hosting;
 using OnlineAuction.ServiceClasses;
@@ -8,6 +10,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web.Mvc;
@@ -48,29 +51,49 @@ namespace OnlineAuction.Controllers
                 //System.IO.File.WriteAllText(filePath, json);
                 ////4а)дополнить текущ. модель нов. данными
                 ////4б)отправ. расшир .данн. в HTML в соотв. метод
-                #endregion 
+                #endregion
 
-                ////надо инскапсулир. python-code в AWS-lambda  или   исп. библ. keras.net
+                #region in2step
                 ////1)-снчала запись файла json     
                 ////-----на сервере из-за этого ошибка- надо сразу писать в AWS --------------
-                var filePath = "";
-                try
-                {
-                    filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PythonScript/json.txt");
-                    System.IO.File.WriteAllText(filePath, json);
-                }
-                catch(Exception e)
-                {
-                    return new JsonResult { Data = new { success = false, message = e.Message }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
-                }
+                //var dirPath = "";
+                //var filePath = "";
+                //try
+                //{
+                //    dirPath = Server.MapPath("~/PythonScript/");
+                //    //AppDomain.CurrentDomain.GetData("DataDirectory").ToString();
 
-                //2)-json ->save AWS S3Bucket, s3Bucket->lambda AWS
-                var flagWrite = await BlobHelper.UploadJsonAWSbucket(filePath);
-                if (flagWrite == true)
-                    return new JsonResult { Data = new { success = true, message = "Файл отправлен в AWS" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                //    if (dirPath == "")
+                //    {
+                //        var dir = Directory.CreateDirectory(dirPath);
+                //    }
+                //    filePath = Path.Combine(dirPath, "json.json");
+                //    System.IO.File.WriteAllText(filePath, json);
+                //}
+                //catch (Exception e)
+                //{
+                //    return new JsonResult { Data = new { success = false, message = e.Message }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                //}
+
+                ////2)-json ->save AWS S3Bucket, s3Bucket->lambda AWS
+                //var flagWrite = await BlobHelper.UploadJsonAWSbucket(filePath);
+                //if (flagWrite == true)
+                //    return new JsonResult { Data = new { success = true, message = "Файл отправлен в AWS", data = filePath }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                //else
+                //    return new JsonResult { Data = new { success = false, message = "Error2", data = filePath }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                #endregion
+
+                var res= await BlobHelper.PutFileToS3Async("auction-predict-bucket", "json.json", json);
+                if(res.Item1 == true)
+                {
+                    return new JsonResult { Data = new { success = true, message = "Файл отправлен в AWS"}, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                }
                 else
-                    return new JsonResult { Data = new { success = false, message = "Error2" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                {
+                    return new JsonResult { Data = new { success = false, message = res.Item2 }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                }
             }
+
             return View();
         }
 
