@@ -153,9 +153,6 @@
     <Reference Include="Pandas.NET, Version=0.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Pandas.NET.0.1.0\lib\netstandard2.0\Pandas.NET.dll</HintPath>
     </Reference>
-    <Reference Include="PlantUml.Net, Version=1.2.48.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PlantUml.Net.1.2.48\lib\net461\PlantUml.Net.dll</HintPath>
-    </Reference>
     <Reference Include="Quartz, Version=3.1.0.0, Culture=neutral, PublicKeyToken=f6b8c98a402cc8a4, processorArchitecture=MSIL">
       <HintPath>..\packages\Quartz.3.1.0\lib\net461\Quartz.dll</HintPath>
     </Reference>
@@ -965,7 +962,9 @@
     <Content Include="fonts\fontawesome-webfont.eot" />
     <Content Include="Lib\ensurepip\_bundled\setuptools-40.6.2-py2.py3-none-any.whl" />
     <Content Include="Lib\ensurepip\_bundled\pip-18.1-py2.py3-none-any.whl" />
+    <Content Include="App_Data\json.json" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
+    <Content Include="PythonScript\json.json" />
     <None Include="Scripts\jquery-3.3.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.3.1.js" />
     <Content Include="Scripts\jquery-3.3.1.min.js" />
@@ -1037,9 +1036,7 @@
     <Content Include="Views\Auctions\Partial\_ChatAuctionView.cshtml" />
     <Content Include="Views\AdminPanel\Index.cshtml" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="App_Data\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
