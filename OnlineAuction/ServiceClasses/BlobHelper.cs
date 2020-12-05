@@ -93,7 +93,7 @@ namespace OnlineAuction.ServiceClasses
                 var profile = new CredentialProfile("dotnet-tutorials", options);
                 profile.Region = RegionEndpoint.EUWest1;         //.USWest2;
                 var sharedFile = new SharedCredentialsFile();
-                sharedFile.RegisterProfile(profile);
+                //sharedFile.RegisterProfile(profile); //попробовать после 01.12.20
 
                 if (sharedFile.TryGetProfile("dotnet-tutorials", out profile)
                     && AWSCredentialsFactory.TryGetAWSCredentials(profile, sharedFile, out AWSCredentials awsCredentials))
@@ -129,53 +129,78 @@ namespace OnlineAuction.ServiceClasses
 
             // Create the data to write to the stream.
             byte[] memstring = uniEncoding.GetBytes(json);
+            string message = "";
+            #region
+            //try
+            //{
+            //    var options = new CredentialProfileOptions
+            //    {
+            //        AccessKey = "AKIA4LDGGJIMCE3BJE3C",
+            //        SecretKey = "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"
+            //    };
+            //    var profile = new CredentialProfile("dotnet-tutorials", options);
+            //    profile.Region = RegionEndpoint.EUWest1;         //.USWest2;
+            //    var sharedFile = new SharedCredentialsFile();
+            //    sharedFile.RegisterProfile(profile);  //access denied!???????????????????????????
 
+            //    if (AWSCredentialsFactory.TryGetAWSCredentials(profile, sharedFile, out AWSCredentials awsCredentials))
+            //    {
+            //        using (MemoryStream memStream = new MemoryStream(1024))
+            //        {
+            //            memStream.Write(memstring, 0, memstring.Length);
+            //            try
+            //            {
+            //                AmazonS3Client s3 = new AmazonS3Client(awsCredentials, profile.Region);
+            //                using (Amazon.S3.Transfer.TransferUtility tranUtility = new Amazon.S3.Transfer.TransferUtility(s3))
+            //                {
+            //                    await tranUtility.UploadAsync(memStream, bucketname, keyname);
+            //                    string message = "Good";
+            //                    return new Tuple<bool, string>(true, message);
+            //                }
+            //            }
+            //            catch (Exception ex)
+            //            {
+            //                string message = "Error: " + ex.Message; ;
+            //                return new Tuple<bool, string>(false, message);
+            //            }
+            //        }
 
-            try
-            {
-                var options = new CredentialProfileOptions
+            //    }
+            //    else
+            //    {
+            //        return new Tuple<bool, string>(false, "Unknown error!");
+            //    }
+            //}
+            //catch (Exception e)
+            //{
+            //    string message = "Error2: " + e.Message; ;
+            //    return new Tuple<bool, string>(false, message);
+            //}
+            #endregion
+
+            try { 
+            AmazonS3Client client2 = new AmazonS3Client(RegionEndpoint.EUWest1);    //credentials, region
+                using (Stream stream = new MemoryStream(1024))
                 {
-                    AccessKey = "AKIA4LDGGJIMCE3BJE3C",
-                    SecretKey = "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"
-                };
-                var profile = new CredentialProfile("dotnet-tutorials", options);
-                profile.Region = RegionEndpoint.EUWest1;         //.USWest2;
-                var sharedFile = new SharedCredentialsFile();
-                sharedFile.RegisterProfile(profile);  //access denied!???????????????????????????????????????
-                
-                if (AWSCredentialsFactory.TryGetAWSCredentials(profile, sharedFile, out AWSCredentials awsCredentials))
-                {
-                    using (MemoryStream memStream = new MemoryStream(1024))
+                    stream.Write(memstring, 0, memstring.Length);
+                    PutObjectRequest request = new PutObjectRequest
                     {
-                        memStream.Write(memstring, 0, memstring.Length);
-                        try
-                        {
-                            AmazonS3Client s3 = new AmazonS3Client(awsCredentials, profile.Region);
-                            using (Amazon.S3.Transfer.TransferUtility tranUtility = new Amazon.S3.Transfer.TransferUtility(s3))
-                            {
-                                await tranUtility.UploadAsync(memStream, bucketname, keyname);
-                                string message = "Good";
-                                return new Tuple<bool, string>(true, message);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            string message = "Error: " + ex.Message; ;
-                            return new Tuple<bool, string>(false, message);
-                        }
-                    }
+                        BucketName = bucketname, //"auction-predict-bucket",
+                        Key = keyname,  //"json.json",
+                        InputStream = stream
+                    };
 
-                }
-                else
-                {
-                    return new Tuple<bool, string>(false, "Unknown error!");
-                }
+                    //b) Put object
+                    PutObjectResponse response2 = await client2.PutObjectAsync(request);
+                    message = "It's Good!";
+                }                
             }
-            catch (Exception e)
+            catch(Exception e)
             {
-                string message = "Error2: " + e.Message; ;
-                return new Tuple<bool, string>(false, message);
+                 message = "Error: " + e.Message; ;
+                
             }
+            return new Tuple<bool, string>(false, message);
         }
     }
 

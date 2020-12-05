@@ -246,14 +246,14 @@
                 //}
             }
             //console.log("label: ", _label)
-            //console.log("_data: ", _data)
+            console.log("_data: ", _data)
             var obj = {
                 label: item, //_label,
                 backgroundColor: ringQueue.pop(),
                 borderColor: 'rgb(255, 99, 132)',
                 data: _data
             };
-            set.push(obj);
+            set.push(obj);//для кажд. пола свой массив данных
         })
         return set;
     }
@@ -278,17 +278,32 @@
         //console.log("labels: ", _labels)
         //console.log("dataSets: ", dataSets)
         //---------------------chart.js----------------------------
+        drawGraphic(_labels, dataSets)
+        //var ctx = document.getElementById('myChart').getContext('2d');
+        //var chart = new Chart(ctx, {
+        //    type: 'bar',
+        //    //отрис.  граф. для наборов из 3 групп
+        //    data: {
+        //        labels: _labels,    //[DVD, Books, Electronic] ;[2017, 2018, 2019] - oX
+        //        datasets: dataSets
+        //    },
+        //    options: {}
+        //});
+    }
+    function drawGraphic(_labels, dataSets) {
         var ctx = document.getElementById('myChart').getContext('2d');
         var chart = new Chart(ctx, {
             type: 'bar',
             //отрис.  граф. для наборов из 3 групп
             data: {
                 labels: _labels,    //[DVD, Books, Electronic] ;[2017, 2018, 2019] - oX
-                datasets: dataSets
+                datasets: dataSets  //Mens->{17, 1, 1}..
             },
             options: {}
         });
     }
+    //---------------
+    //вычисл. выше
     var _labels = []
     var dataSets = []
     //=========================AWS Lambda-Predict ================================
@@ -298,7 +313,8 @@
             e.preventDefault();
             $.ajax({
                 method: 'GET',
-                url: "/AdminPanel/Index?keyPython=1",
+                //далее в контроллере json.txt  уйдет в AWS-s3 (saving)
+                url: "/AdminPanel/Index?keyPython=1",   
                 success: function (data) {
                     if (data.success) {
                         alert(data.message)
@@ -319,12 +335,19 @@
             //console.log("dataSets[0].label: ", dataSets[0].label)
 
             $.ajax({
+                //адр.  измен.
                 url: "https://nzz4kopwfc.execute-api.us-west-2.amazonaws.com/dev2",
                 data: { keyOne: _labels[0], keyTwo: dataSets[0].label },
                 method: 'Get',
                 success: function (data) {
                     //alert(data)
-                    console.log("data: ", data.body)
+                    console.log("data: ", data)
+                    //1)-нужно изм. dataSet - исп. пришедш. массив массивов: Mens1->{17, 1, 1} => Mens2->{17,  1, -10, -21}..
+                    dataSets.map(function (i, item) {
+                        item.data = data[i]
+                    })
+                    //2)-перерис. графики
+                    drawGraphic(_labels, dataSets)
                 },
                 error(xhr, msg) {
                     alert(msg)
