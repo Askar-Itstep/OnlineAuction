@@ -32,29 +32,23 @@ namespace OnlineAuction.Controllers
                 //1)sequens ->Json
                 string json = JsonSerializer.Serialize(StatisticModels);
                 //System.Diagnostics.Debug.WriteLine("json: ", json);
-                #region IronPython - не работ.!
+
+                #region 1) IronPython - не работ.!
                 ////2)отправить в Python json-data
                 //ScriptEngine engine = Python.CreateEngine();
-                //ScriptScope scope = engine.CreateScope();
-                ////3-------------------------------------
-                //var scriptPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PythonScript/factorial.py");//HttpRuntime.
-                //engine.ExecuteFile(scriptPath, scope);
-                //dynamic function = scope.GetVariable("factorial");
-                //int x = 7;
-                //dynamic res = function(x);
-                //System.Diagnostics.Debug.WriteLine("res: " + (int)res);
-                ////4----------------------------
+                //ScriptScope scope = engine.CreateScope();              
                 //scope.SetVariable("json", json);
-                //var scriptPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PythonScript/pandora.py");
-                //engine.ExecuteFile(scriptPath, scope);
                 //var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PythonScript/json.txt");
+                //engine.ExecuteFile(scriptPath, scope);
                 //System.IO.File.WriteAllText(filePath, json);
-                ////4а)дополнить текущ. модель нов. данными
-                ////4б)отправ. расшир .данн. в HTML в соотв. метод
                 #endregion
 
-                #region in2step
-                ////1)-снчала запись файла json     
+                #region 2) ML.net - не подходит! 
+                //ML.net - не подходит,т.к. требует "расчесанные данные" и не понимает json!
+                #endregion
+
+                #region 3) in2step
+                //1)-снчала запись файла json     
                 ////-----на сервере из-за этого ошибка- надо сразу писать в AWS --------------
                 //var dirPath = "";
                 //var filePath = "";
@@ -83,15 +77,18 @@ namespace OnlineAuction.Controllers
                 //    return new JsonResult { Data = new { success = false, message = "Error2", data = filePath }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
                 #endregion
 
-                var res= await BlobHelper.PutFileToS3Async("auction-predict-bucket", "json.json", json);
-                if(res.Item1 == true)
+                //4) прямая передача данных в AWS (без  созд.  файла на сервере - иначе ошибка <access denied>
+                #region
+                var res = await BlobHelper.PutFileToS3Async("auction-predict-bucket", "json.json", json);
+                if (res.Item1 == true)
                 {
-                    return new JsonResult { Data = new { success = true, message = "Файл отправлен в AWS"}, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+                    return new JsonResult { Data = new { success = true, message = "Файл отправлен в AWS" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
                 }
                 else
                 {
                     return new JsonResult { Data = new { success = false, message = res.Item2 }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
                 }
+                #endregion
             }
 
             return View();
