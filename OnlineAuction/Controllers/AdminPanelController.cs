@@ -25,7 +25,7 @@ namespace OnlineAuction.Controllers
         {
             this.mapper = mapper;
         }
-        public async Task<ActionResult> Index(int? keyPython)
+        public async Task<ActionResult> Index(int? keyPython) //если key != null : json-> AWS-s3Bucket
         {
             if (keyPython != null)
             {
@@ -79,7 +79,7 @@ namespace OnlineAuction.Controllers
 
                 //4) прямая передача данных в AWS (без  созд.  файла на сервере - иначе ошибка <access denied>
                 #region
-                var res = await BlobHelper.PutFileToS3Async("auction-predict-bucket", "json.json", json);
+                var res = await BlobHelper.PutFileToS3Async("auction-predict-bucket", "json.txt", json);
                 if (res.Item1 == true)
                 {
                     return new JsonResult { Data = new { success = true, message = "Файл отправлен в AWS" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
@@ -304,9 +304,12 @@ namespace OnlineAuction.Controllers
             //    System.Diagnostics.Debug.WriteLine(item.CategoryName);
             //}
             #endregion
-            var labels = seq.GroupBy(s => s.CategoryId).Select(s => s.First()).Select(s => s.CategoryName); //DVD, Electronic..
+
+            var labels = seq.GroupBy(s => s.CategoryId).Select(s => s.First()).Select(s => s.CategoryName); //сортир. поCategorId!!!!!!!!!
+                //.OrderBy((c => c), new MySimpleStringComparer()); //Book, DVD, Electronic..
 
             var countByCategoriesForMan = seq.Where(s => s.Gender == Gender.MEN).GroupBy(s => s.CategoryId).Select(s => new { CategoryId = s.Key, Count = s.Count() });
+                //.OrderBy(c=>c, new MySimpleStringComparer());
             var countByCategoriesForWomen = seq.Where(s => s.Gender == Gender.WOMEN).GroupBy(s => s.CategoryId).Select(s => new { CategoryId = s.Key, Count = s.Count() });
             var countByCategoriesForX = seq.Where(s => s.Gender == Gender.UNDEFINED).GroupBy(
                                                                                                  s => s.CategoryId).Select(s => new { CategoryId = s.Key, Count = s.Count() });
@@ -322,5 +325,12 @@ namespace OnlineAuction.Controllers
             var res = new { labels, arrLabel, arrData };
             return res;
         }
+    }
+}
+public  class MySimpleStringComparer : IComparer<string>
+{
+    public  int Compare(string x, string y)
+    {
+        return string.Compare(x, y);
     }
 }
