@@ -279,16 +279,18 @@
         //console.log("dataSets: ", dataSets)
         //---------------------chart.js----------------------------
         drawGraphic(_labels, dataSets)
-        //var ctx = document.getElementById('myChart').getContext('2d');
-        //var chart = new Chart(ctx, {
-        //    type: 'bar',
-        //    //отрис.  граф. для наборов из 3 групп
-        //    data: {
-        //        labels: _labels,    //[DVD, Books, Electronic] ;[2017, 2018, 2019] - oX
-        //        datasets: dataSets
-        //    },
-        //    options: {}
-        //});
+        {
+            //var ctx = document.getElementById('myChart').getContext('2d');
+            //var chart = new Chart(ctx, {
+            //    type: 'bar',
+            //    //отрис.  граф. для наборов из 3 групп
+            //    data: {
+            //        labels: _labels,    //[DVD, Books, Electronic] ;[2017, 2018, 2019] - oX
+            //        datasets: dataSets
+            //    },
+            //    options: {}
+            //});
+        }
     }
     function drawGraphic(_labels, dataSets) {
         var ctx = document.getElementById('myChart').getContext('2d');
@@ -328,26 +330,65 @@
                 }
             })
         })
+        //<Получить прогноз>: обратиться к бакету ч/з API-Gateway
         //вызвать  AWS-lambda  по keyOne, keyTwo
         $('#link-predict-json').click((e) => {
             e.preventDefault();
-            //console.log("labels[0]: ", _labels[0])
-            //console.log("dataSets[0].label: ", dataSets[0].label)
-
+            //console.log("labels[0]: ", _labels[0])  //DVD
+            //console.log("dataSets[0].label: ", dataSets[0].label)   //Mens
+            //console.log("dataSets[0].label: ", dataSets[0].data)    //{17, 1, 1}
             $.ajax({
-                //адр.  измен.
-                url: "https://nzz4kopwfc.execute-api.us-west-2.amazonaws.com/dev2",
-                data: { keyOne: _labels[0], keyTwo: dataSets[0].label },
-                method: 'Get',
+                //Api-Gateway(proxy)
+                url: "https://c1dzhr2cal.execute-api.us-west-2.amazonaws.com/dev1/{+proxy}",
+                data: { keyOne: _labels[0], keyTwo: dataSets[0].label },    //DVD, Mens
+                method: 'POST',
                 success: function (data) {
-                    //alert(data)
-                    console.log("data: ", data)
-                    //1)-нужно изм. dataSet - исп. пришедш. массив массивов: Mens1->{17, 1, 1} => Mens2->{17,  1, -10, -21}..
-                    dataSets.map(function (i, item) {
-                        item.data = data[i]
+                   
+                    //1)-нужно изм. dataSet - исп. пришедш. массив массивов: Mens: {17, 1, 1} => Mens: {-21, 0, 0}..
+                    dataSets.map(function (item, i) {
+                        console.log("item old data: " + item.data) //17, 1, 1
+                        if (i == 0) {   //Mens
+                            //item.data = data['Mens'] //полная замена
+                            $(data['Mens']).each((j, val) => {
+                                if (val['category'] == 'DVD') {
+                                    item.data[0] = val['predict']
+                                } else if (val['category'] == 'Books') {
+                                    item.data[1] = val['predict']
+                                } else {
+                                    item.data[2] = val['predict']
+                                }
+                            })
+                        }
+                        else if (i == 1) {
+                            //item.data = data['Womens']
+                            $(data['Womens']).each((j, val) => {
+                                if (val['category'] == 'DVD') {
+                                    item.data[0] = val['predict']
+                                } else if (val['category'] == 'Books') {
+                                    item.data[1] = val['predict']
+                                } else {
+                                    item.data[2] = val['predict']
+                                }
+                            })
+                        }
+                        else {
+                            //item.data=data['X']
+                            $(data['Womens']).each((j, val) => {
+                                if (val['category'] == 'DVD') {
+                                    item.data[0] = val['predict']
+                                } else if (val['category'] == 'Books') {
+                                    item.data[1] = val['predict']
+                                } else {
+                                    item.data[2] = val['predict']
+                                }
+                            })
+                        }
                     })
+                    //console.log("upd dataSet: " + dataSets)
+
                     //2)-перерис. графики
                     drawGraphic(_labels, dataSets)
+                    $('#link-code-aws').removeClass('disabled')
                 },
                 error(xhr, msg) {
                     alert(msg)
@@ -399,7 +440,10 @@
 <div class="jumbotron alert-info hidden sandbox">
     <p>Распределние статистики по выборкам</p>
     <div class="col-lg-3">
-        <p><a class="btn btn-link disabled" href="https://nzz4kopwfc.execute-api.us-west-2.amazonaws.com/dev2" id="link-predict-json">Расчитать прогноз &raquo;</a></p>
+        <p><a class="btn btn-link disabled" href="https://c1dzhr2cal.execute-api.us-west-2.amazonaws.com/dev1" id="link-predict-json">Расчитать прогноз &raquo;</a></p>
+    </div>
+    <div class="col-lg-3">
+        <a class="btn btn-link disabled" href="https://for-static-web.s3-us-west-2.amazonaws.com/Auction.html" id="link-code-aws">Python Code for prediction &raquo;</a>
     </div>
     <canvas id="myChart"></canvas>
 </div>

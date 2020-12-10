@@ -130,6 +130,7 @@ namespace OnlineAuction.ServiceClasses
             // Create the data to write to the stream.
             byte[] memstring = uniEncoding.GetBytes(json);
             string message = "";
+            bool flag = false;
             #region
             //try
             //{
@@ -179,7 +180,7 @@ namespace OnlineAuction.ServiceClasses
             #endregion
 
             try { 
-            AmazonS3Client client2 = new AmazonS3Client(RegionEndpoint.EUWest1);    //credentials, region
+            AmazonS3Client client2 = new AmazonS3Client(RegionEndpoint.EUWest1);    //credentials, region Irland
                 using (Stream stream = new MemoryStream(1024))
                 {
                     stream.Write(memstring, 0, memstring.Length);
@@ -193,14 +194,15 @@ namespace OnlineAuction.ServiceClasses
                     //b) Put object
                     PutObjectResponse response2 = await client2.PutObjectAsync(request);
                     message = "It's Good!";
+                    flag = true;
                 }                
             }
             catch(Exception e)
             {
                  message = "Error: " + e.Message; ;
-                
+                flag = false;
             }
-            return new Tuple<bool, string>(false, message);
+            return new Tuple<bool, string>(flag, message);
         }
     }
 
