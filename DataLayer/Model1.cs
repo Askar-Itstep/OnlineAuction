@@ -1,4 +1,4 @@
-namespace OnlineAuction.Entities
+namespace DataLayer.Entities
 {
     using DataLayer.Entities;
     using Microsoft.WindowsAzure.Storage;

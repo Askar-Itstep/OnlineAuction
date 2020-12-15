@@ -8,7 +8,6 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using DataLayer.Entities;
-using OnlineAuction.Entities;
 
 namespace OnlineAuction.Controllers
 {

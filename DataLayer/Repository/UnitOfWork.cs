@@ -1,10 +1,7 @@
 ﻿using DataLayer.Entities;
-using OnlineAuction.Entities;
 
 namespace DataLayer.Repository
 {
-    //Паттерн Unit of Work позволяет упростить работу с различными репозиториями - 
-    //    т.е. все репозитории будут использовать один и тот же контекст данных.
     public class UnitOfWork : IUnitOfWork
     {
         private BaseRepository<Account> accounts;
@@ -85,7 +82,6 @@ namespace DataLayer.Repository
                 return auctionClientsLinks;
             }
         }
-
 
         public BaseRepository<BetAuction> BetAuctions
         {

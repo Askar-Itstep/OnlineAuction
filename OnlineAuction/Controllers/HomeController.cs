@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BusinessLayer.BusinessObject;
+using DataLayer.Entities;
 using OnlineAuction.ServiceClasses;
 using OnlineAuction.ViewModels;
 using System.Collections.Generic;
@@ -35,10 +36,12 @@ namespace OnlineAuction.Controllers
                     if (UserHub == null)
                     {
                         UserHubVM userHubVM = new UserHubVM { AccountId = (int)accountId, ConnectionId = "" };
-                        UserHub = mapper.Map<UserHubBO>(userHubVM);
+                        UserHub userHub = mapper.Map<UserHub>(userHubVM);
+                        UserHub = mapper.Map<UserHubBO>(userHub);
                         UserHub.Save(UserHub);
                     }
                     UserHub.Account = accountBO;
+                    //первый вызов инициализир. instance ChatHub
                     var sender = PushSender.InstanceClient;
                     sender.User = UserHub;
                     sender.mapper = mapper;
@@ -60,7 +63,6 @@ namespace OnlineAuction.Controllers
         public async Task<ActionResult> ChatAsync(string connectionId, string message, string friendConnectId)//1-ый парам. по 1-му заходу, 2-ой по 2-му
         {
             string alert = "";
-            //sender
             var accountId = Session["accountId"] ?? 0;
             if ((int)accountId == 0)
             {
@@ -86,7 +88,7 @@ namespace OnlineAuction.Controllers
                 //addresser
                 if (friendConnectId != null && friendConnectId != "")
                 {
-                    await sender.CommunicationWIthAuthor(message, connectionId, friendConnectId);
+                    await sender.CommunicationWIthAuthorAsync(message, connectionId, friendConnectId);
                 }
                 else
                 {
@@ -98,7 +100,7 @@ namespace OnlineAuction.Controllers
 
         //public ActionResult SwitchContainer(string platform)
         //{
-        //    //db.Platform->INSERT INTO Platform values(azure, GETDATE()) 
+        //    //need create fabric connect to DB
         //    return RedirectToAction("Index");
         //}
 
@@ -113,27 +115,5 @@ namespace OnlineAuction.Controllers
             ViewBag.Message = "Your contact page.";
             return View();
         }
-        ////===================================S.T.A.T.I.S.T.I.C.S.=====================================
-        //public static IEnumerable<StatisticViewModel> StatisticModels { get; set; }
-        //public ActionResult Statistic()
-        //{
-        //    ServiceStatistics.mapper = mapper;
-        //    StatisticModels = ServiceStatistics.CreateStatisticModel();
-        //    #region Print
-        //    //foreach (var item in StatisticModels)
-        //    //{
-        //    //    System.Diagnostics.Debug.WriteLine("auctID: {0}, Fullname: {1}, prodTitle: {2}, countBet: {3}, maxBet{4}, isBuy: {5}", item.AuctionId,
-        //    //        item.Account.FullName, item.Product.Title, item.CountBet, item.MaxBet, item.IsBuy);
-        //    //}
-        //    #endregion
-
-        //    return new JsonResult { Data = "Данные статистики подготовлены!", JsonRequestBehavior = JsonRequestBehavior.AllowGet };
-        //}
-        //public ActionResult CategoriesOnGenderStatistic()
-        //{
-        //    var seq = StatisticModels.Select(s => new { Gender = s.Account.Gender, CategoryId = s.Product.Category.Id, CategoryName = s.Product.Category.Title });
-        //    ViewBag.Seq = seq;
-        //    return PartialView("Partial/_CategoriessOnGender");
-        //}
     }
 }

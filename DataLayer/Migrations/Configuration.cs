@@ -5,14 +5,14 @@ namespace OnlineAuction.Migrations
     using System.Data.Entity.Migrations;
     using System.Linq;
 
-    internal sealed class Configuration : DbMigrationsConfiguration<OnlineAuction.Entities.Model1>
+    internal sealed class Configuration : DbMigrationsConfiguration<DataLayer.Entities.Model1>
     {
         public Configuration()
         {
             AutomaticMigrationsEnabled = false;
         }
 
-        protected override void Seed(OnlineAuction.Entities.Model1 context)
+        protected override void Seed(DataLayer.Entities.Model1 context)
         {
             //  This method will be called after migrating to the latest version.
 

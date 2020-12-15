@@ -29,10 +29,10 @@ namespace OnlineAuction
                 mpr.CreateMap<AccountBO, Account>()
                .ConstructUsing(c => DependencyResolver.Current.GetService<Account>());
 
-                mpr.CreateMap<AccountVM, AccountBO>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<AccountBO>());
+                mpr.CreateMap<AccountVM, Account>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<Account>());
 
-                mpr.CreateMap<AccountBO, AccountVM>()
+                mpr.CreateMap<Account, AccountVM>()
              .ConstructUsing(c => DependencyResolver.Current.GetService<AccountVM>());
                 //.ForMember(dist=>dist.ConnectionId, opt=>opt.MapFrom(src=>0));
 
@@ -55,8 +55,8 @@ namespace OnlineAuction
                 mpr.CreateMap<RoleBO, Role>()
                .ConstructUsing(c => DependencyResolver.Current.GetService<Role>());
 
-                // mpr.CreateMap<RoleVM, Role>()
-                //.ConstructUsing(c => DependencyResolver.Current.GetService<Role>());
+                mpr.CreateMap<RoleVM, Role>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<Role>());
 
                 //------------------Client ----------------------------------
                 mpr.CreateMap<Client, ClientBO>()
@@ -65,11 +65,11 @@ namespace OnlineAuction
                 mpr.CreateMap<ClientBO, Client>()
                .ConstructUsing(c => DependencyResolver.Current.GetService<Client>());
 
-                mpr.CreateMap<ClientBO, ClientVM>()
+                mpr.CreateMap<Client, ClientVM>()
                .ConstructUsing(c => DependencyResolver.Current.GetService<ClientVM>());
 
-                mpr.CreateMap<ClientVM, ClientBO>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<ClientBO>());
+                mpr.CreateMap<ClientVM, Client>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<Client>());
 
                 //-----------------------RoleAccountLink---------------------------
                 mpr.CreateMap<RoleAccountLink, RoleAccountLinkBO>()
@@ -78,8 +78,8 @@ namespace OnlineAuction
                 mpr.CreateMap<RoleAccountLinkBO, RoleAccountLink>()
                .ConstructUsing(c => DependencyResolver.Current.GetService<RoleAccountLink>());
 
-                mpr.CreateMap<RoleAccountLinkVM, RoleAccountLinkBO>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<RoleAccountLinkBO>());
+                mpr.CreateMap<RoleAccountLinkVM, RoleAccountLink>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<RoleAccountLink>());
 
                 mpr.CreateMap<RoleAccountLink, RoleAccountLinkVM>()
               .ConstructUsing(c => DependencyResolver.Current.GetService<RoleAccountLinkVM>());
@@ -91,11 +91,11 @@ namespace OnlineAuction
                 mpr.CreateMap<AuctionBO, Auction>()
                .ConstructUsing(c => DependencyResolver.Current.GetService<Auction>());
 
-                mpr.CreateMap<AuctionBO, AuctionVM>()
+                mpr.CreateMap<Auction, AuctionVM>()
                 .ConstructUsing(c => DependencyResolver.Current.GetService<AuctionVM>());
 
-                mpr.CreateMap<AuctionVM, AuctionBO>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<AuctionBO>());
+                mpr.CreateMap<AuctionVM, Auction>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<Auction>());
                 //--------------------------------------Category ---------------------------------------
                 mpr.CreateMap<Category, CategoryBO>()
                                 .ConstructUsing(c => DependencyResolver.Current.GetService<CategoryBO>());
@@ -103,18 +103,18 @@ namespace OnlineAuction
                 mpr.CreateMap<CategoryBO, Category>()
                .ConstructUsing(c => DependencyResolver.Current.GetService<Category>());
 
-                mpr.CreateMap<CategoryVM, CategoryBO>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<CategoryBO>()).ReverseMap();
+                mpr.CreateMap<CategoryVM, Category>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<Category>()).ReverseMap();
 
-                //--------------------------------------Category ---------------------------------------
+                //--------------------------------------Product ---------------------------------------
                 mpr.CreateMap<Product, ProductBO>()
                                 .ConstructUsing(c => DependencyResolver.Current.GetService<ProductBO>());
 
                 mpr.CreateMap<ProductBO, Product>()
                .ConstructUsing(c => DependencyResolver.Current.GetService<Product>());
 
-                mpr.CreateMap<ProductVM, ProductBO>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<ProductBO>()).ReverseMap();
+                mpr.CreateMap<ProductVM, Product>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<Product>()).ReverseMap();
 
                 //--------------------------------------Image -------------------------------------------
                 mpr.CreateMap<Image, ImageBO>()
@@ -123,8 +123,8 @@ namespace OnlineAuction
                 mpr.CreateMap<ImageBO, Image>()
                .ConstructUsing(c => DependencyResolver.Current.GetService<Image>());
 
-                mpr.CreateMap<ImageVM, ImageBO>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<ImageBO>()).ReverseMap();
+                mpr.CreateMap<ImageVM, Image>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<Image>()).ReverseMap();
                 //---------------------Addon!-----------------------------
                 mpr.CreateMap<string, Uri>().ConvertUsing<StringToUriConverter>();
                 mpr.CreateMap<Uri, string>().ConvertUsing<UriToStringConverter>();
@@ -137,8 +137,8 @@ namespace OnlineAuction
                 mpr.CreateMap<ImageProductLinkBO, ImageProductLink>()
                .ConstructUsing(c => DependencyResolver.Current.GetService<ImageProductLink>());
 
-                mpr.CreateMap<ImageProductLinkVM, ImageProductLinkBO>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<ImageProductLinkBO>()).ReverseMap();
+                mpr.CreateMap<ImageProductLinkVM, ImageProductLink>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<ImageProductLink>()).ReverseMap();
                 //--------------------------------------Address ------------------------------------------
                 mpr.CreateMap<Address, AddressBO>()
                                 .ConstructUsing(c => DependencyResolver.Current.GetService<AddressBO>());
@@ -146,10 +146,10 @@ namespace OnlineAuction
                 mpr.CreateMap<AddressBO, Address>()
                .ConstructUsing(c => DependencyResolver.Current.GetService<Address>());
 
-                mpr.CreateMap<AddressVM, AddressBO>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<AddressBO>());
+                mpr.CreateMap<AddressVM, Address>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<Address>());
 
-                mpr.CreateMap<AddressBO, AddressVM>()
+                mpr.CreateMap<Address, AddressVM>()
                  .ConstructUsing(c => DependencyResolver.Current.GetService<AddressVM>());
                 //--------------------------------------BetAuctions ---------------------------------------
                 mpr.CreateMap<BetAuction, BetAuctionBO>()
@@ -158,15 +158,16 @@ namespace OnlineAuction
                 mpr.CreateMap<BetAuctionBO, BetAuction>()
                .ConstructUsing(c => DependencyResolver.Current.GetService<BetAuction>());
 
-                mpr.CreateMap<BetAuctionVM, BetAuctionBO>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<BetAuctionBO>());
+                mpr.CreateMap<BetAuction, BetAuctionVM>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<BetAuctionVM>());
 
-                mpr.CreateMap<BetAuctionBO, BetAuctionVM>()
-                 .ConstructUsing(c => DependencyResolver.Current.GetService<BetAuctionVM>());
+                mpr.CreateMap<BetAuctionVM, BetAuction>()
+                 .ConstructUsing(c => DependencyResolver.Current.GetService<BetAuction>());
 
                 //==========================AuctionEditVM==================================================
+                //AuctionEdit, AuctionEditBO- таких типов нет
 
-                mpr.CreateMap<AuctionBO, AuctionEditVM>()
+                 mpr.CreateMap<AuctionBO, AuctionEditVM>()
                 .ConstructUsing(c => DependencyResolver.Current.GetService<AuctionEditVM>())
                 .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Product.Title))
                 .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Product.Price))
@@ -211,10 +212,10 @@ namespace OnlineAuction
                 mpr.CreateMap<OrderBO, Order>()
                .ConstructUsing(c => DependencyResolver.Current.GetService<Order>());
 
-                mpr.CreateMap<OrderVM, OrderBO>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<OrderBO>());
+                mpr.CreateMap<OrderVM, Order>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<Order>());
 
-                mpr.CreateMap<OrderBO, OrderVM>()
+                mpr.CreateMap<Order, OrderVM>()
                  .ConstructUsing(c => DependencyResolver.Current.GetService<OrderVM>());
 
                 //--------------------------------------Items ---------------------------------------
@@ -224,14 +225,15 @@ namespace OnlineAuction
                 mpr.CreateMap<ItemBO, Item>()
                .ConstructUsing(c => DependencyResolver.Current.GetService<Item>());
 
-                mpr.CreateMap<ItemVM, ItemBO>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<ItemBO>());
+                mpr.CreateMap<ItemVM, Item>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<Item>());
 
-                mpr.CreateMap<ItemBO, ItemVM>()
+                mpr.CreateMap<Item, ItemVM>()
                  .ConstructUsing(c => DependencyResolver.Current.GetService<ItemVM>());
 
 
                 //==========================OrderFullMapVM==================================================
+                //OrderFullMap, OrderFullMapBO - таких типов нет!
 
                 mpr.CreateMap<OrderVM, OrderFullMapVM>()
                 .ConstructUsing(c => DependencyResolver.Current.GetService<OrderFullMapVM>())
@@ -287,10 +289,10 @@ namespace OnlineAuction
                 mpr.CreateMap<UserHubBO, UserHub>()
                .ConstructUsing(c => DependencyResolver.Current.GetService<UserHub>());
 
-                mpr.CreateMap<UserHubVM, UserHubBO>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<UserHubBO>());
+                mpr.CreateMap<UserHubVM, UserHub>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<UserHub>());
 
-                mpr.CreateMap<UserHubBO, UserHubVM>()
+                mpr.CreateMap<UserHub, UserHubVM>()
                  .ConstructUsing(c => DependencyResolver.Current.GetService<UserHubVM>());
 
             });

@@ -1,4 +1,4 @@
-﻿using OnlineAuction.Entities;
+﻿using DataLayer.Entities;
 using System;
 using System.Linq;
 using System.Web.Security;

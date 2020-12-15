@@ -15,5 +15,10 @@ namespace DataLayer.Repository
         void Save();
         IQueryable<T> Include(params string[] navigationProperty);
         void Delete(int? item);
+
+        IQueryable<T> GetAllNoTracking();
+        //Task<T> FirstOrDefaultAsync(Func<T, bool> param);
+        Task SaveAsync();
+        Task<T> GetByIdAsync(int? id);
     }
 }

@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using BusinessLayer.BusinessObject;
-using OnlineAuction.Entities;
+using DataLayer.Entities;
 using OnlineAuction.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -18,13 +18,14 @@ namespace OnlineAuction.ServiceClasses
         {
         }
         //sql: select..auction join items on productId..join orders on itemId..group bu orderId
-        public static IEnumerable<OrderFullMapVM> GetSynteticVM(List<OrderBO> orders)
+        public static IEnumerable<OrderFullMapVM> GetSynteticVM(List<Order> orders)
         {
             var itemBO = DependencyResolver.Current.GetService<ItemBO>();
             IEnumerable<ItemBO> items = itemBO.LoadAll();
 
             var auctionBO = DependencyResolver.Current.GetService<AuctionBO>();
-            IEnumerable<AuctionBO> auctions = auctionBO.LoadWithInclude("Product");
+            IEnumerable<AuctionBO> auctionsBO = auctionBO.LoadWithInclude("Product");
+            var auctions = auctionsBO.Select(a => mapper.Map<Auction>(a));
             var query = auctions.Join(items,
                 a => a.Product.Id,
                 i => i.Product.Id,
