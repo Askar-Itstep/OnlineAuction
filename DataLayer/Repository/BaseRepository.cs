@@ -1,9 +1,10 @@
-﻿using OnlineAuction.Entities;
+﻿using DataLayer.Entities;
 using System;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Validation;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace DataLayer.Repository
 {
@@ -44,7 +45,6 @@ namespace DataLayer.Repository
             {
                 return null;
             }
-
             return dbSet.Find(id);
         }
         public T GetLast()
@@ -58,7 +58,6 @@ namespace DataLayer.Repository
             {
                 query.Include(item);
             }
-
             return query;
         }
 
@@ -81,7 +80,7 @@ namespace DataLayer.Repository
                 }
             }
             catch (DbUpdateException exc)
-            {   //
+            {   
                 System.Diagnostics.Debug.WriteLine( $"db update error: {exc.InnerException.Message}");
                 throw;
             }
@@ -105,11 +104,25 @@ namespace DataLayer.Repository
 
             db.Entry(item).State = EntityState.Modified;
         }
-
+        //-------------------add methods-------------------
         public IQueryable<T> GetAllNoTracking()
         {
             return dbSet.AsNoTracking();
         }
+       
+        public async Task SaveAsync()
+        {
+            await db.SaveChangesAsync();
+        }
 
+        public async Task<T> GetByIdAsync(int? id)
+        {
+            if (id == null)
+            {
+                return null;
+            }
+            return await dbSet.FindAsync(id);
+        }
+      
     }
 }

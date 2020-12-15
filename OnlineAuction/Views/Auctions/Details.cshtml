@@ -1,7 +1,6 @@
 ﻿@model OnlineAuction.ViewModels.AuctionVM
 
 @{
-    /**/
 
     ViewBag.Title = "Details";
     ViewBag.OfferNextBet = ViewBag.TopBet.Bet + Model.Step;
@@ -20,36 +19,38 @@
                 alert("Ставка не может быть null!");
                 return false;
             }
-            if (currBet >= yourBet || currBet % (yourBet - currBet) != 0) {
+
+            console.log("%bet: ", currBet % (yourBet - currBet ))
+            if (currBet >= yourBet || (currBet % (yourBet - currBet) != 0 )) {
                 alert("Ставка должна быть положительной с шагом кратным заданному!");
                 return false;
             }
             return true;
         }
 
-        //2)------Ajax------------
-        var myForm1 = document.form1;
+        //2)------Ajax-->BetAuctionsController----------===Сделать ставку====
+        var myForm1 = document.betForm;
         $(myForm1).submit(function (e) {
             e.preventDefault();
-
             //провер. свой аукцион или нет (запрет автоучастия, кроме 1-ой ставки)
-            if (parseInt($('.div-client')) == parseInt(@Model.ActorId)) {
+            if (parseInt($('.div-client').html()) == parseInt(@Model.ActorId)) {
                 alert("Организатор аукциона не может быть его участником!")
                 return;
             }
 
             //ajax-----------------------------
             var currBet = parseFloat($('div.curr_bet').html())
-            var yourBet = parseFloat($('input#bet').val())
+            var yourBet = ($('input#bet').val())
 
             if (checkBet(currBet, yourBet) == false) {
                 return;
             }
             var data = {                //view model JsonRequetCreateBet
-                "auctionId": $('div.div-auction').html(),
-                "clientId": $('div.div-client').html(),
-                "bet": yourBet
+                auctionId: $('div.div-auction').html(),
+                clientId: $('div.div-client').html(),
+                bet: yourBet
             }
+            console.log("data: ", data)
             if (data.clientId == undefined || data.clientId == NaN) {
                 alert("Вы не являетесь клиентом. Проверте баланс!")
                 return
@@ -58,9 +59,12 @@
                 method: "Post",
                 url: '@Url.Action("Create", "BetAuctions")',
                 accept: 'application/json',
-                data: { data: data },
+                data: { data: data},
+                beforeSend: function () {
+                    console.log("data: ", JSON.stringify(data) )
+                },
                 success: function (data) {
-                    alert(data.messageError)
+                    alert(data)
                     $(location).attr('href', "/Auctions/Index")
                 },
                 error: function (e, msg) {
@@ -75,7 +79,7 @@
             $('.redemption').html(parseFloat($('.curr_bet').html()) * 3.0)
         }
     })
- //-------------------------к редактированию аукциона -----------------------------------------------------
+ //-------------------------к редактированию аукциона ->AuctionsController----------------------------------------------------
     $(function () {
         $('a#editLink').click(function (e) {
             e.preventDefault();
@@ -100,10 +104,10 @@
                 }
                 return;
             }
-            if (date > dateEndFormatDatetimeJS) {
-                alert("Аукцион уже завершен. Изменение не возможно!")
-                return;
-            }
+            //if (date > dateEndFormatDatetimeJS) {
+            //    alert("Аукцион уже завершен. Изменение не возможно!")
+            //    return;
+            //}
             //3) надо не просто перейти, но еще и передать все знач. и имена значим. полей
             var price = parseFloat($('.div-price').html())
             var nextBet = parseFloat($('.bet').html())
@@ -111,29 +115,31 @@
 
             var dateBegin = getDateTime(begin)[0]   // vol.1 -исп.в контролл. преобраз. в DateTime.ASP
             var timeBegin = getDateTime(begin)[1]   // vol.2 -тоже
-
+            console.log(dateBegin)
             var duration = (dateEndFormatDatetimeJS - dateBeginFormatDatetimeJS) / (1000 * 3600);    //- только часы
 
             //пакет для редактир. (в методе Create!)=>AuctionEditVM!
             var data = {
-                id: parseInt($('.div-auction').html()),
-                title: $('.div-title').html(),
-                description: $('#description').html(),
-                productId: $('.div-prod-id').html(),
-                price: price,
-                step: step,
-                redemptionPrice: parseFloat($('.redemption').html()),
-                dayBegin: dateBegin, //2020-09-12T14:25:00 -> C# DateTime
-                timeBegin: timeBegin,
-                duration: duration,
-                imageId: parseInt($('.div-image-id').html())
+                Id: parseInt($('.div-auction').html()),
+                Title: $('.div-title').html(),
+                Description: $('#description').html(),
+                ProductId: parseInt($('.div-prod-id').html()),
+                CategoryId: parseInt($('.div-category-id').html()),
+                Price: price,
+                Step: step,
+                RedemptionPrice: parseFloat($('.redemption').html()),
+                DayBegin: dateBegin, // -> C# DateTime: "2020-09-12T14:25:00"
+                TmeBegin: timeBegin,
+                Duration: duration,
+                ImageId: parseInt($('.div-image-id').html())
             }
-            console.log(data.productId)
+            console.log(JSON.stringify(data))
+
             $.ajax({
-                method: "Get",
+                method: "GET",
                 url: '@Url.Action("Create", "Auctions")',
                 accept: 'application/json',
-                data: data,
+                data:   data, //данные перед. в строке: тело запроса недопустимо
                 success: function (data) {
                     alert(data.alert)
                     if (data.success == true)
@@ -147,7 +153,7 @@
         })
     })
 
-            //============================================== Покупки ==================================================
+            //============================================== Покупки ->OrdersController==================================================
     $(function () {
         //а)  Обработ. <Купить сейчас>
         //- т.е. перейти к оплате немедленно
@@ -219,6 +225,7 @@
 <hr />
 <div class="hidden div-auction">@Model.Id</div>
 <div class="hidden div-prod-id">@Model.Product.Id</div>
+<div class="hidden div-category-id">@Model.Product.CategoryId</div>
 <div class="hidden div-price">@Model.Product.Price</div>
 <div class="hidden div-title">@Model.Product.Title</div>
 <div class="hidden div-image-id">@Model.Product.ImageId</div>
@@ -228,7 +235,7 @@
 @{
     if (@ViewBag.Client != null)
     {
-        <div class=" div-client">@ViewBag.Client.Id</div>
+        <div class="hidden div-client">@ViewBag.Client.Id</div>
         <div class="hidden div-account">@ViewBag.Client.AccountId</div>
 
     }
@@ -281,7 +288,7 @@
         <a class="btn btn-success send-message" style="margin-left:40px" href="/Auctions/Chat">Отправить сообщение автору</a>
 
         <div class="fa-border" style="margin-top:50px">
-            <form class="clearfix" name="form1">
+            <form class="clearfix" name="betForm">
                 <input type="hidden" name="auctionId" value=@Model.Id>
                 <div class="col-md-3">
                     <h5><b>Текущая ставка</b></h5>
@@ -297,7 +304,7 @@
             </form>
 
 
-            <form class="clearfix" name="form2" style="margin-top:10px">
+            <form class="clearfix" name="buyNowForm" style="margin-top:10px">
                 <input type="hidden" name="auctionId" value=@Model.Id>
                 <div class="col-md-4" style="margin-top:10px">
                     <h5><b>Цена “купить сейчас”</b></h5>

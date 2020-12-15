@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using BusinessLayer.BusinessObject;
 using DataLayer.Entities;
-using OnlineAuction.Entities;
 using OnlineAuction.Schedulers;
 using OnlineAuction.ServiceClasses;
 using OnlineAuction.ViewModels;
@@ -27,11 +26,11 @@ namespace OnlineAuction.Controllers
         public ActionResult Index(int? accountId, string alert)
         {
             OrderBO orderBO = DependencyResolver.Current.GetService<OrderBO>();
-            List<OrderBO> orders = orderBO.LoadAllWithInclude("Client").ToList();
+            List<OrderBO> ordersBO = orderBO.LoadAllWithInclude("Client").ToList();
             if (accountId != null) {
-                orders = orders.Where(o => o.Client.AccountId == accountId).ToList();
+                ordersBO = ordersBO.Where(o => o.Client.AccountId == accountId).ToList();
             }
-            List<OrderVM> ordersVM = orders.Select(o => mapper.Map<OrderVM>(o)).ToList();
+            List<Order> orders = ordersBO.Select(o => mapper.Map<Order>(o)).ToList();
             //2)
             //получить заказы с датами (только по связям с item, Product, Auction)
             HelperOrderCreate.mapper = mapper;

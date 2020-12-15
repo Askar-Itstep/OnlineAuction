@@ -34,6 +34,12 @@ namespace BusinessLayer.BusinessObject
             var res = betAuctions.AsEnumerable().Select(a => mapper.Map<BetAuctionBO>(a)).ToList();
             return res;
         }
+        public IEnumerable<BetAuctionBO> LoadAllWithInclude(params string[] parameters)  //из DataObj в BusinessObj 
+        {
+            var betAuctions = unitOfWork.BetAuctions.Include(parameters);
+            var res = betAuctions.AsEnumerable().Select(a => mapper.Map<BetAuctionBO>(a)).ToList();
+            return res;
+        }
         public BetAuctionBO Load(int id)
         {
             var betAuction = unitOfWork.BetAuctions.GetById(id);
@@ -50,6 +56,19 @@ namespace BusinessLayer.BusinessObject
             }
             unitOfWork.BetAuctions.Save();
         }
+        public async Task SaveAsync(BetAuctionBO betAuctionBO)
+        {
+            var betAuction = mapper.Map<BetAuction>(betAuctionBO);
+            if (betAuctionBO.Id == 0)
+            {
+                Add(betAuction);
+            }
+            else
+            {
+                Update(betAuction);
+            }
+            await unitOfWork.BetAuctions.SaveAsync();
+        }
         private void Add(BetAuction betAuction)
         {
             unitOfWork.BetAuctions.Create(betAuction);
@@ -63,6 +82,18 @@ namespace BusinessLayer.BusinessObject
             var betAuction = mapper.Map<BetAuction>(betAuctionBO);
             unitOfWork.BetAuctions.Delete(betAuction.Id);
             unitOfWork.BetAuctions.Save();
+        }
+
+        public async Task<BetAuction> FindByIdAsync(int? id)
+        {
+            if (id is null) return null;
+             return await unitOfWork.BetAuctions.GetByIdAsync((int)id);            
+        }
+        public  async Task<BetAuctionBO> FindBOByIdAsync(int? id)
+        {
+            if (id is null) return null;
+            BetAuction betAuction =await unitOfWork.BetAuctions.GetByIdAsync((int)id);
+            return mapper.Map<BetAuctionBO>(betAuction);
         }
     }
 }

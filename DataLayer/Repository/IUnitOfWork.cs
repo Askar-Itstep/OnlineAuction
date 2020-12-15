@@ -20,6 +20,9 @@ namespace DataLayer.Repository
         BaseRepository<Order> Orders { get; }
         BaseRepository<Product> Products { get; }
         BaseRepository<Role> Roles { get; }
-        //BaseRepository<User> Users { get; }
+        BaseRepository<RoleAccountLink> RoleAccountLinks { get; }
+        BaseRepository<UserHub> UserHubs { get; }
+        BaseRepository<ImageProductLink> ImageProductLinks { get; }
+        BaseRepository<Category> Categories { get; }
     }
 }

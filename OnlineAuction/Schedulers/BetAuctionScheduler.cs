@@ -34,10 +34,11 @@ namespace OnlineAuction.Schedulers
             IScheduler scheduler = await StdSchedulerFactory.GetDefaultScheduler();
             await scheduler.Start();
 
+            //работа: определ.  победителя
             IJobDetail job = JobBuilder.Create<WinnerFinder>()
                 .UsingJobData("AuctionId", AuctionId)
                 .Build();
-
+            //установ. триггера
             ITrigger simpleTrigger = TriggerBuilder.Create()
                  .WithIdentity("trigger2", "group2")
                 .EndAt(DateTime.SpecifyKind(DateEnd, DateTimeKind.Utc))

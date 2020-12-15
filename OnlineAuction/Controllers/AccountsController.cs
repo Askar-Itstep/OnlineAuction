@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using BusinessLayer.BusinessObject;
 using DataLayer.Entities;
-using OnlineAuction.Entities;
 using OnlineAuction.ServiceClasses;
 using OnlineAuction.ViewModels;
 using System;
@@ -203,10 +202,9 @@ namespace OnlineAuction.Controllers
                     return new JsonResult { Data = new { success = false, message = "Пользователя с таким логином и паролем нет. Либо ваш аккаунт заблокирован" }, JsonRequestBehavior = JsonRequestBehavior.DenyGet };
                 }
                 var roleAccountBOList = roleAccountBO.LoadAll().Where(r => r.AccountId == accountBO.Id).ToList();
-                List<RoleBO> rolesBO = roleAccountBOList.Where(r => r.AccountId == accountBO.Id).Select(r => r.Role).ToList();
-                accountBO.RolesBO = rolesBO;
+                //accountBO.RolesBO = rolesBO;
 
-                //нет денег удал. роль moder -связь Role-Account надоудалить или добавить
+                //нет денег удал. роль moder -> удалить или добавитьсвязь Role-Account
                 RoleAccountLinkBO linkRoleClientAccount = roleAccountBOList.Where(r => r.Role.RoleName.Contains("moder")).FirstOrDefault();    //client
                 if (accountBO.Balance <= 0)
                 {
@@ -220,11 +218,14 @@ namespace OnlineAuction.Controllers
                     if (linkRoleClientAccount == null)
                     {
                         RoleBO roleModer = DependencyResolver.Current.GetService<RoleBO>().LoadAll().FirstOrDefault(r => r.RoleName.Contains("moder"));
-                        roleAccountBO.Role = roleModer;
-                        roleAccountBO.Account = accountBO;
+                        roleAccountBO.RoleId = roleModer.Id;
+                        roleAccountBO.AccountId = (int)accountBO.Id;
                         roleAccountBO.Save(roleAccountBO);
+                        //перезагрузить роли-аккаунты
+                        roleAccountBOList = roleAccountBO.LoadAll().Where(r => r.AccountId == accountBO.Id).ToList();
                     }
                 }
+                List<RoleBO> rolesBO = roleAccountBOList.Where(r => r.AccountId == accountBO.Id).Select(r => r.Role).ToList();
                 FormsAuthentication.SetAuthCookie(model.Login, true);
 
                 //далее accountId,  myURI, myRoles отправл.по ajax в КЛИЕНТ
@@ -330,13 +331,13 @@ namespace OnlineAuction.Controllers
             return RedirectToAction("Login", "Accounts");
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
+        //protected override void Dispose(bool disposing)
+        //{
+        //    if (disposing)
+        //    {
+        //        db.Dispose();
+        //    }
+        //    base.Dispose(disposing);
+        //}
     }
 }

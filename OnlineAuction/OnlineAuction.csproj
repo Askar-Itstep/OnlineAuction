@@ -303,6 +303,7 @@
     <Compile Include="ServiceClasses\BlobHelper.cs" />
     <Compile Include="App_Start\StringToUriConverter.cs" />
     <Compile Include="App_Start\UriToStringConverter.cs" />
+    <Compile Include="ServiceClasses\AuctionViewModelBinder.cs" />
     <Compile Include="ServiceClasses\ServiceStatistics.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="App_Start\UnityConfig.cs" />

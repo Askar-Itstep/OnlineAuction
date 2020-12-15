@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using BusinessLayer.BusinessObject;
-using OnlineAuction.Entities;
+using DataLayer.Entities;
 using OnlineAuction.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -153,8 +153,6 @@ namespace OnlineAuction.ServiceClasses
                 OrderBO editBO = mapper.Map<OrderBO>(orderVM);
                 EditEntity(orderBO, editBO, 5);
             }
-
-
         }
 
         private static List<Type> listTypes = new List<Type>()
@@ -178,7 +176,8 @@ namespace OnlineAuction.ServiceClasses
                                 System.Diagnostics.Debug.WriteLine(prop.Name + ": " + prop.GetValue(editBO));
                                 prop.SetValue(modelBO, prop.GetValue(editBO));
                             }
-                            else if ((prop.PropertyType.Name.ToLower().Contains("int") || prop.PropertyType.Name.ToLower().Contains("nullable")) && (int)prop.GetValue(editBO) != 0)
+                            else if ((prop.PropertyType.Name.ToLower().Contains("int") || prop.PropertyType.Name.ToLower().Contains("nullable")) 
+                                && prop.GetValue(editBO) != null && (int)prop.GetValue(editBO) != 0)
                             {
                                 System.Diagnostics.Debug.WriteLine(prop.Name + ": " + prop.GetValue(editBO));
                                 prop.SetValue(modelBO, prop.GetValue(editBO));

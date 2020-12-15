@@ -1,6 +1,5 @@
 ﻿using DataLayer.Entities;
 using Microsoft.AspNet.SignalR;
-using OnlineAuction.Entities;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -28,26 +27,30 @@ namespace OnlineAuction
             Clients.All.addMessage(name, message, accountId);
         }
 
-        public async Task Connect(string userName)
+        public void Connect(string userName)
         {
-            using (Model1 db = new Model1()) {                
+            using (Model1 db = new Model1())
+            {
                 Users = db.UserHubs.ToList(); //должно обновл.
-                
+
                 var id = Context.ConnectionId;
 
                 //если имеющ. юзеры не имеют такого подключ. - добав.нов.юзера
-                if (!Users.Any(x => x.ConnectionId == id)) {
+                if (!Users.Any(x => x.ConnectionId == id))
+                {
                     User.ConnectionId = id;
-                    if (Users.FirstOrDefault(u => u.AccountId == User.AccountId) != null) {
+                    if (Users.FirstOrDefault(u => u.AccountId == User.AccountId) != null)
+                    {
                         SqlParameter paramConnId = new SqlParameter("@ConnId", id);
                         SqlParameter paramAccId = new SqlParameter("@AccId", User.AccountId);
                         db.Database.ExecuteSqlCommand("Update UserHubs SET ConnectionId = @ConnId WHERE AccountId = @AccId", paramConnId, paramAccId);
                     }
-                    else {
+                    else
+                    {
                         Users.Add(User);
                         db.UserHubs.Add(User);  //добавл., но также доб. нов. Account??????????
                     }
-                    await db.SaveChangesAsync();
+                    db.SaveChanges();
                     //Users = db.UserHubs.ToList();
 
                     //текущему пользователю вывести список юзеров на клиенте
