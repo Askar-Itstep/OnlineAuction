@@ -113,7 +113,13 @@
                                 <li>@Html.ActionLink("Контакты", "Contact", "Home")</li>
                             </ul>
                         </li>
-                        <li>@Html.ActionLink("Чат", "Chat", "Home")</li>
+                        <li>@Html.ActionLink("Dashboard", "Index", "AdminPanel")</li>
+                        @{
+                            if (!User.IsInRole("admin"))
+                            {
+                                <li>@Html.ActionLink("Чат", "Chat", "Home")</li>
+                            }
+                        }
                     </ul>
                     <ul class="nav navbar-nav" id="ul-two">
                         @{

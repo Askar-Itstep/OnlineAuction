@@ -24,16 +24,13 @@ namespace OnlineAuction
             return new MapperConfiguration(mpr =>
             {
                 mpr.CreateMap<Account, AccountBO>()
-                .ConstructUsing(c => DependencyResolver.Current.GetService<AccountBO>());
+                .ConstructUsing(c => DependencyResolver.Current.GetService<AccountBO>()).ReverseMap();
 
-                mpr.CreateMap<AccountBO, Account>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<Account>());
-
-                mpr.CreateMap<AccountVM, Account>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<Account>());
+                mpr.CreateMap<AccountBO, AccountVM>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<AccountVM>()).ReverseMap();
 
                 mpr.CreateMap<Account, AccountVM>()
-             .ConstructUsing(c => DependencyResolver.Current.GetService<AccountVM>());
+             .ConstructUsing(c => DependencyResolver.Current.GetService<AccountVM>()).ReverseMap();
                 //.ForMember(dist=>dist.ConnectionId, opt=>opt.MapFrom(src=>0));
 
                 //-------------------RegisterVM ------------------------------
@@ -50,81 +47,72 @@ namespace OnlineAuction
 
                 //---------------Role ----------------------------------
                 mpr.CreateMap<Role, RoleBO>()
-                .ConstructUsing(c => DependencyResolver.Current.GetService<RoleBO>());
+                .ConstructUsing(c => DependencyResolver.Current.GetService<RoleBO>()).ReverseMap();
 
-                mpr.CreateMap<RoleBO, Role>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<Role>());
+                mpr.CreateMap<RoleBO, RoleVM>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<RoleVM>()).ReverseMap();
 
                 mpr.CreateMap<RoleVM, Role>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<Role>());
+               .ConstructUsing(c => DependencyResolver.Current.GetService<Role>()).ReverseMap();
 
                 //------------------Client ----------------------------------
                 mpr.CreateMap<Client, ClientBO>()
-                .ConstructUsing(c => DependencyResolver.Current.GetService<ClientBO>());
+                .ConstructUsing(c => DependencyResolver.Current.GetService<ClientBO>()).ReverseMap();
 
-                mpr.CreateMap<ClientBO, Client>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<Client>());
-
-                mpr.CreateMap<Client, ClientVM>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<ClientVM>());
+                mpr.CreateMap<ClientBO, ClientVM>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<ClientVM>()).ReverseMap();
 
                 mpr.CreateMap<ClientVM, Client>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<Client>());
+               .ConstructUsing(c => DependencyResolver.Current.GetService<Client>()).ReverseMap();
 
                 //-----------------------RoleAccountLink---------------------------
                 mpr.CreateMap<RoleAccountLink, RoleAccountLinkBO>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<RoleAccountLinkBO>());
+               .ConstructUsing(c => DependencyResolver.Current.GetService<RoleAccountLinkBO>()).ReverseMap();
 
-                mpr.CreateMap<RoleAccountLinkBO, RoleAccountLink>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<RoleAccountLink>());
-
-                mpr.CreateMap<RoleAccountLinkVM, RoleAccountLink>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<RoleAccountLink>());
+                mpr.CreateMap<RoleAccountLinkBO, RoleAccountLinkVM>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<RoleAccountLinkVM>()).ReverseMap();
 
                 mpr.CreateMap<RoleAccountLink, RoleAccountLinkVM>()
-              .ConstructUsing(c => DependencyResolver.Current.GetService<RoleAccountLinkVM>());
+              .ConstructUsing(c => DependencyResolver.Current.GetService<RoleAccountLinkVM>()).ReverseMap();
 
                 //--------------------------------------Auctions ---------------------------------------
                 mpr.CreateMap<Auction, AuctionBO>()
-                .ConstructUsing(c => DependencyResolver.Current.GetService<AuctionBO>());
+                .ConstructUsing(c => DependencyResolver.Current.GetService<AuctionBO>()).ReverseMap();
 
-                mpr.CreateMap<AuctionBO, Auction>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<Auction>());
-
-                mpr.CreateMap<Auction, AuctionVM>()
-                .ConstructUsing(c => DependencyResolver.Current.GetService<AuctionVM>());
+                mpr.CreateMap<AuctionBO, AuctionVM>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<AuctionVM>()).ReverseMap();
 
                 mpr.CreateMap<AuctionVM, Auction>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<Auction>());
+               .ConstructUsing(c => DependencyResolver.Current.GetService<Auction>()).ReverseMap();
                 //--------------------------------------Category ---------------------------------------
                 mpr.CreateMap<Category, CategoryBO>()
-                                .ConstructUsing(c => DependencyResolver.Current.GetService<CategoryBO>());
+                                .ConstructUsing(c => DependencyResolver.Current.GetService<CategoryBO>()).ReverseMap();
 
-                mpr.CreateMap<CategoryBO, Category>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<Category>());
+                mpr.CreateMap<CategoryBO, CategoryVM>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<CategoryVM>()).ReverseMap();
 
                 mpr.CreateMap<CategoryVM, Category>()
                .ConstructUsing(c => DependencyResolver.Current.GetService<Category>()).ReverseMap();
 
                 //--------------------------------------Product ---------------------------------------
                 mpr.CreateMap<Product, ProductBO>()
-                                .ConstructUsing(c => DependencyResolver.Current.GetService<ProductBO>());
+                                .ConstructUsing(c => DependencyResolver.Current.GetService<ProductBO>()).ReverseMap();
 
-                mpr.CreateMap<ProductBO, Product>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<Product>());
+                mpr.CreateMap<ProductBO, ProductVM>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<ProductVM>()).ReverseMap();
 
                 mpr.CreateMap<ProductVM, Product>()
                .ConstructUsing(c => DependencyResolver.Current.GetService<Product>()).ReverseMap();
 
                 //--------------------------------------Image -------------------------------------------
                 mpr.CreateMap<Image, ImageBO>()
-                                .ConstructUsing(c => DependencyResolver.Current.GetService<ImageBO>());
+                                .ConstructUsing(c => DependencyResolver.Current.GetService<ImageBO>()).ReverseMap();
 
-                mpr.CreateMap<ImageBO, Image>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<Image>());
+                mpr.CreateMap<ImageBO, ImageVM>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<ImageVM>()).ReverseMap().ReverseMap();
 
                 mpr.CreateMap<ImageVM, Image>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<Image>()).ReverseMap();
+               .ConstructUsing(c => DependencyResolver.Current.GetService<Image>()).ReverseMap().ReverseMap();
                 //---------------------Addon!-----------------------------
                 mpr.CreateMap<string, Uri>().ConvertUsing<StringToUriConverter>();
                 mpr.CreateMap<Uri, string>().ConvertUsing<UriToStringConverter>();
@@ -132,37 +120,31 @@ namespace OnlineAuction
 
                 //--------------------------------------ImageProductLink -------------------------------------------
                 mpr.CreateMap<ImageProductLink, ImageProductLinkBO>()
-                                .ConstructUsing(c => DependencyResolver.Current.GetService<ImageProductLinkBO>());
+                                .ConstructUsing(c => DependencyResolver.Current.GetService<ImageProductLinkBO>()).ReverseMap();
 
-                mpr.CreateMap<ImageProductLinkBO, ImageProductLink>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<ImageProductLink>());
+                mpr.CreateMap<ImageProductLinkBO, ImageProductLinkVM>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<ImageProductLinkVM>()).ReverseMap();
 
                 mpr.CreateMap<ImageProductLinkVM, ImageProductLink>()
                .ConstructUsing(c => DependencyResolver.Current.GetService<ImageProductLink>()).ReverseMap();
                 //--------------------------------------Address ------------------------------------------
                 mpr.CreateMap<Address, AddressBO>()
-                                .ConstructUsing(c => DependencyResolver.Current.GetService<AddressBO>());
+                                .ConstructUsing(c => DependencyResolver.Current.GetService<AddressBO>()).ReverseMap();
 
-                mpr.CreateMap<AddressBO, Address>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<Address>());
-
-                mpr.CreateMap<AddressVM, Address>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<Address>());
+                mpr.CreateMap<AddressBO, AddressVM>()
+              .ConstructUsing(c => DependencyResolver.Current.GetService<AddressVM>()).ReverseMap();
 
                 mpr.CreateMap<Address, AddressVM>()
-                 .ConstructUsing(c => DependencyResolver.Current.GetService<AddressVM>());
+                 .ConstructUsing(c => DependencyResolver.Current.GetService<AddressVM>()).ReverseMap();
                 //--------------------------------------BetAuctions ---------------------------------------
                 mpr.CreateMap<BetAuction, BetAuctionBO>()
-                                .ConstructUsing(c => DependencyResolver.Current.GetService<BetAuctionBO>());
+                                .ConstructUsing(c => DependencyResolver.Current.GetService<BetAuctionBO>()).ReverseMap();
 
-                mpr.CreateMap<BetAuctionBO, BetAuction>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<BetAuction>());
-
-                mpr.CreateMap<BetAuction, BetAuctionVM>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<BetAuctionVM>());
+                mpr.CreateMap<BetAuctionBO, BetAuctionVM>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<BetAuctionVM>()).ReverseMap();
 
                 mpr.CreateMap<BetAuctionVM, BetAuction>()
-                 .ConstructUsing(c => DependencyResolver.Current.GetService<BetAuction>());
+                 .ConstructUsing(c => DependencyResolver.Current.GetService<BetAuction>()).ReverseMap();
 
                 //==========================AuctionEditVM==================================================
                 //AuctionEdit, AuctionEditBO- таких типов нет
@@ -200,36 +182,26 @@ namespace OnlineAuction
 
                 //--------------------------------------Message ---------------------------------------
                 mpr.CreateMap<Message, MessageBO>()
-                                .ConstructUsing(c => DependencyResolver.Current.GetService<MessageBO>());
-
-                mpr.CreateMap<MessageBO, Message>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<Message>());
+                                .ConstructUsing(c => DependencyResolver.Current.GetService<MessageBO>()).ReverseMap();
 
                 //--------------------------------------Orders ---------------------------------------
                 mpr.CreateMap<Order, OrderBO>()
-                                .ConstructUsing(c => DependencyResolver.Current.GetService<OrderBO>());
+                                .ConstructUsing(c => DependencyResolver.Current.GetService<OrderBO>()).ReverseMap();
 
-                mpr.CreateMap<OrderBO, Order>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<Order>());
-
-                mpr.CreateMap<OrderVM, Order>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<Order>());
+                mpr.CreateMap<OrderVM, OrderBO>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<OrderBO>()).ReverseMap();
 
                 mpr.CreateMap<Order, OrderVM>()
-                 .ConstructUsing(c => DependencyResolver.Current.GetService<OrderVM>());
+                 .ConstructUsing(c => DependencyResolver.Current.GetService<OrderVM>()).ReverseMap();
 
                 //--------------------------------------Items ---------------------------------------
                 mpr.CreateMap<Item, ItemBO>()
-                                .ConstructUsing(c => DependencyResolver.Current.GetService<ItemBO>());
+                                .ConstructUsing(c => DependencyResolver.Current.GetService<ItemBO>()).ReverseMap();
 
-                mpr.CreateMap<ItemBO, Item>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<Item>());
-
-                mpr.CreateMap<ItemVM, Item>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<Item>());
+                mpr.CreateMap<ItemBO, ItemVM>() .ConstructUsing(c => DependencyResolver.Current.GetService<ItemVM>()).ReverseMap();
 
                 mpr.CreateMap<Item, ItemVM>()
-                 .ConstructUsing(c => DependencyResolver.Current.GetService<ItemVM>());
+                 .ConstructUsing(c => DependencyResolver.Current.GetService<ItemVM>()).ReverseMap();
 
 
                 //==========================OrderFullMapVM==================================================
@@ -284,16 +256,13 @@ namespace OnlineAuction
 
                 //======================= UserHub ========================================
                 mpr.CreateMap<UserHub, UserHubBO>()
-                               .ConstructUsing(c => DependencyResolver.Current.GetService<UserHubBO>());
+                               .ConstructUsing(c => DependencyResolver.Current.GetService<UserHubBO>()).ReverseMap();
 
-                mpr.CreateMap<UserHubBO, UserHub>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<UserHub>());
-
-                mpr.CreateMap<UserHubVM, UserHub>()
-               .ConstructUsing(c => DependencyResolver.Current.GetService<UserHub>());
+                mpr.CreateMap<UserHubBO, UserHubVM>()
+               .ConstructUsing(c => DependencyResolver.Current.GetService<UserHubVM>()).ReverseMap();
 
                 mpr.CreateMap<UserHub, UserHubVM>()
-                 .ConstructUsing(c => DependencyResolver.Current.GetService<UserHubVM>());
+                 .ConstructUsing(c => DependencyResolver.Current.GetService<UserHubVM>()).ReverseMap();
 
             });
         }
