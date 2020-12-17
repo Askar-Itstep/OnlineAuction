@@ -3,6 +3,7 @@ using BusinessLayer.BusinessObject;
 using DataLayer.Entities;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
+using OnlineAuction.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,28 +24,25 @@ namespace OnlineAuction.ServiceClasses
             Clients = clients;
         }
         public IMapper mapper;
-        private IHubConnectionContext<dynamic> Clients { get; set; }
+        private IHubConnectionContext<dynamic> Clients { get; set; } // != ClientBO
 
-        //public static List<UserHubBO> UsersBO { get; set; } //= ChatHub.Users;   
-        //public static List<UserHubBO> Users { get; set; } //= ChatHub.Users;   
-        public UserHubBO UserBO { get; set; }
-        public UserHub User { get; set; }
+        public UserVM UserVM { get;  set; }
 
         public async Task SendHello(string message)
         {
-            ChatHub.User = mapper.Map<UserHub>(UserBO);
-            await Clients.All.hello(UserBO.Account.FullName, message);
+            ChatHub.User = mapper.Map<UserVM>(UserVM);
+            await Clients.All.hello(UserVM.Account.FullName, message);
         }
 
         public async Task SendMessage(string message, bool keySignIn = false)
         {
             //var context = Microsoft.AspNet.SignalR.GlobalHost.ConnectionManager.GetHubContext<ChatHub>();
-            ChatHub.User = mapper.Map<UserHub>(UserBO);
-            await Clients.All.addMessage(UserBO.Account.FullName, message, UserBO.Account.Id);
+            ChatHub.User = UserVM;
+            await Clients.All.addMessage(UserVM.Account.FullName, message);
 
-            //сохр. в БД
+            #region запись сообщен. в MSSQL кроме сообщ. приветствия
             var clientBO = DependencyResolver.Current.GetService<ClientBO>();
-            ClientBO sender = clientBO.LoadAll().FirstOrDefault(c => c.AccountId == UserBO.Account.Id);
+            ClientBO sender = clientBO.LoadAll().FirstOrDefault(c => c.AccountId == UserVM.Account.Id);
             List<ClientBO> addressers = clientBO.LoadAll().ToList();
 
             //не все клиенты, а только вошедшие на chat  //сопоставить с юзерами ChatHub       
@@ -54,21 +52,23 @@ namespace OnlineAuction.ServiceClasses
                                                 (c, a) => new { client = c, account = a })
                                                 .Where(c => c.client.AccountId == c.account.Id)
                                                 .Select(c => c.client);
-
-            if (keySignIn == false) //запись в БД кроме сообщ. приветствия
+            if (keySignIn == false) 
             {
-                //chatClients.ToList().ForEach(a => SaveMessage(message, User.Account.Id, a));
+                chatClients.ToList().ForEach(a => SaveMessage(message, UserVM.Account.Id, a));
             }
+            #endregion
         }
 
 
         public async Task<bool> CommunicationWIthAuthorAsync(string message, string myConnectId, string connectId)
         {
-            ChatHub.User = mapper.Map<UserHub>(UserBO);
+            ChatHub.User = UserVM; 
             //сообщ. только у получателя!
-           await Clients.Client(connectId).addMessage(UserBO.Account.FullName, message, UserBO.AccountId);
+            await Clients.Client(connectId).addMessage(UserVM.Account.FullName, message, UserVM.AccountId);
+
             //доп сообщ. send self
-            await Clients.Client(myConnectId).addMessage(UserBO.Account.FullName, message, UserBO.AccountId);
+            await Clients.Client(myConnectId).addMessage(UserVM.Account.FullName, message, UserVM.AccountId);
+
             //------------------save database----------------------
             //найти клиента с соотв. connectID
             var user = ChatHub.Users.FirstOrDefault(u => u.ConnectionId == connectId);
@@ -78,7 +78,8 @@ namespace OnlineAuction.ServiceClasses
                 userAccountId = user.AccountId;
             }
 
-            ClientBO actorBO = DependencyResolver.Current.GetService<ClientBO>().LoadAll().FirstOrDefault(c => c.AccountId == UserBO.Account.Id);
+            //using MSSQL
+            ClientBO actorBO = DependencyResolver.Current.GetService<ClientBO>().LoadAll().FirstOrDefault(c => c.AccountId == UserVM.Account.Id);
             if (userAccountId != 0)
             {
                 SaveMessage(message, userAccountId, actorBO);
@@ -103,7 +104,7 @@ namespace OnlineAuction.ServiceClasses
             {
                 messageBO.ClientId = (int)senderClient.Id;
                 messageBO.PartnerId = (int)actorBO.Id;
-                messageBO.Save(messageBO);
+                //messageBO.Save(messageBO);
             }
         }
     }

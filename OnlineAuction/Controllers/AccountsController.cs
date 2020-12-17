@@ -331,13 +331,5 @@ namespace OnlineAuction.Controllers
             return RedirectToAction("Login", "Accounts");
         }
 
-        //protected override void Dispose(bool disposing)
-        //{
-        //    if (disposing)
-        //    {
-        //        db.Dispose();
-        //    }
-        //    base.Dispose(disposing);
-        //}
     }
 }

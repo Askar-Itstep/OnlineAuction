@@ -1,6 +1,10 @@
 ﻿using AutoMapper;
 using BusinessLayer.BusinessObject;
 using DataLayer.Entities;
+using FireSharp.Config;
+using FireSharp.Interfaces;
+using FireSharp.Response;
+using Newtonsoft.Json;
 using OnlineAuction.Schedulers;
 using OnlineAuction.ServiceClasses;
 using OnlineAuction.ViewModels;
@@ -22,6 +26,12 @@ namespace OnlineAuction.Controllers
         {
             this.mapper = mapper;
         }
+        private IFirebaseConfig config = new FirebaseConfig
+        {
+            AuthSecret = "r7NFXF1rmprl3xQlJ8lmhdWyVguJqNprrnxnUA2P",
+            BasePath = "https://asp-net-with-firebase-default-rtdb.firebaseio.com/"
+        };
+        private IFirebaseClient client;
 
         //isActor - только из _Layout.html (опред. по клику "мои аукц.")
         //CategoryId - параметр из формы для фильтр.
@@ -42,8 +52,8 @@ namespace OnlineAuction.Controllers
             {
                 auctionsBO = auctionsBO.Where(a => a.IsActive).ToList();
             }
-            var auctions = auctionsBO.Select(a => mapper.Map<Auction>(a)).ToList();
-            var auctionsVM = auctions.Select(a => mapper.Map<AuctionVM>(a));
+            //var auctions = auctionsBO.Select(a => mapper.Map<Auction>(a)).ToList();
+            var auctionsVM = auctionsBO.Select(a => mapper.Map<AuctionVM>(a));
             //т.е. для "мои аукционы"
             if (accountId != null && (int)accountId != 0 && isActor != null)
             {
@@ -131,19 +141,14 @@ namespace OnlineAuction.Controllers
             return View(mapper.Map<AuctionVM>(auction));
         }
 
-
-        public string BrowserInfo(string browser)
-        {
-            return browser;
-        }
-
         //+Edit---------------------------------------------------------------------
+        [Authorize(Roles = "member, admin")]
         public ActionResult Create(AuctionEditVM data, int? flagCreate, int? imageId) //ajax-метод Detai.html->click("Edit")
         {
             var request = Request.QueryString;
             var accountId = Session["accountId"] ?? 0;
             if ((int)accountId == 0)
-            { 
+            {
                 return RedirectToAction("Index", new { alert = "Вы сейчас не можете создать лот. Залогинтесь!" });
             }
             //сначала надо проверить явл. ли юзер moder'ом?
@@ -169,8 +174,7 @@ namespace OnlineAuction.Controllers
                 if (imageId != null)
                 {
                     imageBO = imageBO.Load((int)imageId);
-                    var image = mapper.Map<Image>(imageBO);
-                    imageVM = mapper.Map<ImageVM>(image);
+                    imageVM = mapper.Map<ImageVM>(imageBO);
                 }
                 //подготов. данных для 2го захода->потом из ajax снова  в этот контроллер, в котор. вызвать объект из сессии
                 Session["editImg"] = imageVM;
@@ -179,10 +183,10 @@ namespace OnlineAuction.Controllers
             }
             //данные для 2-го захода (Edit)
             var editVM = Session["auctionEdit"];
-             if (data.Id == 0 && editVM == null)
+            if (data.Id == 0 && editVM == null)
             {
                 return new JsonResult { Data = new { success = false, alert = "Cбой передачи данных. Обратитесь к администратору!" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
-            }            
+            }
             ViewBag.editImg = Session["editImg"];
             ViewBag.Title = "Edit";
             return View(editVM);
@@ -191,6 +195,7 @@ namespace OnlineAuction.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "member, admin")]
         public async Task<ActionResult> Create(AuctionEditVM editVM, int? id, HttpPostedFileBase upload)
         {
             var userId = Session["accountId"] ?? 0;
@@ -278,6 +283,7 @@ namespace OnlineAuction.Controllers
         //    return View(auction);
         //}
         #endregion
+        [Authorize(Roles = "member, admin")]
         public ActionResult Delete(int? id)
         {
             if (id == null)
@@ -289,12 +295,13 @@ namespace OnlineAuction.Controllers
             {
                 return HttpNotFound();
             }
-            var auction = mapper.Map<Auction>(auctionBO);
-            return View(mapper.Map<AuctionVM>(auction));
+            //var auction = mapper.Map<Auction>(auctionBO);
+            return View(mapper.Map<AuctionVM>(auctionBO));
         }
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "member, admin")]
         public ActionResult DeleteConfirmed(int id)
         {
             AuctionBO auctionBO = DependencyResolver.Current.GetService<AuctionBO>().Load((int)id);
@@ -303,10 +310,12 @@ namespace OnlineAuction.Controllers
         }
 
         //=======================ChatHub============================
-        private static UserHubBO UserHub { get; set; }
+        //private static UserHubBO UserHub { get; set; }
+        private static UserVM UserVM { get; set; }
 
         //1-ый заход: по клику ссылки "Связаться с Автором"
         //2-ой: по ajax-заходу (и активац. хаба) в _ChatAuctionView - для получ. ConnectID
+        [Authorize(Roles = "member, client")]
         public async Task<ActionResult> ChatAsync(int? auctionId, string connectionId, string message)//1-ый парам. по 1-му заходу, 2-ой по 2-му
         {
             var accountId = Session["accountId"] ?? 0;
@@ -320,27 +329,21 @@ namespace OnlineAuction.Controllers
                 ViewBag.User = null;
                 var sender = PushSender.InstanceClient;
                 AccountBO accountBO = DependencyResolver.Current.GetService<AccountBO>().Load((int)accountId);
+                //проверить если юзер-админ: выйти
                 List<RoleAccountLinkBO> rolesAccount = DependencyResolver.Current.GetService<RoleAccountLinkBO>()
-                    .LoadAll().Where(r => r.AccountId == (int)accountId).ToList();
+                                                                                                         .LoadAll().Where(r => r.AccountId == (int)accountId).ToList();
                 var roleAdmin = rolesAccount.FirstOrDefault(r => r.Role.RoleName.Contains("admin"));
-                if (accountBO != null && roleAdmin == null)
-                {
-                    UserHub = DependencyResolver.Current.GetService<UserHubBO>().Load((int)accountId);
-                    if (UserHub == null)
-                    {
-                        var userHubVM = new UserHubVM { AccountId = (int)accountId, ConnectionId = "" };
-                        var userHub = mapper.Map<UserHub>(userHubVM);
-                        UserHub = mapper.Map<UserHubBO>(userHub);
-                        UserHub.Save(UserHub);
-                    }
-                    UserHub.Account = accountBO;
-                    sender.User = UserHub;
-                    ViewBag.User = UserHub.Account;
-                }
+
+                ChatHubService hubService = new ChatHubService(mapper: mapper);
+                var tuple = await hubService.RunChatHubAsync(accountId, accountBO, roleAdmin);
+                UserVM = tuple.Item2;
+                ViewBag.User = UserVM.Account;
+
                 if (connectionId == "" || connectionId is null)
                 {
                     return View("Partial/_ChatAuctionView");
                 }
+                //если connectId != "" (2-ой заход)
                 //----------------addresser-------------------
                 AuctionBO auctionBO = DependencyResolver.Current.GetService<AuctionBO>().Load((int)auctionId);
                 ViewBag.Actor = null;
@@ -349,26 +352,32 @@ namespace OnlineAuction.Controllers
                 {
                     var actorBO = auctionBO.Actor;
                     var actorAccountBO = actorBO.Account;
-                    var actorAccount = mapper.Map<Account>(actorAccountBO);
-                    var actorAccountVM = mapper.Map<AccountVM>(actorAccount);
+                    var actorAccountVM = mapper.Map<AccountVM>(actorAccountBO);
 
                     ViewBag.Actor = actorAccountVM;
-                    var users = db.UserHubs.ToList();
-                    var actor = users.FirstOrDefault(u => u.AccountId == actorAccountVM.Id);
-                    if (actor != null)
-                    {
-                        message = message.Equals("") ? "Hello author!" : message;
-                        sender.mapper = mapper;
-                        bool flag = await sender.CommunicationWIthAuthorAsync(message, connectionId, actor.ConnectionId);
+                    client = new FireSharp.FirebaseClient(config);
+                    FirebaseResponse firebaseResponse = await client.GetAsync("Users");
+                    dynamic data = JsonConvert.DeserializeObject<dynamic>(firebaseResponse.Body);
 
-                        //PushSender.SaveMessage(message, accountId, actorBO);   //сохр. в БД
-                        if (flag == true)
+                    if (data != null)
+                    {
+                        List<UserVM> users = ChatHubService.GetUsersFirebase(data);
+                        var actor = users.FirstOrDefault(u => u.AccountId == actorAccountVM.Id);
+                        if (actor != null)
                         {
-                            alert = "It's good";
-                        }
-                        else
-                        {
-                            alert = "Fail";
+                            message = message.Equals("") ? "Hello author!" : message;
+                            sender.mapper = mapper;
+                            bool flag = await sender.CommunicationWIthAuthorAsync(message, connectionId, actor.ConnectionId);
+
+                            PushSender.SaveMessage(message, accountId, actorBO);   //сохр. в БД
+                            if (flag == true)
+                            {
+                                alert = "It's good";
+                            }
+                            else
+                            {
+                                alert = "Fail";
+                            }
                         }
                     }
                     else

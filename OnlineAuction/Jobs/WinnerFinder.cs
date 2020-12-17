@@ -34,7 +34,6 @@ namespace OnlineAuction.Jobs
             AccountBO winnerBO = winnBet.Client.Account;
             //Account winner = mapper.Map<Account>(winnerBO);
             var sender = PushSender.InstanceClient;
-            sender.User.Account = winnerBO;
             await sender.SendMessage(string.Format("Победитель аукциона: {0}", winnerBO.FullName)); // winnBet.Client.Account.FullName
 
             //2)отправить письма о победителе аукциона
