@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using BusinessLayer.BusinessObject;
-using DataLayer.Entities;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
 using OnlineAuction.ViewModels;
