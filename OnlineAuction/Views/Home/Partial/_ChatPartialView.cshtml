@@ -61,8 +61,11 @@
                 $('#header').html('<h3>Добро пожаловать, ' + userName + '</h3>');
                 // Добавление всех пользователей в отображен.
                 for (i = 0; i < allUsers.length; i++) {
-                    AddUser(allUsers[i].ConnectionId, allUsers[i].Account.FullName, allUsers[i].Account.Image.URI);
-                    console.log("user[i]: " + allUsers[i].Account.Image.URI)
+                    //AddUser(allUsers[i].ConnectionId, allUsers[i].Account.FullName, allUsers[i].Account.Image.URI);
+                    //console.log("user[i]: " + allUsers[i])
+                    for (item in user[i]) {
+                        console.log(item)
+                    }
                 }
                 sessionStorage.setItem("allUsers", JSON.stringify(allUsers));
             }

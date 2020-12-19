@@ -1,14 +1,7 @@
 ﻿using AutoMapper;
 using BusinessLayer.BusinessObject;
-using DataLayer.Entities;
-using FireSharp.Config;
-using FireSharp.Interfaces;
-using FireSharp.Response;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using OnlineAuction.ServiceClasses;
 using OnlineAuction.ViewModels;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,15 +13,7 @@ namespace OnlineAuction.Controllers
     {
         private IMapper mapper;
 
-        //using Firebase GoogleCloud-----------------------------
         private static UserVM UserVM { get; set; }
-        //private IFirebaseConfig config = new FirebaseConfig
-        //{
-        //    AuthSecret = "r7NFXF1rmprl3xQlJ8lmhdWyVguJqNprrnxnUA2P",
-        //    BasePath = "https://asp-net-with-firebase-default-rtdb.firebaseio.com/"
-        //};
-        //private IFirebaseClient client;
-
 
         public HomeController(IMapper mapper)
         {
@@ -44,68 +29,15 @@ namespace OnlineAuction.Controllers
                                                                                 .LoadAll().Where(r => r.AccountId == (int)accountId).ToList();
                 //админ - не участв. в чате! (доп. контроль в представл. и контроллере Home/Chat()) 
                 var roleAdmin = rolesAccount.FirstOrDefault(r => r.Role.RoleName.Contains("admin"));
+
+                //поприветствовать при входе (видно только в чате)
                 ChatHubService hubService = new ChatHubService(mapper: mapper);
                 var tuple  = await hubService.RunChatHubAsync(accountId, accountBO, roleAdmin);
+                ViewBag.Message = tuple.Item1;  //может быть Good || Error
                 UserVM = tuple.Item2;
             }
             return View();
         }
-
-        //private async Task RunChatHub(object accountId, AccountBO accountBO, RoleAccountLinkBO roleAdmin)
-        //{
-        //    if (accountBO != null && roleAdmin == null)
-        //    {
-        //        client = new FireSharp.FirebaseClient(config);
-        //        FirebaseResponse firebaseResponse = await client.GetAsync("Users");
-        //        dynamic data = JsonConvert.DeserializeObject<dynamic>(firebaseResponse.Body);
-
-        //        if (data != null)
-        //        {
-        //            var list = new List<UserVM>();
-        //            foreach (var item in data)
-        //            {
-        //                //System.Diagnostics.Debug.WriteLine("dynamic: " + JsonConvert.DeserializeObject<UserVM>(((JProperty)item).Value.ToString()));
-        //                list.Add(JsonConvert.DeserializeObject<UserVM>(((JProperty)item).Value.ToString()));
-        //            }
-        //            UserVM = list.Where(u => u.AccountId == (int)accountId).FirstOrDefault();
-        //        }
-
-        //          if (UserVM == null)//UserHubBO
-        //        {
-        //            //в табл. UserHubs - нет постоянн. данных! (при выходе из чата-данные удалятся)                    
-        //            UserVM = new UserVM { Id="", AccountId = (int)accountId, ConnectionId = "" };
-        //            //сохр. в GoogleFirebase
-        //            try
-        //            {
-        //                InsertUserToFirebaseAsync(UserVM); //отступл. от правил (сохр. простой объект)
-        //                ModelState.AddModelError(string.Empty, "Added Succefully");
-        //            }
-        //            catch (Exception e)
-        //            {
-        //                ModelState.AddModelError(string.Empty, e.Message);
-        //            }
-        //        }
-        //        var account = mapper.Map<Account>(accountBO);
-
-        //        //new model for Firebase 
-        //        UserVM = new UserVM { Id="", AccountId = (int)accountId, ConnectionId = "" };
-        //        UserVM.Account = mapper.Map<AccountVM>(account);
-
-        //        //первый вызов инициализир. instance ChatHub
-        //        var sender = PushSender.InstanceClient;
-        //        sender.UserVM = UserVM;
-        //        sender.mapper = mapper;
-        //        await sender.SendHello(string.Format("А у нас новый участник: {0}", UserVM.Account.FullName));
-        //    }
-        //}
-
-        //private  void InsertUserToFirebaseAsync(UserVM user)
-        //{
-        //    client = new FireSharp.FirebaseClient(config);
-        //    PushResponse responce = client.Push("Users/", user);
-        //    user.Id = responce.Result.name;
-        //    SetResponse setResponse = client.Set("Users/" + user.Id, user);
-        //}
 
         [Authorize(Roles = "member, client")]
         public ActionResult Chat()
@@ -115,7 +47,7 @@ namespace OnlineAuction.Controllers
             {
                 return RedirectToAction("Login", "Accounts");
             }
-            ViewBag.User = UserVM.Account; //UserHubBO.Account;
+            ViewBag.User = UserVM.Account; 
             return View("Partial/_ChatPartialView");
         }
         //sms - прилетают из формы Partial/_ChatPartialView 
@@ -132,7 +64,7 @@ namespace OnlineAuction.Controllers
             {
                 ViewBag.User = null;
                 var sender = PushSender.InstanceClient;
-                if (UserVM.Account != null)  //accountBO
+                if (UserVM.Account != null)  
                 {
                     ViewBag.User = UserVM.Account;
                 }
@@ -159,6 +91,14 @@ namespace OnlineAuction.Controllers
         public ActionResult SwitchContainer(string platform)
         {
             //need create fabric connect to DB
+            if (platform.ToLower().Contains("aws"))
+            {
+
+            }
+            else
+            {
+
+            }
             return RedirectToAction("Index");
         }
 

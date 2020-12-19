@@ -28,6 +28,7 @@ namespace OnlineAuction.ServiceClasses
 
         public UserVM UserVM { get;  set; }
 
+        //1-ый вызов метода инициал. _instance ChatHub + context SignalR.GlobalHost
         public async Task SendHello(string message)
         {
             ChatHub.User = mapper.Map<UserVM>(UserVM);
@@ -43,7 +44,7 @@ namespace OnlineAuction.ServiceClasses
             #region запись сообщен. в MSSQL кроме сообщ. приветствия
             var clientBO = DependencyResolver.Current.GetService<ClientBO>();
             ClientBO sender = clientBO.LoadAll().FirstOrDefault(c => c.AccountId == UserVM.Account.Id);
-            List<ClientBO> addressers = clientBO.LoadAll().ToList();
+            List<ClientBO> addressers = clientBO.LoadAll().ToList(); 
 
             //не все клиенты, а только вошедшие на chat  //сопоставить с юзерами ChatHub       
             var usersHubBO = ChatHub.Users.Select(u => mapper.Map<UserHubBO>(u));

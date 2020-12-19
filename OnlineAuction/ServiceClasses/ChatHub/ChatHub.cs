@@ -34,6 +34,7 @@ namespace OnlineAuction
         {
             await Clients.Caller.addMessage(name, message);
         }
+
         //к данным методам обращ. в клиенте API SignalR
         public void Send(string name, string message, int?accountId)
         {
@@ -46,10 +47,11 @@ namespace OnlineAuction
             client = new FireSharp.FirebaseClient(config);
             FirebaseResponse firebaseResponse = await client.GetAsync("Users");
             dynamic data = JsonConvert.DeserializeObject<dynamic>(firebaseResponse.Body);
-
+            //после аутенитиф.  БД не пустая (кроме ConnectId, Account)
             if (data != null)
             {
                 Users = new List<UserVM>();
+                //
                 foreach (var item in data)
                 {
                     Users.Add(JsonConvert.DeserializeObject<UserVM>(((JProperty)item).Value.ToString()));
