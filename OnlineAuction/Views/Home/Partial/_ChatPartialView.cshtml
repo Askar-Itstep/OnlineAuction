@@ -61,11 +61,11 @@
                 $('#header').html('<h3>Добро пожаловать, ' + userName + '</h3>');
                 // Добавление всех пользователей в отображен.
                 for (i = 0; i < allUsers.length; i++) {
-                    //AddUser(allUsers[i].ConnectionId, allUsers[i].Account.FullName, allUsers[i].Account.Image.URI);
-                    //console.log("user[i]: " + allUsers[i])
-                    for (item in user[i]) {
-                        console.log(item)
-                    }
+                    AddUser(allUsers[i].ConnectionId, allUsers[i].Account.FullName, allUsers[i].Account.Image.URI);
+                    console.log("user[i]: " + allUsers[i].Account.Image.URI)
+                    //for (item in allUsers[i]) {
+                    //    console.log(item)
+                    //}
                 }
                 sessionStorage.setItem("allUsers", JSON.stringify(allUsers));
             }
@@ -152,17 +152,20 @@
                     //alert(data) //сейчас возвр. View т.е. html-файл
                 },
                 error: function (e, msg) {
-                    alert("Error: ", msg)
+                    //alert("Error: ", msg)
+                    console.log("Error: ", msg)
                 }
             })
         }
         //Добавление имени нового собеседника в  отображ. чат-комнаты
         function AddUser(id, name, uri = "") {
             var userId = $('#hdId').val();
-            //console.log("hdId: "+id)
-            if (userId != id) {
+            //console.log("userId: " + userId)
+            //console.log("id: " + id)
+            //console.log("uri: " + uri)
+            //if (userId != id) {
                 $("#chatusers").append('<p id="' + id + '"><b>' + name + '</b><img src=' + uri +' style="width:40px; heigh:40px" /></p>');
-            }
+            //}
         }
     </script>
 }

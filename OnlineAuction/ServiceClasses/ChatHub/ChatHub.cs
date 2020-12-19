@@ -1,5 +1,4 @@
-﻿using DataLayer.Entities;
-using FireSharp.Config;
+﻿using FireSharp.Config;
 using FireSharp.Interfaces;
 using FireSharp.Response;
 using Microsoft.AspNet.SignalR;
@@ -8,7 +7,6 @@ using Newtonsoft.Json.Linq;
 using OnlineAuction.ViewModels;
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 

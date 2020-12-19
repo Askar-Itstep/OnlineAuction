@@ -1,16 +1,9 @@
-﻿using Amazon;
-using Amazon.S3;
-using AutoMapper;
-using IronPython.Hosting;
-using Microsoft.Scripting.Hosting;
+﻿using AutoMapper;
 using OnlineAuction.ServiceClasses;
 using OnlineAuction.ViewModels;
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web.Mvc;
