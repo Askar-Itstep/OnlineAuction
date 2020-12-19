@@ -10,14 +10,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
-using System.Web.Mvc;
 
 namespace OnlineAuction.ServiceClasses
 {
     public class ChatHubService
     {
         private IMapper mapper;
+        //using Firebase GoogleCloud-----------------------------
         private IFirebaseConfig config = new FirebaseConfig
         {
             AuthSecret = "r7NFXF1rmprl3xQlJ8lmhdWyVguJqNprrnxnUA2P",
@@ -45,7 +44,7 @@ namespace OnlineAuction.ServiceClasses
                     UserVM = list.Where(u => u.AccountId == (int)accountId).FirstOrDefault();
                 }
 
-                if (UserVM == null)//UserHubBO
+                if (UserVM == null)
                 {
                     //в табл. UserHubs - нет постоянн. данных! (при выходе из чата-данные удалятся)                    
                     UserVM = new UserVM { Id = "", AccountId = (int)accountId, ConnectionId = "" };
@@ -56,12 +55,10 @@ namespace OnlineAuction.ServiceClasses
                     }
                     catch (Exception e)
                     {
-                        message = e.Message;
+                        message = "Error: "+e.Message;
                     }
                 }
-                //var account = mapper.Map<Account>(accountBO);
-
-                //new model for Firebase 
+                 //new model for Firebase 
                 UserVM = new UserVM { Id = "", AccountId = (int)accountId, ConnectionId = "" };
                 UserVM.Account = mapper.Map<AccountVM>(accountBO);
 
