@@ -20,15 +20,20 @@ namespace OnlineAuction.ServiceClasses
         public BuilderSynteticModels(IMapper mapper)
         {
         }
-        public static async Task<AuctionBO> CreateEntity(AuctionEditVM editVM, AuctionBO auction, object userId, HttpPostedFileBase upload)
+        public static async Task<AuctionBO> CreateEntity(HttpPostedFileBase upload, AuctionBO auction = null, object userId = null, AuctionEditVM editVM = null)
         {
-            ImageBO image = await CreateImageEntity(editVM, upload);
-            ProductBO product = CreateProductEntity(editVM, image).Item1;
+            ImageBO image = await CreateImageEntity(upload, editVM);
+            if (editVM != null)
+            {
+                ProductBO product = CreateProductEntity(editVM, image).Item1;
 
-            var client = DependencyResolver.Current.GetService<ClientBO>().LoadAll().Where(c => c.AccountId == (int)userId).FirstOrDefault();
-            CreateAuctionEntity(editVM, ref auction, product, client);
-            CreateBetAuctionEntity(editVM, auction);
-            return await Task.FromResult(auction);
+                var client = DependencyResolver.Current.GetService<ClientBO>().LoadAll().Where(c => c.AccountId == (int)userId).FirstOrDefault();
+                CreateAuctionEntity(editVM, ref auction, product, client);
+                CreateBetAuctionEntity(editVM, auction);
+                return await Task.FromResult(auction);
+            }
+
+            return null;
         }
 
         private static void CreateAuctionEntity(AuctionEditVM editVM, ref AuctionBO auction, ProductBO product, ClientBO client)
@@ -71,23 +76,20 @@ namespace OnlineAuction.ServiceClasses
             return new Tuple<ProductBO, ImageProductLinkBO>(product, imageProductLinkBO);
         }
 
-        //Create->flag:false, Edit->flag:true
-        #region OldCode
-        //private static ImageBO CreateImageEntity(AuctionEditVM editVM, HttpPostedFileBase upload, bool flag = false)
-        //{
-        //    byte[] myBytes = new byte[upload.ContentLength];
-        //    upload.InputStream.Read(myBytes, 0, upload.ContentLength);
-        //    var image = DependencyResolver.Current.GetService<ImageBO>();
-        //    image.FileName = editVM.Title;
-        //    image.ImageData = myBytes;
-        //    return image;
-        //}
-        #endregion
-        private static async Task<ImageBO> CreateImageEntity(ISyntetic editVM, HttpPostedFileBase upload, bool flag = false, AccountBO account = null)
+        //Create->flag:false, Edit->flag:true      
+        private static async Task<ImageBO> CreateImageEntity(HttpPostedFileBase upload, ISyntetic editVM = null, bool flag = false, AccountBO account = null)
         {
-            ImageVM imageVM = new ImageVM { FileName = ((AuctionEditVM)editVM).Title };
+            ImageVM imageVM = null;
+            if (editVM != null)
+            {
+                imageVM = new ImageVM { FileName = ((AuctionEditVM)editVM).Title };
+            }
+            else
+            {
+                imageVM = new ImageVM { FileName = upload.FileName };
+            }
             ImageBO imageBO = DependencyResolver.Current.GetService<ImageBO>();
-            return await BlobHelper.SetImageAsync(upload, imageVM, imageBO, mapper, account);
+            return await BlobHelper.SetImageAsync(upload, imageVM, imageBO, mapper, account, "aws");
         }
 
 
@@ -122,7 +124,7 @@ namespace OnlineAuction.ServiceClasses
                     if (imageBO != null)
                     {
                         ImageBO editImageBO = DependencyResolver.Current.GetService<ImageBO>();
-                        editImageBO = await CreateImageEntity((AuctionEditVM)editVM, upload, true);    //true->edit
+                        editImageBO = await CreateImageEntity(upload, (AuctionEditVM)editVM, true);    //true->edit
                         //EditEntity(imageBO, editImageBO, 3);  //теперь доп.изобр. добавл. в пул
                         ImageProductLinkBO imgProductLink = DependencyResolver.Current.GetService<ImageProductLinkBO>();
                         //1)перенос в пул визит. карт. (dbo.Image->new dbo.ImageProductLink)
@@ -176,7 +178,7 @@ namespace OnlineAuction.ServiceClasses
                                 System.Diagnostics.Debug.WriteLine(prop.Name + ": " + prop.GetValue(editBO));
                                 prop.SetValue(modelBO, prop.GetValue(editBO));
                             }
-                            else if ((prop.PropertyType.Name.ToLower().Contains("int") || prop.PropertyType.Name.ToLower().Contains("nullable")) 
+                            else if ((prop.PropertyType.Name.ToLower().Contains("int") || prop.PropertyType.Name.ToLower().Contains("nullable"))
                                 && prop.GetValue(editBO) != null && (int)prop.GetValue(editBO) != 0)
                             {
                                 System.Diagnostics.Debug.WriteLine(prop.Name + ": " + prop.GetValue(editBO));

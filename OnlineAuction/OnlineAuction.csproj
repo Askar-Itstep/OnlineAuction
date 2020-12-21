@@ -289,6 +289,8 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\AdminPanelController.cs" />
+    <Compile Include="Controllers\ImagesController.cs" />
+    <Compile Include="Controllers\ProductsController.cs" />
     <Compile Include="Controllers\UserHubController.cs" />
     <Compile Include="ServiceClasses\BlobHelper.cs" />
     <Compile Include="App_Start\StringToUriConverter.cs" />
@@ -509,6 +511,16 @@
     <Content Include="Views\Home\Partial\_ChatPartialView.cshtml" />
     <Content Include="Views\Auctions\Partial\_ChatAuctionView.cshtml" />
     <Content Include="Views\AdminPanel\Index.cshtml" />
+    <Content Include="Views\Products\Create.cshtml" />
+    <Content Include="Views\Products\Delete.cshtml" />
+    <Content Include="Views\Products\Details.cshtml" />
+    <Content Include="Views\Products\Edit.cshtml" />
+    <Content Include="Views\Products\Index.cshtml" />
+    <Content Include="Views\Images\Create.cshtml" />
+    <Content Include="Views\Images\Delete.cshtml" />
+    <Content Include="Views\Images\Details.cshtml" />
+    <Content Include="Views\Images\Edit.cshtml" />
+    <Content Include="Views\Images\Index.cshtml" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

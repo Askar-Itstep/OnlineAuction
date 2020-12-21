@@ -39,7 +39,7 @@ namespace OnlineAuction.Controllers
             return View();
         }
 
-        [Authorize(Roles = "member, client")]
+        [Authorize(Roles = "moder, client")]   
         public ActionResult Chat()
         {
             var accountId = Session["accountId"] ?? 0;
@@ -51,7 +51,7 @@ namespace OnlineAuction.Controllers
             return View("Partial/_ChatPartialView");
         }
         //sms - прилетают из формы Partial/_ChatPartialView 
-        [Authorize(Roles = "member, client")]
+        [Authorize(Roles = "moder, client")]
         public async Task<ActionResult> ChatAsync(string connectionId, string message, string friendConnectId)//1-ый парам. по 1-му заходу, 2-ой по 2-му
         {
             string alert = "";

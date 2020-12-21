@@ -15,6 +15,8 @@ using System.Web.Security;
 
 namespace OnlineAuction.Controllers
 {
+ //---------!!!!!!!!!!!!!!!!!!!!!!---------убрать после "production"---------------!!!!!!!!!!!!!!!!!!!!!!!!------
+    //[Authorize(Roles ="admin")]
     public class AccountsController : Controller
     {
         private Model1 db = new Model1();
@@ -233,6 +235,7 @@ namespace OnlineAuction.Controllers
                 var myURI = accountBO.Image.URI;
                 var isAdmin = roleAccountBOList.Select(r => r.Role.RoleName.ToLower().Contains("admin")).FirstOrDefault();
                 IEnumerable<string> myRoles = rolesBO.Select(r => r.RoleName);
+
                 //2) сохр. в Session Server
                 HttpContext.Session["accountId"] = accountId;
                 HttpContext.Session["isAdmin"] = isAdmin;

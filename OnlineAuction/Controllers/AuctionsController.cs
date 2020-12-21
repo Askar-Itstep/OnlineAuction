@@ -209,7 +209,7 @@ namespace OnlineAuction.Controllers
                     if ((int)userId != 0)
                     {
                         BuilderSynteticModels.mapper = mapper;
-                        auction = await BuilderSynteticModels.CreateEntity(editVM, auction, userId, upload);
+                        auction = await BuilderSynteticModels.CreateEntity( upload, auction, userId, editVM);
                         message = "Данные записаны!";
                         //------установ. планировщика, триггер должен сработать по истеч. врмени аукциона
                         //------работа: выбор победителя, прекращ. аукциона, ставок, отправка писем
