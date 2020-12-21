@@ -8,6 +8,7 @@ namespace DataLayer.Entities
     using System.Configuration;
     using System.Data.Entity;
     using System.IO;
+    using System.Web.Configuration;
 
     public partial class Model1 : DbContext
     {
@@ -43,7 +44,7 @@ namespace DataLayer.Entities
     public class MyContextInitializer : DropCreateDatabaseIfModelChanges<Model1>
     {
         private string connectName = "blobContainer";
-        private string uripath = "https://storageauction.blob.core.windows.net/blobcontainer";
+        private string uripath = WebConfigurationManager.AppSettings["azureUrl"];
         private string blobContainerName = "blobcontainer";    //именя контейнеров в Azure
 
         
