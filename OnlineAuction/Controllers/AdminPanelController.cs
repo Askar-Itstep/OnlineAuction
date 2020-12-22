@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DataLayer;
 using OnlineAuction.ServiceClasses;
 using OnlineAuction.ViewModels;
 using System.Collections;
@@ -87,9 +88,20 @@ namespace OnlineAuction.Controllers
             return View();
         }
 
-        public ActionResult SwitchContainer(string platform)
+        public ActionResult SwitchContainer(string platform="")
         {
-            //db.Platform->INSERT INTO Platform values(azure, GETDATE()) ?? - или надо делать свой Dependensy Rsolver??
+            if (platform.ToLower().Contains("azur"))
+            {
+                //пока так
+                MyConfig.tempConnectString = MyConfig.connectionString2;
+                MyConfig.connectionString = MyConfig.tempConnectString;
+            }
+            else
+            {
+                MyConfig.tempConnectString = MyConfig.connectionString;
+                MyConfig.connectionString = MyConfig.tempConnectString;
+            }
+            //дальше см. BlobHelper.SetImageAsync(...conn)
             return RedirectToAction("Index");
         }
         //===================================S.T.A.T.I.S.T.I.C.S.=====================================

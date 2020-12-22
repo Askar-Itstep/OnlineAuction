@@ -5,6 +5,7 @@ using Amazon.S3;
 using Amazon.S3.Model;
 using AutoMapper;
 using BusinessLayer.BusinessObject;
+using DataLayer;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using OnlineAuction.ViewModels;
@@ -25,11 +26,11 @@ namespace OnlineAuction.ServiceClasses
     public class BlobHelper
     {
         const string blobContainerName = "blobcontainer";
-        private static readonly string uriAzure = WebConfigurationManager.AppSettings["azureUrl"];
-        private static readonly string uriAWS = WebConfigurationManager.AppSettings["awsUrl"];
+        private static readonly string uriAzure = MyConfig.azureUrl;    //WebConfigurationManager.AppSettings["azureUrl"];
+        private static readonly string uriAWS = MyConfig.awsUrl;         //WebConfigurationManager.AppSettings["awsUrl"];
 
         public static async Task<ImageBO> SetImageAsync(HttpPostedFileBase upload, ImageVM imageVM, 
-                                                                                                ImageBO imageBase, IMapper mapper, AccountBO userBO = null, string key="azure")
+                                                                                                ImageBO imageBase, IMapper mapper, AccountBO userBO = null, string key="updauction")
         {
             //а)------запись в blobStorage ----------------------            
             string filename = Path.GetFileName(upload.FileName);
@@ -38,7 +39,7 @@ namespace OnlineAuction.ServiceClasses
             if (resUpload == true)
             {
                 string uriStr = uriAzure + "/" + filename;
-                if (!key.ToLower().Contains("azur"))
+                if (key.ToLower().Contains("updauction"))
                 {
                     uriStr = uriAWS + "/" + filename;
                 }

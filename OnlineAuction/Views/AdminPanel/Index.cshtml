@@ -12,15 +12,15 @@
             flag = key < 0 ? false : true;
             $(this).attr('checked', flag)
             if (flag == true) {
-                $(this).val('Azur')
+                $(this).val('AWS');
             }
             else {
-                $(this).val('AWS');
+                $(this).val('Azur')
             }
             $.ajax({
                 url: "/AdminPanel/SwitchContainer",
                 method: "GET",
-                data: { nameContainer: $(this).val() },    //AWS - Azure
+                data: { platform: $(this).val() },    //AWS - Azure
                 success: function (data) {
                     alert("It's good!")
                 },
@@ -278,19 +278,7 @@
         //console.log("labels: ", _labels)
         //console.log("dataSets: ", dataSets)
         //---------------------chart.js----------------------------
-        drawGraphic(_labels, dataSets)
-        {
-            //var ctx = document.getElementById('myChart').getContext('2d');
-            //var chart = new Chart(ctx, {
-            //    type: 'bar',
-            //    //отрис.  граф. для наборов из 3 групп
-            //    data: {
-            //        labels: _labels,    //[DVD, Books, Electronic] ;[2017, 2018, 2019] - oX
-            //        datasets: dataSets
-            //    },
-            //    options: {}
-            //});
-        }
+        drawGraphic(_labels, dataSets)       
     }
     function drawGraphic(_labels, dataSets) {
         var ctx = document.getElementById('myChart').getContext('2d');
@@ -402,11 +390,11 @@
 <div class="jumbotron">
     <div style="display:flex">
         <div class="list-group-item col-lg-6" id="switch-blobcontainer" style="width:300px">
-            AWS container
+            Azure container
             <div class="material-switch pull-right">
                 <input id="switchOptionContainer" name="switchOption" type="checkbox" checked="checked" />
                 <label for="switchOptionContainer" class="label-default"></label>
-                Azure container
+                AWS container
             </div>
         </div>
         <div class="col-lg-3">

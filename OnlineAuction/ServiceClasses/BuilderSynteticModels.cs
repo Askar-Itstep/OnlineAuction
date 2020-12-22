@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BusinessLayer.BusinessObject;
+using DataLayer;
 using DataLayer.Entities;
 using OnlineAuction.ViewModels;
 using System;
@@ -14,7 +15,6 @@ namespace OnlineAuction.ServiceClasses
 {
     public class BuilderSynteticModels
     {
-        private static Model1 db = new Model1();
         public static IMapper mapper;
 
         public BuilderSynteticModels(IMapper mapper)
@@ -89,7 +89,9 @@ namespace OnlineAuction.ServiceClasses
                 imageVM = new ImageVM { FileName = upload.FileName };
             }
             ImageBO imageBO = DependencyResolver.Current.GetService<ImageBO>();
-            return await BlobHelper.SetImageAsync(upload, imageVM, imageBO, mapper, account, "aws");
+
+            //пока исп-ся  .DataLayer.MyConfig
+            return await BlobHelper.SetImageAsync(upload, imageVM, imageBO, mapper, account, MyConfig.tempConnectString);
         }
 
 
