@@ -15,10 +15,9 @@ using System.Web.Mvc;
 namespace OnlineAuction.Controllers
 {
   
-    public class BetAuctionsController : Controller //не использ.
+    public class BetAuctionsController : Controller 
     {
         private Model1 db = new Model1();
-        private UnitOfWork unit = new UnitOfWork();
         private IMapper mapper;
 
         public BetAuctionsController(IMapper mapper)

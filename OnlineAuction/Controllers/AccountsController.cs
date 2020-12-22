@@ -15,8 +15,6 @@ using System.Web.Security;
 
 namespace OnlineAuction.Controllers
 {
- //---------!!!!!!!!!!!!!!!!!!!!!!---------убрать после "production"---------------!!!!!!!!!!!!!!!!!!!!!!!!------
-    //[Authorize(Roles ="admin")]
     public class AccountsController : Controller
     {
         private Model1 db = new Model1();
