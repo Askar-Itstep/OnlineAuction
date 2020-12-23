@@ -9,6 +9,7 @@ using System.Web.Mvc;
 
 namespace OnlineAuction.Controllers
 {
+    [Authorize(Roles ="admin, moder, client")]
     public class HomeController : Controller
     {
         private IMapper mapper;

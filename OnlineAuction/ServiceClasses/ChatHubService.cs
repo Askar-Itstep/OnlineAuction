@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BusinessLayer.BusinessObject;
+using DataLayer;
 using FireSharp.Config;
 using FireSharp.Interfaces;
 using FireSharp.Response;
@@ -17,10 +18,13 @@ namespace OnlineAuction.ServiceClasses
     {
         private IMapper mapper;
         //using Firebase GoogleCloud-----------------------------
+
         private IFirebaseConfig config = new FirebaseConfig
         {
-            AuthSecret = "r7NFXF1rmprl3xQlJ8lmhdWyVguJqNprrnxnUA2P",
-            BasePath = "https://asp-net-with-firebase-default-rtdb.firebaseio.com/"
+            AuthSecret = MyConfig.authSecretFirebase, 
+                                         //"r7NFXF1rmp..........yVguJqNprrnxnUA2P",
+            BasePath = MyConfig.basePathFirebase
+                                     //"https:\//asp-..........firebaseio.com/"
         };
         private IFirebaseClient client;
         private  UserVM UserVM { get; set; }
