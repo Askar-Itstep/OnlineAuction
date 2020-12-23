@@ -21,6 +21,12 @@ namespace DataLayer
         [JsonPropertyName("connectString2")]
         public string ConnectionString2 { get;  set; }
 
+        [JsonPropertyName("authSecret")]
+        public string AuthSecretFirebase { get;  set; }
+
+        [JsonPropertyName("BasePath")]
+        public string BasePathbase { get;  set; }
+
         //[System.Text.Json.Serialization.JsonIgnore]
         //public string UserName { get; set; }
     }

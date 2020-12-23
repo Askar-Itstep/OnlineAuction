@@ -191,7 +191,7 @@ namespace OnlineAuction.Controllers
         //4
         private object CategoriesByAge()
         {
-            //юзеров сгруппиров. по 10-летн. группам
+            //юзеров сгруппиров. по годов. группам
             var seq = StatisticModels.Select(s => new { s.Product.CategoryId, CategoryTitle = s.Product.Category.Title, s.Account.Age });
             var labelsOx = seq.GroupBy(s => s.Age).Select(s => s.First()).Select(s => s.Age);   //23,30,40..
             var labels = seq.GroupBy(s => s.CategoryTitle).Select(s => s.First()).Select(s => s.CategoryTitle); //DVD, Book, ..

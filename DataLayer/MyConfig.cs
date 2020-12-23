@@ -22,6 +22,9 @@ namespace DataLayer
         public  static string awsUrl = "";
         public static string connectionString2 = ""; //AWSRDS.db.Auction->.Image.Url ="https://...azureContainer...
         public static string tempConnectString = "";
+        //GoogleFirebase
+        public static string authSecretFirebase="";
+        public static string basePathFirebase = "";
 
         public MyConfig()
         {
@@ -74,7 +77,12 @@ namespace DataLayer
             azureUrl = json.AzureUrl;
             awsUrl = json.AwsUrl;
             connectionString2 = json.ConnectionString2;
+
+            //GoogleFirebase
+            authSecretFirebase = json.AuthSecretFirebase;
+            basePathFirebase = json.BasePathbase;
         }
+
     }
     
 }
