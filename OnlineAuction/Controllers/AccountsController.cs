@@ -21,7 +21,7 @@ namespace OnlineAuction.Controllers
         private IMapper mapper;
         public AccountsController(IMapper mapper)
         {
-            this.mapper = mapper;
+            this.mapper = mapper; //вызов карт сопостовл. зависимостей
         }
 
         [Authorize(Roles = "admin")]    //кнопка "Пользователи" (админ-панель)
