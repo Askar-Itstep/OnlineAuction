@@ -88,21 +88,7 @@ namespace OnlineAuction.Controllers
                 return new JsonResult { Data = alert, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
             }
         }
-
-        //заглушка
-        public ActionResult SwitchContainer(string platform)
-        {
-            //need create fabric connect to DB
-            if (platform.ToLower().Contains("aws"))
-            {
-
-            }
-            else
-            {
-
-            }
-            return RedirectToAction("Index");
-        }
+        
 
         public ActionResult About()
         {
