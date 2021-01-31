@@ -35,6 +35,11 @@ namespace OnlineAuction.ServiceClasses
         }
         public async Task<Tuple<string, UserVM>> RunChatHubAsync(object accountId, AccountBO accountBO, RoleAccountLinkBO roleAdmin)
         {
+            bool flag = CheckFirebase();
+            if (!flag)
+            {
+                return new Tuple<string, UserVM>("Firebase dsn't work!", new UserVM { Id = "", AccountId = (int)accountId, ConnectionId = "" });
+            }
             string message = "";
             if (accountBO != null && roleAdmin == null)
             {
@@ -55,7 +60,7 @@ namespace OnlineAuction.ServiceClasses
                     //сохр. в GoogleFirebase
                     try
                     {
-                        InsertUserToFirebaseAsync(UserVM); //отступл. от правил (сохр. простой объект)
+                        InsertUserToFirebaseAsync(UserVM); //сохр. п/пустой объект
                     }
                     catch (Exception e)
                     {
@@ -73,6 +78,11 @@ namespace OnlineAuction.ServiceClasses
                 await sender.SendHello(string.Format("А у нас новый участник: {0}", UserVM.Account.FullName));
             }
             return new Tuple<string, UserVM>(message, UserVM);
+        }
+
+        private bool CheckFirebase()
+        {
+            return config.Host != null;
         }
 
         public static List<UserVM> GetUsersFirebase(dynamic data)

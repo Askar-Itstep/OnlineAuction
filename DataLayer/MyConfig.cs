@@ -35,7 +35,7 @@ namespace DataLayer
         }
         public static void GetSecret()
         {
-            string secretName = "conn/MSSQL";
+            string secretName = "connect/MSSQL/database";         //"conn/MSSQL";
             string region = "us-west-2";
             string secret = "";
 
