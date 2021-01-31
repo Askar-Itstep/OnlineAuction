@@ -122,7 +122,14 @@
                         @{
                             if (!User.IsInRole("admin"))
                             {
-                                <li>@Html.ActionLink("Чат", "Chat", "Home")</li>
+                                if (ViewBag.Firebase != null)
+                                {
+                                    <li>@Html.ActionLink("Чат", "Chat", "Home")</li>
+                                }
+                                else
+                                {
+                                    <li>@Html.ActionLink("Чат", "Chat", "Home", null, new { @class = "btn disabled" })</li>
+                                }
                             }
                         }
                     </ul>
