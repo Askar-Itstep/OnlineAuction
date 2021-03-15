@@ -325,7 +325,7 @@ namespace OnlineAuction.Controllers
             }
             else
             {
-                //----------------sender-------------------
+                //------------------------------sender--------------------------------
                 ViewBag.User = null;
                 var sender = PushSender.InstanceClient;
                 AccountBO accountBO = DependencyResolver.Current.GetService<AccountBO>().Load((int)accountId);

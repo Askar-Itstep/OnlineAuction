@@ -247,7 +247,7 @@ namespace OnlineAuction.Controllers
             return new JsonResult { Data = new { success = false, message = "Модель не валидна!" }, JsonRequestBehavior = JsonRequestBehavior.DenyGet };
         }
         //------------------------------------------Registration ---------------------------------------------------------------------
-        [Authorize(Roles="admin")]
+        //[Authorize(Roles="admin")] //------blocking -----------
         public ActionResult Registration()
         {
             return View();
