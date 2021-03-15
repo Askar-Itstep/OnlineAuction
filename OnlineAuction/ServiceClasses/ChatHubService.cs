@@ -33,12 +33,12 @@ namespace OnlineAuction.ServiceClasses
         {
             this.mapper = mapper;
         }
-        public async Task<Tuple<string, UserVM>> RunChatHubAsync(object accountId, AccountBO accountBO, RoleAccountLinkBO roleAdmin)
+        public async Task<Tuple<string, UserVM, bool>> RunChatHubAsync(object accountId, AccountBO accountBO, RoleAccountLinkBO roleAdmin)
         {
             bool flag = CheckFirebase();
             if (!flag)
             {
-                return new Tuple<string, UserVM>("Firebase dsn't work!", new UserVM { Id = "", AccountId = (int)accountId, ConnectionId = "" });
+                return new Tuple<string, UserVM, bool>("Firebase dsn't work!", new UserVM { Id = "", AccountId = (int)accountId, ConnectionId = "" }, flag);
             }
             string message = "";
             if (accountBO != null && roleAdmin == null)
@@ -77,7 +77,7 @@ namespace OnlineAuction.ServiceClasses
                 sender.mapper = mapper;
                 await sender.SendHello(string.Format("А у нас новый участник: {0}", UserVM.Account.FullName));
             }
-            return new Tuple<string, UserVM>(message, UserVM);
+            return new Tuple<string, UserVM, bool>(message, UserVM, flag);
         }
 
         private bool CheckFirebase()

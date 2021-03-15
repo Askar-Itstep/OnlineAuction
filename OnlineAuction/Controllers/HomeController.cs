@@ -9,7 +9,7 @@ using System.Web.Mvc;
 
 namespace OnlineAuction.Controllers
 {
-    [Authorize(Roles ="admin, moder, client")]
+    [Authorize(Roles = "admin, moder, client")]
     public class HomeController : Controller
     {
         private IMapper mapper;
@@ -34,14 +34,19 @@ namespace OnlineAuction.Controllers
                 ////поприветствовать при входе (видно только в чате)
                 ChatHubService hubService = new ChatHubService(mapper: mapper);
                 var tuple = await hubService.RunChatHubAsync(accountId, accountBO, roleAdmin);
-                ViewBag.Message = tuple.Item1;  //может быть Good || Error
+                ViewBag.Message = tuple.Item1;  //может быть Good /Error
                 UserVM = tuple.Item2;
+                if (tuple.Item3)
+                {
+                    ViewBag.Firebase = true;
+                }
             }
+            
             return View();
         }
 
         //click <Чат> NavigationMenu
-        [Authorize(Roles = "moder, client")]   
+        [Authorize(Roles = "moder, client")]
         public ActionResult Chat()
         {
             var accountId = Session["accountId"] ?? 0;
@@ -49,7 +54,7 @@ namespace OnlineAuction.Controllers
             {
                 return RedirectToAction("Login", "Accounts");
             }
-            ViewBag.User = UserVM.Account; 
+            ViewBag.User = UserVM.Account;
             return View("Partial/_ChatPartialView");
         }
         //sms - прилетают из формы Partial/_ChatPartialView 
@@ -66,7 +71,7 @@ namespace OnlineAuction.Controllers
             {
                 ViewBag.User = null;
                 var sender = PushSender.InstanceClient;
-                if (UserVM.Account != null)  
+                if (UserVM.Account != null)
                 {
                     ViewBag.User = UserVM.Account;
                 }
@@ -88,7 +93,7 @@ namespace OnlineAuction.Controllers
                 return new JsonResult { Data = alert, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
             }
         }
-        
+
 
         public ActionResult About()
         {

@@ -32,12 +32,7 @@ namespace DataLayer.Repository
                 if (accounts == null)
                 {
                     accounts = new BaseRepository<Account>();
-                }
-
-                if (accounts is null)
-                {
-                    accounts = new BaseRepository<Account>();
-                }
+                }              
                 return accounts;
             }
         }

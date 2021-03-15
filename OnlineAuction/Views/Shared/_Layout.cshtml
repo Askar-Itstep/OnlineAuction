@@ -57,6 +57,13 @@
             $(".classMyOrders").attr("href", "/Orders/Index/?accountId=" + accountId);  //Мои заказы + Back to List (_AddBalancePartialView)
         })
 
+            //установ. режим с чатом (есть Firebase) или нет
+            ; $(function () {
+                var key = $('p.hidden firebase').html()
+                sessionStorage.setItem('firebase', key) //потом  исп. в /auction/index.html->chat
+            })
+
+
         //установ. поля баланса - отправка в част. представ. BeginForm...
         $(function () {
             $('.classAddBalance')
@@ -124,10 +131,12 @@
                             {
                                 if (ViewBag.Firebase != null)
                                 {
+                                    <p class="hidden firebase">@ViewBag.Firebase</p>
                                     <li>@Html.ActionLink("Чат", "Chat", "Home")</li>
                                 }
                                 else
                                 {
+                                    <p class="hidden firebase">ViewBag.Firebase</p>
                                     <li>@Html.ActionLink("Чат", "Chat", "Home", null, new { @class = "btn disabled" })</li>
                                 }
                             }

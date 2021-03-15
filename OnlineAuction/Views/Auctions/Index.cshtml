@@ -107,7 +107,7 @@
             <img style='width: 300px' , src="@ViewBag.BestAuction.Product.Image.URI" />
         </div>
         <div class="hidden auctionId">
-            ViewBag.BestAuction.Id
+            @ViewBag.BestAuction.Id
         </div>
         <div class="col-md-5" style="margin-top:55px">
             <table class="table">
@@ -116,7 +116,7 @@
                     <td><h4>@ViewBag.BestAuction.Product.Title</h4></td>
                 </tr>
                 <tr>
-                    <th><h4>Title</h4></th>
+                    <th><h4>Descriptio</h4></th>
                     <td><h4>@ViewBag.BestAuction.Description</h4></td>
                 </tr>
                 <tr>
@@ -177,7 +177,6 @@
     {
         <div>
             <h4>Желаете выставить товар? Тогда нажмите "Создать аукцион"</h4>
-            <p>Это медленная загрузка из яндекс-диска ))</p>
             <div><img style="width: 75%" src="https://getfile.dokpub.com/yandex/get/https://yadi.sk/i/GWWs5U_NFCraYQ" /></div>
         </div>
     }
