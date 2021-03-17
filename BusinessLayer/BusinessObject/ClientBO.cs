@@ -10,7 +10,7 @@ namespace BusinessLayer.BusinessObject
     public class ClientBO : BaseBusinessObject
     {
         public int? Id { get; set; }
-        public ICollection<OrderBO> Orders { get; set; }
+        public virtual ICollection<OrderBO> Orders { get; set; }
 
         private decimal cash;
 

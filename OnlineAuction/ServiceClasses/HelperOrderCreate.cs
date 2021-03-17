@@ -46,9 +46,9 @@ namespace OnlineAuction.ServiceClasses
                 q => q.Order.Id,
                 (os, qs) => new
                 {
-                   Id = os.Id,
-                   Client = os.Client,
-                   IsApproved = os.IsApproved,
+                    Id = os.Id,
+                    Client = os.Client,
+                    IsApproved = os.IsApproved,
                     OrderAuctions = qs.Select(q => new
                     {
                         AuctionId = q.Id,
@@ -109,6 +109,24 @@ namespace OnlineAuction.ServiceClasses
             return syntetic;
         }
 
+        public static OrderBO CreateOrder(OrderVM orderVM, AuctionBO auctionBO, ClientBO clientBO, decimal endPrice)
+        {
+            var itemVM = new ItemVM { ProductId = (int)auctionBO.ProductId, EndPrice = (int)endPrice };            
+            orderVM.Items = new List<ItemVM> { itemVM };
+            //var clientVM = mapper.Map<ClientVM>(clientBO);
+            //orderVM.Client = clientVM;
+            orderVM.ClientId = clientBO.Id;
+            var orderBO = mapper.Map<OrderVM, OrderBO>(orderVM);
+
+            //orderVM.Client = clientVM;
+            //orderVM.Items = new List<ItemVM> { itemVM };
+            //orderVM.ClientId = clientId;
+            //var order = mapper.Map<Order>(orderVM);
+
+
+            return orderBO;
+        }
+
         public static int AddToCart(int? prodId, decimal? endPrice, OrderBO lastOrder)
         {
             int orderId;
@@ -116,7 +134,7 @@ namespace OnlineAuction.ServiceClasses
             ItemBO itemMapBO = mapper.Map<ItemBO>(itemVM);
             itemMapBO.OrderId = lastOrder.Id;
             orderId = (int)lastOrder.Id;
-            itemMapBO.Save(itemMapBO);
+            itemMapBO.Save(itemMapBO);  //orderBo.Save(orderBO) - не нужно? каскад. сохр.?
             return orderId;
         }
 
@@ -126,14 +144,18 @@ namespace OnlineAuction.ServiceClasses
             auctionBO.Winner = orderBO.Client;  //только при созд. аукц.
             auctionBO.IsActive = false; //деактивир.
             BetAuctionBO topBetAuction = null;
-            if (bets == null) {//вн. изм. в BetAuction (для <Купить> и <Положить в корз>)                
+            //new BetAuction (для <Купить> и <Положить в корз>)    
+            if (bets == null)
+            {
                 BetAuctionBO betAuctionBO = DependencyResolver.Current.GetService<BetAuctionBO>();
                 betAuctionBO.AuctionId = auctionBO.Id;
                 betAuctionBO.ClientId = (int)orderBO.ClientId;
                 betAuctionBO.Bet = endPrice;
                 betAuctionBO.Save(betAuctionBO);
             }
-            else { //выюор победителя по заверш. аукц.
+            //выбор победителя по заверш. аукц.
+            else
+            {
                 decimal topBet = bets.Max(b => b.Bet);
                 topBetAuction = bets.FirstOrDefault(b => b.Bet == topBet);
                 ClientBO winner = topBetAuction.Client;

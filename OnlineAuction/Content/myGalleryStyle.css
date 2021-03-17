@@ -25,8 +25,8 @@
     grid-template-columns: repeat(4, 1fr);
     grid-gap: 5px;
 }
-
-@keyframes fadeIn {
+/*
+@keyframes fade-In {
     to {
         opacity: 1;
     }
@@ -35,4 +35,4 @@
 .fade-in {
     opacity: 0;
     animation: fadeIn 0.5s ease-in 1 forwards;
-}
+}*/

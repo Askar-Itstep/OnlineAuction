@@ -14,7 +14,7 @@ namespace BusinessLayer.BusinessObject
     {
         public int? Id { get; set; }
 
-        public  ICollection<ItemBO> Items { get; set; }
+        public virtual ICollection<ItemBO> Items { get; set; }
                 
         public int? ClientId { get; set; }
         public virtual ClientBO Client { get; protected set; }

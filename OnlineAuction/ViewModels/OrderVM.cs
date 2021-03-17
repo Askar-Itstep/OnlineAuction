@@ -12,7 +12,7 @@ namespace OnlineAuction.ViewModels
         public ICollection<ItemVM> Items { get; set; }
         
         public int? ClientId { get; set; }
-        public virtual ClientVM Client { get; protected set; }
+        public virtual ClientVM Client { get;  set; }
 
 
         public bool IsApproved { get; protected set; }

@@ -37,11 +37,8 @@ namespace DataLayer.Repository
                 {
                     accounts = new BaseRepository<Account>();
                 }
-
-                if (accounts is null)
-                {
-                    accounts = new BaseRepository<Account>();
-                }
+                //var acc = accounts.GetById(4);
+                //System.Diagnostics.Debug.WriteLine($"Account: {acc.Age}");
                 return accounts;
             }
         }

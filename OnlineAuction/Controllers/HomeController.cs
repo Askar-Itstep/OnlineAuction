@@ -31,10 +31,10 @@ namespace OnlineAuction.Controllers
                 var roleAdmin = rolesAccount.FirstOrDefault(r => r.Role.RoleName.Contains("admin"));
 
                 //поприветствовать при входе (видно только в чате)
-                ChatHubService hubService = new ChatHubService(mapper: mapper);
-                var tuple  = await hubService.RunChatHubAsync(accountId, accountBO, roleAdmin);
-                ViewBag.Message = tuple.Item1;  //может быть Good || Error
-                UserVM = tuple.Item2;
+                //ChatHubService hubService = new ChatHubService(mapper: mapper);
+                //var tuple  = await hubService.RunChatHubAsync(accountId, accountBO, roleAdmin);
+                //ViewBag.Message = tuple.Item1;  //может быть Good || Error
+                //UserVM = tuple.Item2;
             }
             return View();
         }
