@@ -33,7 +33,8 @@ namespace OnlineAuction.Entities
         }        
     }
 
-    public class MyContextInitializer : DropCreateDatabaseIfModelChanges<Model1>    
+    public class MyContextInitializer : CreateDatabaseIfNotExists<Model1>
+    //DropCreateDatabaseIfModelChanges<Model1>    
     {
         protected override void Seed(Model1 context)    
         {
@@ -46,12 +47,14 @@ namespace OnlineAuction.Entities
             context.Roles.Add(adminRole);
             context.Roles.Add(memberRole);
             context.Roles.Add(clientRole);
-
-            //2)Account
-            Account account = new Account { FullName = "admin", Email = "admin@mail.ru", Password = "admin"};
+            //2)Address
+            Address address = new Address { City = "Temirtau", Region = "Karagandy", Street = "Metallurgov", House = "12" };
+            //3)Account
+            Account account = new Account { FullName = "admin", Email = "admin@mail.ru", Password = "admin", Address=address, Balance=0, IsActive=true};
             context.Account.Add(account);
-
-
+            //4)Role-Account
+            RoleAccountLink roleAccount = new RoleAccountLink { Account = account, Role = adminRole };
+            context.RoleAccountLinks.Add(roleAccount);
             context.SaveChanges();
             base.Seed(context);
         }

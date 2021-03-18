@@ -27,7 +27,7 @@ namespace OnlineAuction.Controllers
         public ActionResult Index()
         {
             AccountBO accountBO = DependencyResolver.Current.GetService<AccountBO>();
-            IEnumerable<AccountBO> accountBOs = accountBO.LoadAll().Where(a=>a.IsActive);
+            IEnumerable<AccountBO> accountBOs = accountBO.LoadAll().Where(a => a.IsActive);
             IEnumerable<AccountVM> accountVMs = accountBOs.Select(a => mapper.Map<AccountVM>(a));
 
             IEnumerable<AccountBO> delAccountBOs = accountBO.LoadAll().Where(a => !a.IsActive);
@@ -37,15 +37,17 @@ namespace OnlineAuction.Controllers
         }
 
 
-        [Authorize(Roles = "admin")]  
+        [Authorize(Roles = "admin")]
         public ActionResult Details(int? id)
         {
-            if (id == null) {
+            if (id == null)
+            {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             AccountBO accountBO = DependencyResolver.Current.GetService<AccountBO>().Load((int)id);
             AccountVM account = mapper.Map<AccountVM>(accountBO);
-            if (account == null) {
+            if (account == null)
+            {
                 return HttpNotFound();
             }
             return View(account);
@@ -58,27 +60,34 @@ namespace OnlineAuction.Controllers
         public async Task<ActionResult> Edit(int? id, int? flag)
         {
             //----------для юзера---------------
-            if (id == null) {
+            if (id == null)
+            {
                 var accountId = Session["accountId"] ?? 0;
 
-                if ((int)accountId == 0) {
+                if ((int)accountId == 0)
+                {
                     return RedirectToAction("Login", "Accounts");
                 }
                 AccountBO account = DependencyResolver.Current.GetService<AccountBO>().Load((int)accountId);
-                if (account == null) {
+                if (account == null)
+                {
                     return HttpNotFound("Пользователь не найден");
                 }
-                if (flag == null) {
+                if (flag == null)
+                {
                     return View(mapper.Map<AccountVM>(account));
                 }
-                else {
+                else
+                {
                     return new JsonResult { Data = account, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
                 }
             }
             //---------для админа--------------
-            else {
+            else
+            {
                 AccountBO account = DependencyResolver.Current.GetService<AccountBO>().Load((int)id);
-                if (account == null) {
+                if (account == null)
+                {
                     return HttpNotFound("Пользователь не найден");
                 }
                 return View(mapper.Map<AccountVM>(account));
@@ -89,8 +98,10 @@ namespace OnlineAuction.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Edit(AccountVM account, decimal? balance)
         {
-            if (account.Id != null) { //при простом изм. аккаунта
-                if (ModelState.IsValid) {
+            if (account.Id != null)
+            { //при простом изм. аккаунта
+                if (ModelState.IsValid)
+                {
                     account.Address.Id = account.AddressId;
                     AddressVM address = account.Address;
                     AccountBO accountBO = mapper.Map<AccountBO>(account);
@@ -100,14 +111,20 @@ namespace OnlineAuction.Controllers
                     return View(account);
                 }
             }
-            else if (balance != null) { //при изм. баланса - добав. роль <Moder>(созд. лота)
+            else if (balance != null)
+            { //при изм. баланса - добав. роль <Moder>(созд. лота)
                 var accountId = (int)Session["accountId"];
-                AccountBO accountBO = DependencyResolver.Current.GetService<AccountBO>().LoadAllNoTracking().FirstOrDefault(a=>a.Id==accountId);
+                AccountBO accountBO = DependencyResolver.Current.GetService<AccountBO>().LoadAllNoTracking().FirstOrDefault(a => a.Id == accountId);
                 accountBO.AddBalance((decimal)balance);
                 accountBO.Save(accountBO);
                 //добав. роль "модер" -если такой нет
-                var moderRole = DependencyResolver.Current.GetService<RoleBO>().LoadAll().Where(r => r.RoleName.Contains("moder")).FirstOrDefault(); 
-                
+                var roleBO = DependencyResolver.Current.GetService<RoleBO>();
+                var moderRole = roleBO.LoadAll().Where(r => r.RoleName.Contains("moder")).FirstOrDefault();
+                if (moderRole == null)
+                {
+                    roleBO = IsRole(roleBO, "moder");
+                    moderRole = roleBO.LoadAll().Where(r => r.RoleName.Contains("moder")).FirstOrDefault();
+                }
                 RoleAccountLinkVM linkVM = new RoleAccountLinkVM { AccountId = (int)accountId, RoleId = moderRole.Id };
                 RoleAccountLinkBO linkBO = mapper.Map<RoleAccountLinkBO>(linkVM);
                 linkBO.Save(linkBO);
@@ -118,13 +135,15 @@ namespace OnlineAuction.Controllers
 
         //контроль роли в представл.
         //удал. производ. административно - по письму к админу
-        public async Task<ActionResult> Delete(int? id) 
+        public async Task<ActionResult> Delete(int? id)
         {
-            if (id == null) {
+            if (id == null)
+            {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             Account account = await db.Account.FindAsync(id);
-            if (account == null) {
+            if (account == null)
+            {
                 return HttpNotFound("Пользователь не найден");
             }
             return View(account);
@@ -145,43 +164,58 @@ namespace OnlineAuction.Controllers
         {
             return View();
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Login(LoginModel model)
         {
-            if (ModelState.IsValid) {
+            if (ModelState.IsValid)
+            {
                 var accountBO = DependencyResolver.Current.GetService<AccountBO>();
                 var roleAccountBO = DependencyResolver.Current.GetService<RoleAccountLinkBO>();
 
-                var accountBOList = accountBO.LoadAll().Where(a=>a.IsActive); //только действующие аккаунты
-                accountBO = accountBOList.FirstOrDefault(u => (u.Email.Contains(model.Login) 
+                var accountBOList = accountBO.LoadAll().Where(a => a.IsActive); //только действующие аккаунты
+                accountBO = accountBOList.FirstOrDefault(u => (u.Email.Contains(model.Login)
                                                                 || u.Email.Contains(model.Login)) && u.Password.Equals(model.Password));
-                if (accountBO == null) {
-                    return RedirectToAction("Index", "Home");
+                if (accountBO == null || accountBO.Id == null || accountBO.Id == 0)
+                {
+                    //return RedirectToAction("Index", "Home");
+                    return Json(new { success = false, message = "Account not found!" });
                 }
+                else
+                {
+                    var roleAccountBOList = roleAccountBO.LoadAll().Where(r => r.AccountId == accountBO.Id).ToList();
+                    List<RoleBO> rolesBO = roleAccountBOList.Where(r => r.AccountId == accountBO.Id).Select(r => r.Role).ToList();
+                    accountBO.RolesBO = rolesBO;
 
-                var roleAccountBOList = roleAccountBO.LoadAll().Where(r => r.AccountId == accountBO.Id).ToList();
-                List<RoleBO> rolesBO = roleAccountBOList.Where(r => r.AccountId == accountBO.Id).Select(r => r.Role).ToList();
-                accountBO.RolesBO = rolesBO;
+                    //связь котор. надо удалить или добавить-нет денег удал. роль клиента
+                    RoleAccountLinkBO linkRoleClientAccount = roleAccountBOList.Where(r => r.Role.RoleName.Contains("moder")).FirstOrDefault();    //client
+                    if (accountBO.Balance <= 0)
+                    {
 
-                //связь котор. надо удалить или добавить-нет денег удал. роль клиента
-                RoleAccountLinkBO linkRoleClientAccount = roleAccountBOList.Where(r => r.Role.RoleName.Contains("moder")).FirstOrDefault();    //client
-                if (accountBO.Balance <= 0) { 
-
-                    if (linkRoleClientAccount != null) {
-                        roleAccountBOList.Where(r => r.Role.RoleName.Contains("moder")).FirstOrDefault().DeleteSave(linkRoleClientAccount);
+                        if (linkRoleClientAccount != null)
+                        {
+                            roleAccountBOList.Where(r => r.Role.RoleName.Contains("moder")).FirstOrDefault().DeleteSave(linkRoleClientAccount);
+                        }
                     }
-                }
-                else {
-                    if (linkRoleClientAccount == null) {
-                        RoleBO roleModer = DependencyResolver.Current.GetService<RoleBO>().LoadAll().FirstOrDefault(r => r.RoleName.Contains("moder"));
-                        roleAccountBO.Role = roleModer;
-                        roleAccountBO.Account = accountBO;
-                        roleAccountBO.Save(roleAccountBO);
+                    else
+                    {  //..если есть деньги, но роль "модер" удалена или не было
+                        if (linkRoleClientAccount == null)
+                        {
+                            RoleBO roleBO = DependencyResolver.Current.GetService<RoleBO>();
+                            RoleBO roleModer = roleBO.LoadAll().FirstOrDefault(r => r.RoleName.Contains("moder"));
+                            if (roleModer == null)
+                            {
+                                roleBO = IsRole(roleBO, "moder");
+                            }
+                            roleAccountBO.Role = roleModer;
+                            roleAccountBO.AccountId = (int)accountBO.Id;
+                            roleAccountBO.Save(roleAccountBO);
+                        }
                     }
-                }
 
-                if (accountBO != null) {
+                    //if (accountBO != null)
+                    //{
                     FormsAuthentication.SetAuthCookie(model.Login, true);
 
                     //далее accountId, roles, isActive будут храниться в КЛИЕНТЕ
@@ -193,9 +227,11 @@ namespace OnlineAuction.Controllers
                     //2) сохр. в Session Server
                     HttpContext.Session["accountId"] = accountId;
                     return Json(new { success = true, message = "Wellcome!", accountId, isActive, roles }); //уйдет в предст. Login.html -> _Layout.html
-                }
-                else {
-                    return Json(new { success = false, message = "Пользователя с таким логином и паролем нет" });
+                    //}
+                    //else
+                    //{
+                    //    return Json(new { success = false, message = "Пользователя с таким логином и паролем нет" });
+                    //}
                 }
             }
             return Json(new { success = false, message = "Модель не валидна!" });
@@ -210,17 +246,21 @@ namespace OnlineAuction.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Registration(RegisterModel model)
         {
-            if (ModelState.IsValid) {
+            if (ModelState.IsValid)
+            {
                 var accountBO = DependencyResolver.Current.GetService<AccountBO>();
                 accountBO = accountBO.LoadAll().Where(u => u.Email != null && u.FullName != null).FirstOrDefault(u => u.Email == model.Email || u.FullName.Equals(model.FullName));
-                if (accountBO == null) {
+                if (accountBO == null)
+                {
                     accountBO = CreateAccount(model);
-                    if (accountBO != null) {
+                    if (accountBO != null)
+                    {
                         FormsAuthentication.SetAuthCookie(model.FullName, true);
                         return RedirectToAction("Index", "Home");
                     }
                 }
-                else {
+                else
+                {
                     ModelState.AddModelError("", "Пользователь с таким логином или именем уже существует");
                 }
             }
@@ -239,6 +279,7 @@ namespace OnlineAuction.Controllers
 
             //2)созд. account
             accountBO = mapper.Map<AccountBO>(model);
+            accountBO.IsActive = true;
             accountBO.Save(accountBO);
 
             int accountLastId = accountBO.GetLastId();
@@ -278,7 +319,8 @@ namespace OnlineAuction.Controllers
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing) {
+            if (disposing)
+            {
                 db.Dispose();
             }
             base.Dispose(disposing);

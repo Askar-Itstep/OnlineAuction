@@ -28,10 +28,11 @@ namespace OnlineAuction.Jobs
 
             BetAuctionBO betAuctionBO = DependencyResolver.Current.GetService<BetAuctionBO>();
             List<BetAuctionBO> auctionBets = betAuctionBO.LoadAll().Where(b => b.AuctionId == auctionId).ToList();
-            BetAuctionBO winnBet = HelperOrderCreate.CloseAuction(auction, bets: auctionBets);
+            //BetAuctionBO winnBet =
+             auctionBO =   HelperOrderCreate.CloseAuction(auctionId, bets: auctionBets);
 
             //1)отправить push-уведомл. участникам аукциона
-            AccountBO winnerBO = winnBet.Client.Account;
+            AccountBO winnerBO = auctionBO.Winner.Account;  //winnBet.Client.Account;
             //Account winner = mapper.Map<Account>(winnerBO);
             var sender = PushSender.InstanceClient;
             sender.User.Account = winnerBO;

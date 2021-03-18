@@ -34,7 +34,7 @@ namespace OnlineAuction.Controllers
             List<AuctionBO> auctionsBO = auctionBO.LoadAll().Where(a => a.IsActive).ToList();
             var prodBO = DependencyResolver.Current.GetService<ProductBO>();
             List<ProductBO> productsBO = prodBO.LoadAll().ToList();
-            decimal maxPrice = productsBO.Max(p => p.Price);
+            decimal maxPrice = productsBO.Count==0?0: productsBO.Max(p => p.Price);
 
 
             //------могут быть 2 вида запроса: все аукционы; мои аукционы (актор)- при этом попытка не-клиента должна пресек---------
@@ -67,8 +67,14 @@ namespace OnlineAuction.Controllers
             if (auction == null) {
                 return HttpNotFound();
             }
-            BetAuction topBet = db.BetAuction.Where(b => b.AuctionId == auction.Id).ToList().Last();
-            ViewBag.TopBet = topBet;
+            BetAuction topBet = db.BetAuction.Where(b => b.AuctionId == auction.Id).ToList().LastOrDefault();
+            //BetAuctionBO betAuctionBO = DependencyResolver.Current.GetService<BetAuctionBO>();
+            //var topBetBO = betAuctionBO.LoadAll().LastOrDefault();
+            if (topBet != null)
+            {
+                ViewBag.TopBet = topBet;
+            }
+
 
             var accountId = Session["accountId"] ?? 0;
             if ((int)accountId == 0) {

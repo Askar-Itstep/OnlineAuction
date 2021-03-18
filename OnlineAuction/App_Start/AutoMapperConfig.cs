@@ -216,16 +216,16 @@ namespace OnlineAuction
                 //.ForMember(dest => dest.IsApproved, opt => opt.MapFrom(src => src.IsApproved))
                 .ForMember(dest => dest.AuctionIds, opt => opt.MapFrom(src => new List<int>()))
                 .ForMember(dest => dest.ProductIds, opt => opt.MapFrom(src => new List<int>()))
-                .ForMember(dest => dest.Products, opt => opt.MapFrom(src => src.Items.Select(s=>s.Product)))
+                //.ForMember(dest => dest.Products, opt => opt.MapFrom(src => src.Items.Select(s=>s.Product)))
                 .ForMember(dest => dest.EndTimes, opt => opt.MapFrom(src => new List<DateTime> ()));
 
                 mpr.CreateMap<OrderFullMapVM, OrderVM>()
                .ConstructUsing(c => DependencyResolver.Current.GetService<OrderVM>())
                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
-               .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.GetItems()))
-               //.ForMember(dest => dest.ClientId, opt => opt.MapFrom(src => src.ClientId))    //зачем?
-               //.ForMember(dest => dest.Client, opt => opt.MapFrom(src => src.Client)) 
-               //.ForMember(dest => dest.IsApproved, opt => opt.MapFrom(src => src.IsApproved))
+               //.ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.GetItems()))
+               ////.ForMember(dest => dest.ClientId, opt => opt.MapFrom(src => src.ClientId))    //зачем?
+               ////.ForMember(dest => dest.Client, opt => opt.MapFrom(src => src.Client)) 
+               ////.ForMember(dest => dest.IsApproved, opt => opt.MapFrom(src => src.IsApproved))
                ;
                 //-------------
                 mpr.CreateMap<AuctionVM, OrderFullMapVM>()

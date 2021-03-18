@@ -22,9 +22,6 @@
         AccountVM account = new AccountVM();
     }
     <style>
-        /*.ui-datepicker-next, .ui-datepicker-prev {
-            display: none;
-        }*/
         .ui-datepicker .ui-datepicker-prev span, .ui-datepicker .ui-datepicker-next span {
             color: transparent;
         }
@@ -62,6 +59,13 @@
                     })
                 });
         })
+        //---------my cart-----------------
+        $(function () {
+            var orderId = sessionStorage.getItem("orderId");
+            if (orderId != null && orderId != undefined && orderId != 0) {
+                $('#cart').attr('href', '/orders/confirm?orderId=' + orderId);
+            }
+        })
     </script>
 
     <div class="navbar  navbar-fixed-top" style="background-color:azure">
@@ -97,16 +101,20 @@
                     </ul>
                     <ul class="nav navbar-nav">
                         @{
-                            if (User.Identity.Name.Equals("")) {
+                            if (User.Identity.Name.Equals(""))
+                            {
                                 <li>@Html.ActionLink("Войти", "Login", "Accounts")</li>
                                 <li>@Html.ActionLink("Зарегистрироваться", "Registration", "Accounts")</li>
                             }
                         }
 
-                        @{ if (!User.Identity.Name.Equals("")) {
-                                if (!User.IsInRole("admin")) {
+                        @{ if (!User.Identity.Name.Equals(""))
+                            {
+                                if (!User.IsInRole("admin"))
+                                {
                                     <li>@Html.ActionLink("Создать аукцион", "Create", "Auctions", new { flagCreate = 1 }, new { @class = "classCreateAuction" })</li>
                                     <li>@Html.ActionLink("Аукционы", "Index", "Auctions")</li>
+                                    <li>@Html.ActionLink("Моя корзина", "Confirm", "Order", new { id="cart"})</li>
                                     <li class="dropdown">
                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><div>Hello @User.Identity.Name!</div> <span class="caret"></span></a>
                                         <ul class="dropdown-menu" role="menu">
@@ -121,7 +129,8 @@
                                         </ul>
                                     </li>
                                 }
-                                else {
+                                else
+                                {
                                     <li class="dropdown">
                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><div>Hello @User.Identity.Name!</div> <span class="caret"></span></a>
                                         <ul class="dropdown-menu" id="person_menu" role="menu">

@@ -181,13 +181,13 @@
             data: orderVM,
             success: function (data) {
                 alert(data.message)
-                console.log(flagBuyNow)
-                //if (data.flagBuyNow == true) {
-                if (flagBuyNow == true) {
-                    $(location).attr('href', "/Orders/Confirm/?orderId=" + data.orderId)
+                sessionStorage.setItem("orderId", data.orderId); //для "моя корзина"
+                if (data.flagBuyNow == true) {
+                    $(location).attr('href', "/Orders/Confirm/?orderId=" + data.orderId )
                 }
                 else {
                     console.log("Stay here")
+                    sessionStorage.setItem("orderId", data.orderId)
                 }
 
             },

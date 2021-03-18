@@ -5,15 +5,16 @@
 }
 <script>
     $(function () {
+        var orderId = 0;
         $('button').click(function () {
             $.ajax({
-                method: "Post",
+                method: "POST",
                 url: '/Orders/Confirm',
 
                 success: function (data) {
                     console.log(data.orderId)
                     alert(data.message)
-                    $(location).attr('href', '/Orders/BuyBye?orderId=' + data.orderId)
+                    $(location).attr('href', '/Orders/BuyBye?orderId=' + data.bundle)
                 }
             })
         })
@@ -52,25 +53,30 @@
         </tr>
     </table>
 </div>
-<div class="d-flex flex-wrap bd-highlight mb-3 jumbotron jumbotron-fluid">
+<div class="d-flex flex-wrap bd-highlight mb-3 ">
     @foreach (var item in Model.Items) {
-        <div class="card my-3" style="width: 200px">
-            @Html.Raw("<img  style='width: 200px; height: 130px',  src=\"data:image/jpeg;base64,"
-                                                             + Convert.ToBase64String(item.Product.Image.ImageData) + "\" />")
-            <table class="table table-hover table-sm">
-                <tr>
-                    <th>ID</th>
-                    <td>@item.Id</td>
-                </tr>
-                <tr>
-                    <th>Title</th>
-                    <td>@item.Product.Title</td>
-                </tr>
-                <tr>
-                    <th>EndPrice</th>
-                    <td>@item.EndPrice</td>
-                </tr>
-            </table>
+    <div class="col-md-5">
+        @Html.Raw("<img  style='width: 200px; height: 330px',  src=\"data:image/jpeg;base64,"
+                                                         + Convert.ToBase64String(item.Product.Image.ImageData) + "\" />")
+    </div>
+        <div class="col-md-5 card my-3" style="width: 200px">
+            <div>
+                <table class="table table-hover table-sm">
+                    <tr>
+                        <th>ID</th>
+                        <td>@item.Id</td>
+                    </tr>
+                    <tr>
+                        <th>Title</th>
+                        <td>@item.Product.Title</td>
+                    </tr>
+                    <tr>
+                        <th>EndPrice</th>
+                        <td>@item.EndPrice</td>
+                    </tr>
+                </table>
+            </div>
+           
         </div>
     }
     <div style="width: 10px"></div>

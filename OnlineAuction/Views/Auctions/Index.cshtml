@@ -91,16 +91,25 @@
         })
 
         $('.main-card').click(function (e) {
-            $(location).attr('href', '/Auctions/Details/?auctionId=' + @ViewBag.BestAuction.Id);
+            $(location).attr('href', '/Auctions/Details/?auctionId=' + $('#vb-best').html());
         })
     });
+
 </script>
 
 <h2>@ViewBag.Title</h2>
+
+
+
+
+
 <div class="hidden my-alert">@ViewBag.Alert</div>
-@{
+@if (@ViewBag.BestAuction != null)
+{
     <div class="jumbotron  alert-info  container-fluid main-card">
+
         <h3>Главный экспонат</h3>
+        <p class="hidden" id="vb-best">@ViewBag.BestAuction.Id</p>
         <div class="col-md-5">
             @Html.Raw("<img  style='width: 300px',  src=\"data:image/jpeg;base64," + Convert.ToBase64String(ViewBag.BestAuction.Product.Image.ImageData) + "\" />")
         </div>
@@ -120,11 +129,15 @@
             </table>
         </div>
     </div>
-
-    if (Model.Count() != 0) {
+}
+@if (!User.IsInRole("admin"))
+{
+    if (Model.Count() != 0)
+    {
         <div class="jumbotron  alert-success container-fluid">
 
-            @foreach (var auction in Model.ToList()) {
+            @foreach (var auction in Model.ToList())
+            {
                 var product = auction.Product;
                 <div class="card table-bordered col-md-4" style="height:300px; width: 200px; margin:10px; padding-left:0px">
                     <div class="hidden auctionId">@auction.Id</div>
@@ -145,13 +158,14 @@
         </div>
 
     }
-    else {
+    else
+    {
         <div>
             <h4>Желаете выставить товар? Тогда нажмите "Создать аукцион"</h4>
             <div><img style="width: 75%" src="https://getfile.dokpub.com/yandex/get/https://yadi.sk/i/GWWs5U_NFCraYQ" /></div>
         </div>
     }
-}
 
+}
 
 
