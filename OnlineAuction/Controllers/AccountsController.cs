@@ -141,7 +141,13 @@ namespace OnlineAuction.Controllers
                 accountBO.AddBalance((decimal)balance);
                 accountBO.Save(accountBO);
                 //добав. роль "модер" -если такой нет
-                var moderRole = DependencyResolver.Current.GetService<RoleBO>().LoadAll().Where(r => r.RoleName.Contains("moder")).FirstOrDefault();
+                var roleBO = DependencyResolver.Current.GetService<RoleBO>();
+                var moderRole = roleBO.LoadAll().Where(r => r.RoleName.Contains("moder")).FirstOrDefault();
+                if (moderRole == null)
+                {
+                    roleBO = IsRole(roleBO, "moder");
+                    moderRole = roleBO.LoadAll().Where(r => r.RoleName.Contains("moder")).FirstOrDefault();
+                }
 
                 RoleAccountLinkVM linkVM = new RoleAccountLinkVM { AccountId = accountId, RoleId = moderRole.Id };
                 RoleAccountLinkBO linkBO = mapper.Map<RoleAccountLinkBO>(linkVM);
@@ -213,11 +219,16 @@ namespace OnlineAuction.Controllers
                         roleAccountBOList.Where(r => r.Role.RoleName.Contains("moder")).FirstOrDefault().DeleteSave(linkRoleClientAccount);
                     }
                 }
-                else
+                else//..если есть деньги, но роль "модер" удалена или не было
                 {
                     if (linkRoleClientAccount == null)
                     {
-                        RoleBO roleModer = DependencyResolver.Current.GetService<RoleBO>().LoadAll().FirstOrDefault(r => r.RoleName.Contains("moder"));
+                        RoleBO roleBO = DependencyResolver.Current.GetService<RoleBO>();
+                        RoleBO roleModer = roleBO.LoadAll().FirstOrDefault(r => r.RoleName.Contains("moder"));
+                        if (roleModer == null)
+                        {
+                            roleBO = IsRole(roleBO, "moder");
+                        }
                         roleAccountBO.RoleId = roleModer.Id;
                         roleAccountBO.AccountId = (int)accountBO.Id;
                         roleAccountBO.Save(roleAccountBO);

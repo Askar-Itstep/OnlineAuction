@@ -86,6 +86,13 @@
                     })
                 });
         })
+        //---------my cart-----------------
+        $(function () {
+            var orderId = sessionStorage.getItem("orderId");
+            if (orderId != null && orderId != undefined && orderId != 0) {
+                $('#cart').attr('href', '/orders/confirm?orderId=' + orderId);
+            }
+        })
 
     </script>
     <div class="hidden" id="UserIdentityName">@User.Identity.Name</div>
@@ -157,6 +164,7 @@
                                 {
                                     <li>@Html.ActionLink("Создать аукцион", "Create", "Auctions", new { flagCreate = 1 }, new { @class = "classCreateAuction" })</li>
                                     <li>@Html.ActionLink("Аукционы", "Index", "Auctions")</li>
+                                    <li>@Html.ActionLink("Моя корзина", "Confirm", "Order", new { id = "cart" })</li>
                                     <li class="dropdown" id="second-dropdown">
                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
                                             <div class="div-hello"></div>

@@ -90,7 +90,7 @@ namespace OnlineAuction.Controllers
         {
             var prodBO = DependencyResolver.Current.GetService<ProductBO>();
             List<ProductBO> productsBO = prodBO.LoadAll().ToList();
-            decimal maxPrice = productsBO.Max(p => p.Price);
+            decimal maxPrice = productsBO.Count == 0 ? 0 : productsBO.Max(p => p.Price);
             var bestAuctionBO = auctionsBO.Where(a => a.Product.Price >= maxPrice).FirstOrDefault();
             var bestAuction = mapper.Map<Auction>(bestAuctionBO);
             var bestAuctionVM = mapper.Map<AuctionVM>(bestAuction);
@@ -135,10 +135,10 @@ namespace OnlineAuction.Controllers
             //нужно для запроса в представл. Details.html  на созд. ставки, ajax->BetAuction/Create()
             //Client client = db.Clients.FirstOrDefault(c => c.AccountId == (int)accountId);
             ClientBO clientBO = DependencyResolver.Current.GetService<ClientBO>().LoadAll().FirstOrDefault(c => c.AccountId == (int)accountId);
-            Client client = mapper.Map<Client>(clientBO);
-            ViewBag.Client = mapper.Map<ClientVM>(client);
-            var auction = mapper.Map<Auction>(auctionBO);
-            return View(mapper.Map<AuctionVM>(auction));
+            //Client client = mapper.Map<Client>(clientBO);
+            ViewBag.Client = mapper.Map<ClientVM>(clientBO);
+            //var auction = mapper.Map<Auction>(auctionBO);
+            return View(mapper.Map<AuctionVM>(auctionBO));
         }
 
         //+Edit---------------------------------------------------------------------

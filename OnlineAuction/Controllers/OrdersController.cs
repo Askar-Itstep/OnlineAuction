@@ -67,59 +67,60 @@ namespace OnlineAuction.Controllers
         public ActionResult Create(OrderVM orderVM, int? prodId, decimal endPrice, int? auctionId, bool flagBuyNow)//ItemVM itemVM
         {
             //проверка на налич. прод.
-            if (prodId == null) {
+            if (prodId == null)
+            {
                 return new JsonResult { Data = "Ошибка. Продукт не выбран!", JsonRequestBehavior = JsonRequestBehavior.AllowGet };
             }
             //проверка: актор лота не может быть его клиентом!
             HelperOrderCreate.GetClientWithAuction(orderVM, auctionId, out ClientBO clientBO, out AuctionBO auctionBO);
-            if (auctionBO.IsActive == false) {
+            if (auctionBO.IsActive == false)
+            {
                 return new JsonResult { Data = new { message = "К сожалению, в этом аукционе уже есть победитель" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
             }
-            if (clientBO.Id == auctionBO.ActorId) { //оформл. заказа -> Auctions/Confirm(orderId=null)
+            if (clientBO.Id == auctionBO.ActorId)
+            { //оформл. заказа -> Auctions/Confirm(orderId=null)
                 return new JsonResult { Data = new { message = "Ошибка. Вы не можете участвовать в аукционе!" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
             }
             string message = "Данные записаны!";
             int orderId = 0;
-            OrderBO orderBO = null;
-            try {
-                GetLastClientOrder(orderVM, clientBO, out orderBO, out OrderBO lastClientOrder);
-                if (flagBuyNow == true) {
-
-                    //-------------закрыть аукцион!-----------------------------------------
-                    BetAuctionBO winnBet = HelperOrderCreate.CloseAuction(auctionBO, endPrice, orderBO);    //победная ставка  +изм. дату закрытия             
-                    
-                    //------------отправить письма участникам о заверш. аукц.-----------------
-                    EmailScheduler.AuctionId = auctionBO.Id;
-                    EmailScheduler.WinnerId = auctionBO.WinnerId;
-                    EmailScheduler.Start();
-                }
-                else {
+            //OrderBO orderBO = null;
+            try
+            {
+                GetLastClientOrder(orderVM, clientBO, out OrderBO lastClientOrder);
+                if (!flagBuyNow) //------в корзину (возможн. выкуп =redemptionPrice)
+                {
                     var prodBO = DependencyResolver.Current.GetService<ProductBO>();
                     prodBO = prodBO.Load((int)prodId);
-                    endPrice = prodBO.Price;
+                    //endPrice = prodBO.Price; //себестоимость?
                 }
-                orderId = HelperOrderCreate.AddToCart(prodId, endPrice, lastClientOrder);
+                HelperOrderCreate.mapper = mapper;
+                orderId = HelperOrderCreate.AddToCart(prodId, endPrice, lastClientOrder); //запись items
                 message = "Данные записаны!";
+
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 System.Diagnostics.Debug.WriteLine(e.Message);
                 message = "Произошел сбой записи. Приносим извинения. Обратитесь позднее";
             }
-            var data = new { message, orderId, flagBuyNow };
+            var data = new { message, orderId, flagBuyNow, auctionId };
             Session["data"] = data;
-            //->Detail.html/Ajax-> Confirm.html (оформл. бланка заказа с кнопкой оплатить) 
+            // flagBuyNow(true)->Detail.html/Ajax-> Confirm.html (оформл. бланка заказа с кнопкой оплатить) 
+            //в Layout - сделать кнопку корзины с датчиком!!!!!!!
             return new JsonResult { Data = data, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
         }
 
-        private void GetLastClientOrder(OrderVM orderVM, ClientBO clientBO, out OrderBO orderBO, out OrderBO lastClientOrder)
+        private void GetLastClientOrder(OrderVM orderVM, ClientBO clientBO, out OrderBO lastClientOrder)
         {
-            orderBO = (OrderBO)Session["orderBO"] ?? mapper.Map<OrderBO>(orderVM);
+            var orderSession = (OrderBO)Session["orderBO"];
+            var orderBO = orderSession ?? mapper.Map<OrderBO>(orderVM);
             orderBO.Items = null;
-            //orderBO.Save(orderBO);
+            orderBO.Save(orderBO);
             lastClientOrder = orderBO.LoadAll().Where(o => o.ClientId == clientBO.Id).Last();
         }
 
 
+        //------------------after call back Create->ajax---------------------------------
         public ActionResult Confirm(int? orderId)
         {
             if (orderId == null) {
@@ -129,7 +130,7 @@ namespace OnlineAuction.Controllers
                 return RedirectToAction("Index", "Auctions", new { alert = "Время сессии истекло выйдите и залогинтесь снова!" });
             }
             //проверка- можно смотреть только свой заказ (на случ. прямого перехода из адр. строки)
-            HelperOrderCreate.mapper = mapper;
+            //HelperOrderCreate.mapper = mapper;
             HelperOrderCreate.GetOrderWithClient(orderId, out OrderBO orderBO, out ClientBO clientBO);
             if ((int)Session["accountId"] != clientBO.AccountId) {
                 return RedirectToAction("Index", "Auctions", new { alert = "У вас нет прав просмотра данной страницы!" });
@@ -137,21 +138,39 @@ namespace OnlineAuction.Controllers
             //просмотр деталей заказа + <Оплатить>
             OrderVM orderVM = mapper.Map<OrderVM>(orderBO);
 
-            //------- "Купить сразу" и "Ленивая Корзина"--------------
-            var data = new { message = "", orderId = 0, flagBuyNow = false };
-            data = HelperOrderCreate.Cast(data, Session["data"]);
+            ////------- "Купить сразу" и "Ленивая Корзина"--------------
+            //var data = new { message = "", orderId = 0, flagBuyNow = false };
+            //data = HelperOrderCreate.Cast(data, Session["data"]);
             return View(orderVM);
         }
 
 
 
-        [HttpPost]      //+ IsApproved = true
-        public ActionResult Confirm() //после нажат. <Оплатить>
+        //прилож не учит. взаимодейств. с юзером после оконч. аукциона  - опред. победит. по ставкам (треб. оплаты, формы оплаты..)
+        [HttpPost]
+        public async Task<ActionResult> Confirm() //после нажат. <Оплатить>
         {
-            OrderBO orderBO = (OrderBO)Session["orderBO"];
-            orderBO.IsApproved = true;
-            orderBO.Save(orderBO);
-            return new JsonResult { Data = new { message = "Спасибо за покупки!", orderBO.Id } };
+            OrderBO orderBO = null;
+            if (Session["orderBO"] != null)
+            {
+                orderBO = (OrderBO)Session["orderBO"];
+                orderBO.IsApproved = true;
+                orderBO.Save(orderBO);
+            }
+            dynamic sess = Session["data"];
+            var r = sess.auctionId;
+            int auctionId = (int)r;
+
+            //-------------закрыть аукцион! (выкуп по макс цене >=redemptionPrice)-----------------------------------------
+            var auctionBO = HelperOrderCreate.CloseAuction(auctionId, orderBO);
+            //------------отправить письма участникам о заверш. аукц.-----------------
+            EmailScheduler.AuctionId = auctionBO.Id;
+            EmailScheduler.WinnerId = auctionBO.WinnerId;
+            EmailScheduler.Start();
+
+            var bundle = orderBO == null ? 0 : orderBO.Id;
+            return new JsonResult { Data = new { message = "Спасибо за покупки!", bundle } };
+
         }
 
         public ActionResult BuyBye(int? orderId)

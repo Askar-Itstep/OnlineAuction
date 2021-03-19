@@ -90,7 +90,7 @@
         })
 
         $('.main-card').click(function (e) {
-            $(location).attr('href', '/Auctions/Details/?auctionId=' +@ViewBag.BestAuction.Id)
+            $(location).attr('href', '/Auctions/Details/?auctionId=' +$('vb-best').html())
         })
     });
 
@@ -99,11 +99,13 @@
 <h2>@ViewBag.Title</h2>
 <div class="hidden my-alert">@ViewBag.Alert</div>
 
-@{
+@if (ViewBag.BestAuction != null)
+{
     <div class="jumbotron  alert-info  container-fluid main-card">
 
         <div class="col-md-5">
             <h3>Главный экспонат</h3>
+            <p class="hidden" id="vb-best">@ViewBag.BestAuction.Id</p>
             <img style='width: 300px' , src="@ViewBag.BestAuction.Product.Image.URI" />
         </div>
         <div class="hidden auctionId">
@@ -127,60 +129,64 @@
         </div>
     </div>
 
-    if (Model != null && Model.Count() != 0)
+    if (!User.IsInRole("admin"))
     {
-        <div class="jumbotron  alert-success container-fluid" id="box-auction">
+        if (Model != null && Model.Count() != 0)
+        {
+            <div class="jumbotron  alert-success container-fluid" id="box-auction">
 
-            <div id="sidebar">
-                @{
-                    if (ViewBag.Categories != null)
-                    {
+                <div id="sidebar">
+                    @{
+                        if (ViewBag.Categories != null)
+                        {
 
-                        <div class="form-group category-id">
-                            @Html.Label("Фильтр по категориям", htmlAttributes: new { @class = "control-label col-md-4" })
-                            <div class="col-md-8">
-                                <form action="/Auctions/Index/" method="get">
-                                    @Html.DropDownList("CategoryId", ViewBag.Categories as SelectList, new { name = "category" })
-                                    @Html.ValidationMessage("Duration", "", new { @class = "text-danger" })
-                                    <input type="submit" value="Go!" />
-                                </form>
+                            <div class="form-group category-id">
+                                @Html.Label("Фильтр по категориям", htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    <form action="/Auctions/Index/" method="get">
+                                        @Html.DropDownList("CategoryId", ViewBag.Categories as SelectList, new { name = "category" })
+                                        @Html.ValidationMessage("Duration", "", new { @class = "text-danger" })
+                                        <input type="submit" value="Go!" />
+                                    </form>
+                                </div>
                             </div>
-                        </div>
 
+                        }
                     }
+                </div>
+
+                @foreach (var auction in Model.ToList())
+                {
+                    var product = auction.Product;
+                    <div class="card table-bordered col-md-4" style="height:250px; width: 190px; margin:10px;">
+                        <div class="hidden auctionId">@auction.Id</div>
+                        <img style='width: 90%; height: 130px' , src="@auction.Product.Image.URI" />
+                        <table class="table">
+                            <tr>
+                                <th>Title</th>
+                                <td>@product.Title</td>
+                            </tr>
+                            <tr>
+                                <th>Price</th>
+                                <td>@product.Price</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div style="width: 10px"></div>
                 }
             </div>
 
-            @foreach (var auction in Model.ToList())
-            {
-                var product = auction.Product;
-                <div class="card table-bordered col-md-4" style="height:250px; width: 190px; margin:10px;">
-                    <div class="hidden auctionId">@auction.Id</div>
-                    <img style='width: 90%; height: 130px' , src="@auction.Product.Image.URI" />
-                    <table class="table">
-                        <tr>
-                            <th>Title</th>
-                            <td>@product.Title</td>
-                        </tr>
-                        <tr>
-                            <th>Price</th>
-                            <td>@product.Price</td>
-                        </tr>
-                    </table>
-                </div>
-                <div style="width: 10px"></div>
-            }
-        </div>
-
-    }
-    else
-    {
-        <div>
-            <h4>Желаете выставить товар? Тогда нажмите "Создать аукцион"</h4>
-            <div><img style="width: 75%" src="https://getfile.dokpub.com/yandex/get/https://yadi.sk/i/GWWs5U_NFCraYQ" /></div>
-        </div>
+        }
+        else
+        {
+            <div>
+                <h4>Желаете выставить товар? Тогда нажмите "Создать аукцион"</h4>
+                <div><img style="width: 75%" src="https://getfile.dokpub.com/yandex/get/https://yadi.sk/i/GWWs5U_NFCraYQ" /></div>
+            </div>
+        }
     }
 }
+
 
 
 

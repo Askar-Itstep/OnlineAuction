@@ -13,12 +13,12 @@ namespace DataLayer.Entities
     [DbConfigurationType(typeof(MyConfig))]
     public partial class Model1 : DbContext
     {
-        //public Model1() : base("name=Model1")
-        //{
-        //}
-        public Model1() : base(MyConfig.connectionString)
+        public Model1() : base("name=Model1")
         {
         }
+        //public Model1() : base(MyConfig.connectionString)
+        //{
+        //}
         public virtual DbSet<Role> Roles { get; set; }
         public virtual DbSet<Account> Account { get; set; }
         public virtual DbSet<Address> Addresses { get; set; }

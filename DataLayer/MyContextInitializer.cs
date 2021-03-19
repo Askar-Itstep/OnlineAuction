@@ -6,14 +6,16 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data.Entity;
 using System.IO;
+using System.Linq;
 using System.Web.Configuration;
 
 namespace DataLayer
 {
-    public class MyContextInitializer : DropCreateDatabaseIfModelChanges<Model1>
+    public class MyContextInitializer : CreateDatabaseIfNotExists<Model1>
+    //DropCreateDatabaseIfModelChanges<Model1>
     {
         private string connectName = "blobContainer";
-        private string uripath = WebConfigurationManager.AppSettings["awsUrl"];//["azureUrl"];
+        private string uripath = MyConfig.azureUrl;  // WebConfigurationManager.AppSettings["awsUrl"];//["azureUrl"];
         private string blobContainerName = "blobcontainer";    //именя контейнеров в Azure
 
 
@@ -70,18 +72,20 @@ namespace DataLayer
                 }
             }
             //сохр. в БД дефолт. изобр. юзера и товара
+            List<Image> images = new List<Image>();
             foreach (var filename in filenames)
             {
                 string uriStr = Path.Combine(uripath, filename);
                 Image image = new Image { FileName = filename, URI = uriStr };
                 context.Images.Add(image);
+                images.Add(image);
             }
 
             //3)Account
             Address address = new Address { Region = "Akmola", City = "Nur-Sultan", Street = "Imanova", House = "22" };
             context.Addresses.Add(address);
 
-            var defaultImageUser = context.Images.FirstOrDefaultAsync(i => i.FileName.Contains("men"));
+            //var defaultImageUser = context.Images.FirstOrDefaultAsync(i => i.FileName.Contains("men"));
 
             Account account = new Account
             {
@@ -89,9 +93,10 @@ namespace DataLayer
                 Email = "admin@mail.ru",
                 Password = "admin",
                 Address = address,
-                ImageId = defaultImageUser.Id,
+                Image = images.FirstOrDefault(i=>i.FileName=="men"),
                 Age = 0,
-                CreateAt = DateTime.Parse("2017-01-01 12:00:00")
+                CreateAt = DateTime.Parse("2017-01-01 12:00:00"),
+                RemoveAt = DateTime.Parse("3000-01-01 12:00:00"),
             };
             context.Account.Add(account);
 
@@ -101,6 +106,10 @@ namespace DataLayer
                     Title = "electronic" }, new Category { Title = "book" }, new Category { Title = "DVD" }, new Category { Title = "Digital product" }
             };
             context.Categories.AddRange(categories);
+
+            //5)Role-Account
+            RoleAccountLink roleAccount = new RoleAccountLink { Account = account, Role = adminRole };
+            context.RoleAccountLinks.Add(roleAccount);
 
             await context.SaveChangesAsync();
             base.Seed(context);
