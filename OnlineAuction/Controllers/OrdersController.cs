@@ -129,6 +129,7 @@ namespace OnlineAuction.Controllers
                 return RedirectToAction("Index", "Auctions", new { alert = "Время сессии истекло выйдите и залогинтесь снова!" });
             }
             //проверка- можно смотреть только свой заказ (на случ. прямого перехода из адр. строки)
+            HelperOrderCreate.mapper = mapper;
             HelperOrderCreate.GetOrderWithClient(orderId, out OrderBO orderBO, out ClientBO clientBO);
             if ((int)Session["accountId"] != clientBO.AccountId) {
                 return RedirectToAction("Index", "Auctions", new { alert = "У вас нет прав просмотра данной страницы!" });
