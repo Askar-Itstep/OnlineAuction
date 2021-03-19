@@ -25,7 +25,7 @@ div#box-auction {
     color: transparent;
 }
 
-/*---------стили для галлереи изобр.---------------------*/
+/*---------стили для переключателя облач№ контейнеров---------------------*/
 
 .material-switch > input[type="checkbox"] {
     display: none;

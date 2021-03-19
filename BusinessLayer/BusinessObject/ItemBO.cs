@@ -17,7 +17,7 @@ namespace BusinessLayer.BusinessObject
         public decimal EndPrice { get; set; }
 
         public int? OrderId { get; set; }
-        public OrderBO Order { get; set; }
+        public virtual OrderBO Order { get; set; }
 
         //-------------------------------------------
 

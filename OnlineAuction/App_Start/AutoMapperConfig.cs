@@ -240,6 +240,9 @@ namespace OnlineAuction
                 mpr.CreateMap<OrderBO, OrderVM>()
                .ConstructUsing(c => DependencyResolver.Current.GetService<OrderVM>());
 
+              //  mpr.CreateMap<OrderBO, OrderVM>()
+              //.ConstructUsing(c => DependencyResolver.Current.GetService<OrderVM>());//.ReverseMap();
+
                 mpr.CreateMap<Order, OrderVM>()
                  .ConstructUsing(c => DependencyResolver.Current.GetService<OrderVM>()).ReverseMap();
 
