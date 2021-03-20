@@ -31,7 +31,7 @@ namespace OnlineAuction.Controllers
                 //админ - не участв. в чате! (доп. контроль в представл. и контроллере Home/Chat()) 
                 var roleAdmin = rolesAccount.FirstOrDefault(r => r.Role.RoleName.Contains("admin"));
 
-                ////поприветствовать при входе (видно только в чате)
+                //поприветствовать при входе (видно только в чате)
                 ChatHubService hubService = new ChatHubService(mapper: mapper);
                 var tuple = await hubService.RunChatHubAsync(accountId, accountBO, roleAdmin);
                 ViewBag.Message = tuple.Item1;  //может быть Good /Error

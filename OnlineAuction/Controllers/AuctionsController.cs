@@ -33,8 +33,7 @@ namespace OnlineAuction.Controllers
         };
         private IFirebaseClient client;
 
-        //isActor - только из _Layout.html (опред. по клику "мои аукц.")
-        //CategoryId - параметр из формы для фильтр.
+        [Authorize(Roles="admin, moder, client")]
         public ActionResult Index(int? isActor, int? CategoryId, string alert = null)
         {
             ViewBag.Alert = "";
@@ -48,11 +47,10 @@ namespace OnlineAuction.Controllers
             var accountId = Session["accountId"] ?? 0; //re-sign!
             var isAdmin = Session["isAdmin"] ?? false;
             List<AuctionBO> auctionsBO = auctionBO.LoadAll().ToList();
-            if (isAdmin != null)
+            if ((bool)isAdmin == false)
             {
                 auctionsBO = auctionsBO.Where(a => a.IsActive).ToList();
             }
-            //var auctions = auctionsBO.Select(a => mapper.Map<Auction>(a)).ToList();
             var auctionsVM = auctionsBO.Select(a => mapper.Map<AuctionVM>(a));
             //т.е. для "мои аукционы"
             if (accountId != null && (int)accountId != 0 && isActor != null)
@@ -61,29 +59,24 @@ namespace OnlineAuction.Controllers
             }
             //--------на главн. разворот -------------------------
             ViewBag.BestAuction = 0;
-            auctionsVM= GetMainLot(auctionsBO, auctionsVM.ToList());
+            auctionsVM = GetMainLot(auctionsBO, auctionsVM.ToList());
 
             //--------- --filtering by Categories-------------
-            auctionsVM = GetCategories(CategoryId, auctionsVM.ToList());
+            auctionsVM = GetCategories(CategoryId, auctionsVM);
             return View(auctionsVM);
         }
 
-        private List<AuctionVM> GetCategories(int? CategoryId, List<AuctionVM> auctionsVM)
+        private List<AuctionVM> GetCategories(int? CategoryId, IEnumerable<AuctionVM> auctionsVM)
         {
             var categoriesBO = DependencyResolver.Current.GetService<CategoryBO>().LoadAll();
-            var categories = categoriesBO.Select(c => mapper.Map<Category>(c));
-            var categoriesVM = categories.Select(c => mapper.Map<CategoryVM>(c)).ToList();
-            var emptyCategory = new CategoryVM { Id = 0, Title = "All" };
-            categoriesVM.Add(emptyCategory);
+            var categoriesVM = categoriesBO.Select(c => mapper.Map<CategoryVM>(c)).ToList();
+            categoriesVM.Add(new CategoryVM { Id = 0, Title = "All" });
             ViewBag.Categories = new SelectList(categoriesVM, "Id", "Title");
-            if (CategoryId != null)
+            if (CategoryId != null && CategoryId != 0)
             {
-                if (CategoryId != 0)
-                {
-                    auctionsVM = auctionsVM.Where(a => a.Product.CategoryId == CategoryId).ToList();
-                }
+                auctionsVM = auctionsVM.Where(a => a.Product.CategoryId == CategoryId).ToList();
             }
-            return auctionsVM;
+            return auctionsVM.ToList();
         }
 
         private List<AuctionVM> GetMainLot(List<AuctionBO> auctionsBO, List<AuctionVM> auctionsVM)
@@ -132,11 +125,8 @@ namespace OnlineAuction.Controllers
 
 
             //нужно для запроса в представл. Details.html  на созд. ставки, ajax->BetAuction/Create()
-            //Client client = db.Clients.FirstOrDefault(c => c.AccountId == (int)accountId);
             ClientBO clientBO = DependencyResolver.Current.GetService<ClientBO>().LoadAll().FirstOrDefault(c => c.AccountId == (int)accountId);
-            //Client client = mapper.Map<Client>(clientBO);
             ViewBag.Client = mapper.Map<ClientVM>(clientBO);
-            //var auction = mapper.Map<Auction>(auctionBO);
             return View(mapper.Map<AuctionVM>(auctionBO));
         }
 

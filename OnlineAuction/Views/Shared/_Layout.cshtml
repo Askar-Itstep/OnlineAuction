@@ -86,13 +86,16 @@
                     })
                 });
         })
-        //---------my cart-----------------
+        //-----------------------------------------my cart--------------------------------------------------
         $(function () {
             var orderId = sessionStorage.getItem("orderId");
+            var itemsCount = sessionStorage.getItem("itemsCount")
             if (orderId != null && orderId != undefined && orderId != 0) {
                 $('#cart')
                     .removeClass("hidden")
-                    .attr('href', '/orders/confirm?orderId=' + orderId);
+                    .attr('href', '/orders/confirm?orderId=' + orderId)
+                    .attr('title', "У вас "+itemsCount+ " элементов")
+
             }
             else {
                 $('#cart').addClass('hidden')
@@ -172,10 +175,9 @@
                                 if (!User.IsInRole("admin"))    //просто юзер
                                 {
                                     <li>@Html.ActionLink("Создать аукцион", "Create", "Auctions", new { flagCreate = 1 }, new { @class = "classCreateAuction" })</li>
-                                    <li>@Html.ActionLink("Аукционы", "Index", "Auctions")</li>                                    
-                                    @*<li>@Html.ActionLink("Моя корзина", "Confirm", "Order", new { id = "cart" })</li>*@
+                                    <li>@Html.ActionLink("Аукционы", "Index", "Auctions")</li>                                
                                     <li>
-                                        <a href="orders/confirm" id="cart">
+                                        <a href="orders/confirm" id="cart" style="cursor:pointer" title="У вас  0 элемента">
                                             <i  class="fa fa-cart-plus fa-2x" aria-hidden="true"></i>
                                         </a>
                                     </li>

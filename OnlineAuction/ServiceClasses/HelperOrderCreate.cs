@@ -109,20 +109,17 @@ namespace OnlineAuction.ServiceClasses
             return syntetic;
         }
 
-        public static int AddToCart(int? prodId, decimal? endPrice, OrderBO lastOrder)
+        public static (OrderBO, ItemBO) AddToCart(int? prodId, decimal? endPrice, OrderVM orderVM)
         {
-            int orderId;
+            var lastOrder = mapper.Map<OrderBO>(orderVM);
             var itemVM = new ItemVM { ProductId = (int)prodId, EndPrice = (int)endPrice };
-            ItemBO itemMapBO = mapper.Map<ItemBO>(itemVM);
-            itemMapBO.OrderId = lastOrder.Id;
-            orderId = (int)lastOrder.Id;
-            itemMapBO.Save(itemMapBO);
-            return orderId;
+            ItemBO itemBO = mapper.Map<ItemBO>(itemVM);
+            itemBO.Order = lastOrder;
+            lastOrder.Items=new List<ItemBO> { itemBO };
+           return (lastOrder, itemBO);
         }
 
-        public static AuctionBO CloseAuction(
-            //AuctionBO auctionBO, decimal endPrice = 0,
-            int? auctionId, OrderBO orderBO = null, List<BetAuctionBO> bets = null)   //
+        public static AuctionBO CloseAuction( int? auctionId, OrderBO orderBO = null, List<BetAuctionBO> bets = null)   
         {
             var auctionBO = DependencyResolver.Current.GetService<AuctionBO>().LoadAsNoTracking((int)auctionId);
             auctionBO.EndTime = DateTime.Now;
@@ -145,19 +142,12 @@ namespace OnlineAuction.ServiceClasses
                 auctionBO.Winner = winner;
             }
             auctionBO.Save(auctionBO);
-            return auctionBO;       //topBetAuction;
+            return auctionBO;       
         }
-
-        ////для получ. аноним. объекта из сессии в OrderController/Confirm()
-        //public static T Cast<T>(T typeHolder, Object x)
-        //{
-        //    return (T)x;
-        //}
 
         public static void GetOrderWithClient(int? orderId, out OrderBO orderBO, out ClientBO clientBO)
         {
             orderBO = DependencyResolver.Current.GetService<OrderBO>();
-            //orderBO = orderBO.LoadAllWithInclude("Items").FirstOrDefault(o => o.Id == orderId);
             orderBO = orderBO.LoadAsNoTracking((int)orderId);
             clientBO = DependencyResolver.Current.GetService<ClientBO>();
             clientBO = clientBO.Load((int)orderBO.ClientId);

@@ -155,13 +155,18 @@
 
             //============================================== Покупки ->OrdersController==================================================
     $(function () {
-        //а)  Обработ. <Купить сейчас>
+        //а) Проверка на роль
+        var myRoles = sessionStorage.getItem("myRoles")
+        if (!myRoles.includes("client")) {
+            $('.btn').addClass("disabled")
+        }
+        //б)  Обработ. <Купить сейчас>
         //- т.е. перейти к оплате немедленно
         //(цена = RedemptionPrice, аукцион - закрыв., опред.Победитель, победителю отправл.письмо со ссылкой на стр.оформ.Заказа)
         $('#buy-now-btn').click(function (e) {
             AddToCart(true);
         });
-        //б) положить в Корзину т.е. начать оформление Заказа, но не ставить отметку <isAproved>
+        //в) положить в Корзину т.е. начать оформление Заказа, но не ставить отметку <isAproved>
         //---------------------------------
         //сохр. его в сессии и добавл. в Корзмнц нов. продукты
         $('#btn_add_to_cart').click(function (e) {
@@ -193,12 +198,13 @@
             data: orderVM,
             success: function (data) {
                 alert(data.message)
-                sessionStorage.setItem("orderId", data.orderId); //для "моя корзина"
+                sessionStorage.setItem("orderId", data.orderId)
+                    
                 if (data.flagBuyNow == true) {
                     $(location).attr('href', "/Orders/Confirm/?orderId=" + data.orderId)
                 }
                 else {                    
-                    sessionStorage.setItem("orderId", data.orderId)
+                    sessionStorage.setItem("itemsCount", data.itemsCount) 
                     $(location).attr('href', "/Auctions/index")
                 }
             },
@@ -213,11 +219,11 @@
     $(function () {
         var flagChat = sessionStorage.getItem("firebase");
         if (flagChat == null || flagChat == undefined || flagChat == "undefined") {
-            $('a.send-message').addClass("hidden")
+            $('a.send-message').addClass("disabled").addClass("btn-secondary").removeClass("btn-success")
         }
         else {
             $('a.send-message')
-                .removeClass("hidden")
+                .removeClass("disabled").removeClass("btn-secondary").addClass("btn-success")
                 .click(function (e) {
                 e.preventDefault()
                 var auctionId = $('.div-auction').html()

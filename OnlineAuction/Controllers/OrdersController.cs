@@ -17,12 +17,13 @@ namespace OnlineAuction.Controllers
     {
         private Model1 db = new Model1();
         private IMapper mapper;
-
         public OrdersController(IMapper mapper)
         {
             this.mapper = mapper;
+            HelperOrderCreate.mapper = mapper;
         }
 
+        [Authorize(Roles = "admin, client")]
         public ActionResult Index(int? accountId, string alert)
         {
             OrderBO orderBO = DependencyResolver.Current.GetService<OrderBO>();
@@ -34,13 +35,14 @@ namespace OnlineAuction.Controllers
             List<Order> orders = ordersBO.Select(o => mapper.Map<Order>(o)).ToList();
             //2)
             //получить заказы с датами (только по связям с item, Product, Auction)
-            HelperOrderCreate.mapper = mapper;
+            //HelperOrderCreate.mapper = mapper;
             IEnumerable<OrderFullMapVM> syntetic = HelperOrderCreate.GetSynteticVM(orders.FindAll(o => o.IsApproved)); //оплач.
             IEnumerable<OrderFullMapVM> synteticBad = HelperOrderCreate.GetSynteticVM(orders.FindAll(o => !o.IsApproved));  //не оплач. заказы
             ViewBag.BadOrders = synteticBad;
             return View(syntetic);
         }
 
+        [Authorize(Roles = "moder, client")]
         //кнопка Index.html->click Details заблокир. (не нужна)-но метод исп. для редактир.!
         //+Edit
         public ActionResult Details(OrderFullMapVM orderFullMap, int? flagDetail)
@@ -69,8 +71,9 @@ namespace OnlineAuction.Controllers
             }
         }
 
-        //--------Detals.html ->  <Купить сейчас> или <положить в Корзину>------
-        public ActionResult Create(OrderVM orderVM, int? prodId, decimal endPrice, int? auctionId, bool flagBuyNow)//ItemVM itemVM
+        [Authorize(Roles = "client")]
+        //Detals.html ->  <Купить сейчас> или <положить в Корзину>------
+        public ActionResult Create(OrderVM orderVM, int? prodId, decimal endPrice, int? auctionId, bool flagBuyNow)
         {
             //проверка на налич. прод.
             if (prodId == null)
@@ -87,44 +90,44 @@ namespace OnlineAuction.Controllers
             { //оформл. заказа -> Auctions/Confirm(orderId=null)
                 return new JsonResult { Data = new { message = "Ошибка. Вы не можете участвовать в аукционе!" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
             }
-            string message = "Данные записаны!";
+            string message = "";
             int orderId = 0;
-            //OrderBO orderBO = null;
+            OrderBO lastClientOrder = null;
+            ItemBO itemBO = null;
+            int itemsCount = 0;
             try
-            {
-                GetLastClientOrder(orderVM, clientBO, out OrderBO lastClientOrder);
-                if (!flagBuyNow) //------в корзину (возможн. выкуп =redemptionPrice)
-                {
-                    var prodBO = DependencyResolver.Current.GetService<ProductBO>();
-                    prodBO = prodBO.Load((int)prodId);
-                }
-                HelperOrderCreate.mapper = mapper;
-                orderId = HelperOrderCreate.AddToCart(prodId, endPrice, lastClientOrder); //запись items
-                message = "Данные записаны!";
+            {                    //------в корзину в любом случ. (цена выкуп =redemptionPrice)---------
+                (lastClientOrder, itemBO) = HelperOrderCreate.AddToCart(prodId, endPrice, orderVM); //запись items
+                lastClientOrder = GetLastOrder(clientBO,  lastClientOrder, itemBO);
 
+                message = "Данные записаны!";
+                itemsCount = lastClientOrder.Items.Count;
+                orderId = (int)lastClientOrder.Id;
             }
             catch (Exception e)
             {
                 System.Diagnostics.Debug.WriteLine(e.Message);
                 message = "Произошел сбой записи. Приносим извинения. Обратитесь позднее";
             }
-            var data = new { message, orderId, flagBuyNow, auctionId };
+            var data = new { message, orderId, itemsCount, flagBuyNow, auctionId };
             Session["data"] = data;
-            // flagBuyNow(true)->Detail.html/Ajax-> Confirm.html (оформл. бланка заказа с кнопкой оплатить) 
-            //в Layout - сделать кнопку корзины с датчиком!!!!!!!
+
+            //если flagBuyNow-true: Detail.html/Ajax-> Confirm.html (оформл. бланка заказа с кнопкой оплатить) 
             return new JsonResult { Data = data, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
         }
 
-        private void GetLastClientOrder(OrderVM orderVM, ClientBO clientBO, out OrderBO lastClientOrder)
+        private OrderBO GetLastOrder( ClientBO clientBO, OrderBO orderBO, ItemBO itemBO)
         {
-            var orderSession = (OrderBO)Session["orderBO"];
-            var orderBO = orderSession ?? mapper.Map<OrderBO>(orderVM);
-            orderBO.Items = null;
+            orderBO.ClientId = clientBO.Id;
             orderBO.Save(orderBO);
-            lastClientOrder = orderBO.LoadAll().Where(o => o.ClientId == clientBO.Id).Last();
+
+            itemBO.OrderId = orderBO.Id;
+            itemBO.Save(itemBO);
+            var newOrderBO = DependencyResolver.Current.GetService<OrderBO>().LoadAll().LastOrDefault();
+            return newOrderBO;
         }
 
-
+        [Authorize(Roles = "client")]
         //------------------after call back Create->ajax---------------------------------
         public ActionResult Confirm(int? orderId)
         {
