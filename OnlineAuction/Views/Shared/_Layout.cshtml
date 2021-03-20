@@ -58,7 +58,7 @@
         })
 
             //установ. режим с чатом (есть Firebase) или нет
-            ; $(function () {
+            $(function () {
                 var key = $('p.hidden firebase').html()
                 sessionStorage.setItem('firebase', key) //потом  исп. в /auction/index.html->chat
             })
@@ -90,8 +90,17 @@
         $(function () {
             var orderId = sessionStorage.getItem("orderId");
             if (orderId != null && orderId != undefined && orderId != 0) {
-                $('#cart').attr('href', '/orders/confirm?orderId=' + orderId);
+                $('#cart')
+                    .removeClass("hidden")
+                    .attr('href', '/orders/confirm?orderId=' + orderId);
             }
+            else {
+                $('#cart').addClass('hidden')
+            }
+            //-------------close window------------
+            //window.onbeforeunload = function () {
+            //    sessionStorage.clear();   //после этого прил. не работ т.к. нужны accountId..
+            //}
         })
 
     </script>
@@ -163,8 +172,13 @@
                                 if (!User.IsInRole("admin"))    //просто юзер
                                 {
                                     <li>@Html.ActionLink("Создать аукцион", "Create", "Auctions", new { flagCreate = 1 }, new { @class = "classCreateAuction" })</li>
-                                    <li>@Html.ActionLink("Аукционы", "Index", "Auctions")</li>
-                                    <li>@Html.ActionLink("Моя корзина", "Confirm", "Order", new { id = "cart" })</li>
+                                    <li>@Html.ActionLink("Аукционы", "Index", "Auctions")</li>                                    
+                                    @*<li>@Html.ActionLink("Моя корзина", "Confirm", "Order", new { id = "cart" })</li>*@
+                                    <li>
+                                        <a href="orders/confirm" id="cart">
+                                            <i  class="fa fa-cart-plus fa-2x" aria-hidden="true"></i>
+                                        </a>
+                                    </li>
                                     <li class="dropdown" id="second-dropdown">
                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
                                             <div class="div-hello"></div>

@@ -27,7 +27,8 @@ namespace OnlineAuction.Controllers
         {
             OrderBO orderBO = DependencyResolver.Current.GetService<OrderBO>();
             List<OrderBO> ordersBO = orderBO.LoadAllWithInclude("Client").ToList();
-            if (accountId != null) {
+            if (accountId != null)
+            {
                 ordersBO = ordersBO.Where(o => o.Client.AccountId == accountId).ToList();
             }
             List<Order> orders = ordersBO.Select(o => mapper.Map<Order>(o)).ToList();
@@ -35,28 +36,33 @@ namespace OnlineAuction.Controllers
             //получить заказы с датами (только по связям с item, Product, Auction)
             HelperOrderCreate.mapper = mapper;
             IEnumerable<OrderFullMapVM> syntetic = HelperOrderCreate.GetSynteticVM(orders.FindAll(o => o.IsApproved)); //оплач.
-            IEnumerable<OrderFullMapVM> synteticBad = HelperOrderCreate.GetSynteticVM(orders.FindAll(o=>!o.IsApproved));  //не оплач. заказы
+            IEnumerable<OrderFullMapVM> synteticBad = HelperOrderCreate.GetSynteticVM(orders.FindAll(o => !o.IsApproved));  //не оплач. заказы
             ViewBag.BadOrders = synteticBad;
             return View(syntetic);
         }
 
         //кнопка Index.html->click Details заблокир. (не нужна)-но метод исп. для редактир.!
         //+Edit
-        public ActionResult Details(OrderFullMapVM orderFullMap, int? flagDetail)    
+        public ActionResult Details(OrderFullMapVM orderFullMap, int? flagDetail)
         {
-            if (flagDetail is null) { //для Edit
-                if (orderFullMap == null) {
+            if (flagDetail is null)
+            { //для Edit
+                if (orderFullMap == null)
+                {
                     return new JsonResult { Data = new { success = false, message = "Error. Object is Null!" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
                 }
-                OrderVM order = mapper.Map<OrderVM>(orderFullMap); 
-                if (order == null) {
+                OrderVM order = mapper.Map<OrderVM>(orderFullMap);
+                if (order == null)
+                {
                     return new JsonResult { Data = new { success = false, message = "Error. Order is Null!" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
                 }
                 Session["orderFullMap"] = orderFullMap;
                 return new JsonResult { Data = new { success = true, message = "It's good!" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
             }
-            else { 
-                if (orderFullMap is null || orderFullMap.Id == 0) {
+            else
+            {
+                if (orderFullMap is null || orderFullMap.Id == 0)
+                {
                     return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
                 }
                 return View(orderFullMap);
@@ -91,7 +97,6 @@ namespace OnlineAuction.Controllers
                 {
                     var prodBO = DependencyResolver.Current.GetService<ProductBO>();
                     prodBO = prodBO.Load((int)prodId);
-                    //endPrice = prodBO.Price; //себестоимость?
                 }
                 HelperOrderCreate.mapper = mapper;
                 orderId = HelperOrderCreate.AddToCart(prodId, endPrice, lastClientOrder); //запись items
@@ -123,24 +128,24 @@ namespace OnlineAuction.Controllers
         //------------------after call back Create->ajax---------------------------------
         public ActionResult Confirm(int? orderId)
         {
-            if (orderId == null) {
+            if (orderId == null)
+            {
                 return RedirectToAction("Index", "Auctions");
             }
-            if (Session["accountId"] == null) {
+            if (Session["accountId"] == null)
+            {
                 return RedirectToAction("Index", "Auctions", new { alert = "Время сессии истекло выйдите и залогинтесь снова!" });
             }
             //проверка- можно смотреть только свой заказ (на случ. прямого перехода из адр. строки)
             //HelperOrderCreate.mapper = mapper;
             HelperOrderCreate.GetOrderWithClient(orderId, out OrderBO orderBO, out ClientBO clientBO);
-            if ((int)Session["accountId"] != clientBO.AccountId) {
+            if ((int)Session["accountId"] != clientBO.AccountId)
+            {
                 return RedirectToAction("Index", "Auctions", new { alert = "У вас нет прав просмотра данной страницы!" });
             }
+            Session["orderBO"] = orderBO;
             //просмотр деталей заказа + <Оплатить>
             OrderVM orderVM = mapper.Map<OrderVM>(orderBO);
-
-            ////------- "Купить сразу" и "Ленивая Корзина"--------------
-            //var data = new { message = "", orderId = 0, flagBuyNow = false };
-            //data = HelperOrderCreate.Cast(data, Session["data"]);
             return View(orderVM);
         }
 
@@ -151,15 +156,16 @@ namespace OnlineAuction.Controllers
         public async Task<ActionResult> Confirm() //после нажат. <Оплатить>
         {
             OrderBO orderBO = null;
-            if (Session["orderBO"] != null)
+            if (Session["orderBO"] == null)
             {
-                orderBO = (OrderBO)Session["orderBO"];
-                orderBO.IsApproved = true;
-                orderBO.Save(orderBO);
+                return new JsonResult { Data = new { success = false, message = "Error. Session is null!" } };
             }
+            orderBO = (OrderBO)Session["orderBO"];
+            orderBO.IsApproved = true;
+            orderBO.Save(orderBO);
             dynamic sess = Session["data"];
-            var r = sess.auctionId;
-            int auctionId = (int)r;
+            var data = sess.auctionId;
+            int auctionId = (int)data;
 
             //-------------закрыть аукцион! (выкуп по макс цене >=redemptionPrice)-----------------------------------------
             var auctionBO = HelperOrderCreate.CloseAuction(auctionId, orderBO);
@@ -168,8 +174,8 @@ namespace OnlineAuction.Controllers
             EmailScheduler.WinnerId = auctionBO.WinnerId;
             EmailScheduler.Start();
 
-            var bundle = orderBO == null ? 0 : orderBO.Id;
-            return new JsonResult { Data = new { message = "Спасибо за покупки!", bundle } };
+            var orderId = orderBO == null ? 0 : orderBO.Id;
+            return new JsonResult { Data = new { message = "Спасибо за покупки!", orderId } };
 
         }
 
@@ -178,17 +184,19 @@ namespace OnlineAuction.Controllers
             ViewBag.OrderId = orderId == null ? 0 : orderId;
             return View();
         }
-        
 
+        //===========================================================
         //2-ой заход после Details (Index.html->ajax->Details)
         [Authorize(Roles = "admin")]
         public ActionResult Edit(int? id)
         {
             var orderFullMap = (OrderFullMapVM)Session["orderFullMap"];
-            if (orderFullMap == null) {
-                return new JsonResult { Data = new { success = false, message = "Error. Object is Null!" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
+            if (orderFullMap == null)
+            {
+                return new JsonResult { Data = new { success = false, message = "Error. Object is Null!" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
             }
-            if (orderFullMap.Id == 0) {
+            if (orderFullMap.Id == 0)
+            {
                 new JsonResult { Data = new { success = false, message = "Error. OrderId Not Found!" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
             }
             return View(orderFullMap);
@@ -198,12 +206,13 @@ namespace OnlineAuction.Controllers
         [HttpPost]
         public async Task<ActionResult> EditAsync(OrderFullMapVM orderFullMap)
         {
-            if (ModelState.IsValid) {
+            if (ModelState.IsValid)
+            {
                 OrderBO orderBO = DependencyResolver.Current.GetService<OrderBO>().LoadAsNoTracking(orderFullMap.Id);
                 BuilderSynteticModels.mapper = mapper;
                 await BuilderSynteticModels.EditEntityAsync(orderFullMap, orderBO);
-                
-                return new JsonResult { Data = new { success = true, message = "Данные перезаписаны!" }, JsonRequestBehavior = JsonRequestBehavior.DenyGet};
+
+                return new JsonResult { Data = new { success = true, message = "Данные перезаписаны!" }, JsonRequestBehavior = JsonRequestBehavior.DenyGet };
             }
             return new JsonResult { Data = new { success = false, message = "Извините. Что-то пошло не так!(" }, JsonRequestBehavior = JsonRequestBehavior.DenyGet };
 
@@ -211,11 +220,13 @@ namespace OnlineAuction.Controllers
 
         public async Task<ActionResult> Delete(int? id)
         {
-            if (id == null) {
+            if (id == null)
+            {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             Order order = await db.Orders.FindAsync(id);
-            if (order == null) {
+            if (order == null)
+            {
                 return HttpNotFound();
             }
             return View(order);
@@ -234,7 +245,8 @@ namespace OnlineAuction.Controllers
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing) {
+            if (disposing)
+            {
                 db.Dispose();
             }
             base.Dispose(disposing);

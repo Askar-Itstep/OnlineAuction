@@ -61,9 +61,9 @@ namespace OnlineAuction.Controllers
             }
             //--------на главн. разворот -------------------------
             ViewBag.BestAuction = 0;
-            GetMainLot(auctionsBO, auctionsVM.ToList());
+            auctionsVM= GetMainLot(auctionsBO, auctionsVM.ToList());
 
-            //--------- --Categories-------------
+            //--------- --filtering by Categories-------------
             auctionsVM = GetCategories(CategoryId, auctionsVM.ToList());
             return View(auctionsVM);
         }
@@ -86,18 +86,17 @@ namespace OnlineAuction.Controllers
             return auctionsVM;
         }
 
-        private void GetMainLot(List<AuctionBO> auctionsBO, List<AuctionVM> auctionsVM)
+        private List<AuctionVM> GetMainLot(List<AuctionBO> auctionsBO, List<AuctionVM> auctionsVM)
         {
-            var prodBO = DependencyResolver.Current.GetService<ProductBO>();
-            List<ProductBO> productsBO = prodBO.LoadAll().ToList();
+            List<ProductBO> productsBO = auctionsBO.Select(a => a.Product).ToList();
             decimal maxPrice = productsBO.Count == 0 ? 0 : productsBO.Max(p => p.Price);
             var bestAuctionBO = auctionsBO.Where(a => a.Product.Price >= maxPrice).FirstOrDefault();
-            var bestAuction = mapper.Map<Auction>(bestAuctionBO);
-            var bestAuctionVM = mapper.Map<AuctionVM>(bestAuction);
+            var bestAuctionVM = mapper.Map<AuctionVM>(bestAuctionBO);
             ViewBag.BestAuction = bestAuctionVM;
             //------изъять глав аукц. из общего списка 
             var selectBest = auctionsVM.FirstOrDefault(a => a.Id == bestAuctionVM.Id);
             auctionsVM.Remove(selectBest);
+            return auctionsVM;
         }
 
         //при клике  "сделать ставку" - для хозяина лота будет блокировка! (контроль в клиенте)
@@ -209,7 +208,7 @@ namespace OnlineAuction.Controllers
                     if ((int)userId != 0)
                     {
                         BuilderSynteticModels.mapper = mapper;
-                        auction = await BuilderSynteticModels.CreateEntity( upload, auction, userId, editVM);
+                        auction = await BuilderSynteticModels.CreateEntity(upload, auction, userId, editVM);
                         message = "Данные записаны!";
                         //------установ. планировщика, триггер должен сработать по истеч. врмени аукциона
                         //------работа: выбор победителя, прекращ. аукциона, ставок, отправка писем

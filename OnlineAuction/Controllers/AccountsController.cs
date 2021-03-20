@@ -213,7 +213,7 @@ namespace OnlineAuction.Controllers
                 //нет денег удал. роль moder -> удалить или добавитьсвязь Role-Account
                 RoleAccountLinkBO linkRoleClientAccount = roleAccountBOList.Where(r => r.Role.RoleName.Contains("moder")).FirstOrDefault();    //client
                 if (accountBO.Balance <= 0)
-                {
+                { 
                     if (linkRoleClientAccount != null)
                     {
                         roleAccountBOList.Where(r => r.Role.RoleName.Contains("moder")).FirstOrDefault().DeleteSave(linkRoleClientAccount);

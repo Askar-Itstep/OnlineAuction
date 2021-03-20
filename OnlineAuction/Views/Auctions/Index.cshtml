@@ -90,7 +90,7 @@
         })
 
         $('.main-card').click(function (e) {
-            $(location).attr('href', '/Auctions/Details/?auctionId=' +$('vb-best').html())
+            $(location).attr('href', '/Auctions/Details/?auctionId=' +$('#vb-best').html())
         })
     });
 
@@ -177,7 +177,7 @@
             </div>
 
         }
-        else
+        else if(Model.Count()<= 1)
         {
             <div>
                 <h4>Желаете выставить товар? Тогда нажмите "Создать аукцион"</h4>

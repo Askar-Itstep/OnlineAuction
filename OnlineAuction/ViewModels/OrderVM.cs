@@ -25,7 +25,7 @@ namespace OnlineAuction.ViewModels
 
         public decimal GetTotalPrice()
         {
-            return Items.Sum(i => i.Product.Price);
+            return Items.Sum(i => i.EndPrice); //Product.Price
         }
     }
 }
