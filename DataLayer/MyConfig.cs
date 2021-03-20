@@ -30,8 +30,6 @@ namespace DataLayer
         {
 
             GetSecret();
-            //SqlConnectionFactory defaultFactory =  new SqlConnectionFactory(connectionString);
-            //this.SetDefaultConnectionFactory(defaultFactory);
         }
         public static void GetSecret()
         {

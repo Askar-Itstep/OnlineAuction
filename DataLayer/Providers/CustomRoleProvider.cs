@@ -44,9 +44,18 @@ namespace DataLayer.Providers
 
             using (Model1 db = new Model1())
             {
-                var userRoles = db.RoleAccountLinks.Include("Role").Include("Account").Where(u => u.Account.Email.Contains(username)).
-                    Select(u => u.Role.RoleName).ToList();
-                return userRoles.ToArray();
+                try
+                {
+                    var userRoles = db.RoleAccountLinks.Include("Role").Include("Account");
+                    var userStrRoles = userRoles.Where(u => u.Account.Email.Contains(username)).
+                        Select(u => u.Role.RoleName);
+                    return userStrRoles.ToArray();
+                }
+                catch (Exception e)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error: {e.Message}");
+                    return new string[] { "" };
+                }
             }
         }
 

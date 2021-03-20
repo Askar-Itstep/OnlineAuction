@@ -15,7 +15,8 @@ namespace DataLayer
     //DropCreateDatabaseIfModelChanges<Model1>
     {
         private string connectName = "blobContainer";
-        private string uripath = MyConfig.azureUrl;  // WebConfigurationManager.AppSettings["awsUrl"];//["azureUrl"];
+        //почему-то не работает? - goto Seed
+        //private string uripath = MyConfig.azureUrl;  // WebConfigurationManager.AppSettings["awsUrl"];
         private string blobContainerName = "blobcontainer";    //именя контейнеров в Azure
 
 
@@ -43,7 +44,7 @@ namespace DataLayer
                 return false;
             }
         }
-        protected override async void Seed(Model1 context)
+        protected override  void Seed(Model1 context)
         {
             //1) Roles
             Role adminRole = new Role { RoleName = "admin" };
@@ -56,6 +57,7 @@ namespace DataLayer
             context.Roles.Add(clientRole);
 
             //2) Images            
+            uripath = MyConfig.azureUrl;
             //----------нужно загрузить из папки File: 
             var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Files");
             DirectoryInfo dir = new DirectoryInfo(path);
@@ -93,7 +95,7 @@ namespace DataLayer
                 Email = "admin@mail.ru",
                 Password = "admin",
                 Address = address,
-                Image = images.FirstOrDefault(i=>i.FileName=="men"),
+                Image = images.FirstOrDefault(i=>i.FileName.Contains("men")),
                 Age = 0,
                 CreateAt = DateTime.Parse("2017-01-01 12:00:00"),
                 RemoveAt = DateTime.Parse("3000-01-01 12:00:00"),
@@ -111,7 +113,7 @@ namespace DataLayer
             RoleAccountLink roleAccount = new RoleAccountLink { Account = account, Role = adminRole };
             context.RoleAccountLinks.Add(roleAccount);
 
-            await context.SaveChangesAsync();
+            context.SaveChanges();
             base.Seed(context);
         }
     }
