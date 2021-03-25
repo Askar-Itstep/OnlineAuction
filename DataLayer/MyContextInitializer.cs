@@ -1,4 +1,4 @@
-﻿using DataLayer.Entities;
+﻿ using DataLayer.Entities;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using System;
@@ -14,9 +14,8 @@ namespace DataLayer
     public class MyContextInitializer : CreateDatabaseIfNotExists<Model1>
     //DropCreateDatabaseIfModelChanges<Model1>
     {
-        private string connectName = "blobContainer";
-        //почему-то не работает? - goto Seed
-        //private string uripath = MyConfig.azureUrl;  // WebConfigurationManager.AppSettings["awsUrl"];
+        private string connectName = "blobContainer";   //WebConfig
+        private string uripath = MyConfig.azureUrl; 
         private string blobContainerName = "blobcontainer";    //именя контейнеров в Azure
 
 
@@ -99,6 +98,7 @@ namespace DataLayer
                 Age = 0,
                 CreateAt = DateTime.Parse("2017-01-01 12:00:00"),
                 RemoveAt = DateTime.Parse("3000-01-01 12:00:00"),
+                IsActive=true
             };
             context.Account.Add(account);
 
