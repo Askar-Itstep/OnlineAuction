@@ -29,12 +29,12 @@
             });
             $('.td-is-approved').each(function (ind, item) {
                 if ($(item).data("i") == i) {
-                    data.IsApproved = [$(this).html()]
+                    data.IsApproved = $(this).val()
                 }
             });
             $('.td-auction-id').each(function (ind, item) {
                 if ($(item).data("i") == i && $(item).data("j") == j) {
-                    data.AuctionIds = $(this).html()
+                    data.AuctionIds = [parseInt($(this).html())]
                 }
             });
             $('.td-endtime').each(function (ind, item) {
@@ -44,13 +44,13 @@
             });
             $('.product-id').each(function (ind, item) {
                 if ($(item).data("i") == i && $(item).data("j") == j) {
-                    data.ProductIds = $(this).html()
+                    data.ProductIds = [parseInt($(this).html())]
                 }
             });
             console.log(data)
 
             $.ajax({
-                method: "GET",
+                method: "POST",
                 url: "/Orders/Details",
                 data: data,
                 success: function (data) {

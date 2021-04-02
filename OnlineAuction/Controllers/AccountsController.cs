@@ -211,7 +211,7 @@ namespace OnlineAuction.Controllers
                 //accountBO.RolesBO = rolesBO;
 
                 //нет денег удал. роль moder -> удалить или добавитьсвязь Role-Account
-                RoleAccountLinkBO linkRoleClientAccount = roleAccountBOList.Where(r => r.Role.RoleName.Contains("moder")).FirstOrDefault();    //client
+                RoleAccountLinkBO linkRoleClientAccount = roleAccountBOList.Where(r => r.Role.RoleName.Contains("moder")).FirstOrDefault();    //client- authoregistr.
                 if (accountBO.Balance <= 0)
                 { 
                     if (linkRoleClientAccount != null)
@@ -225,7 +225,7 @@ namespace OnlineAuction.Controllers
                     {
                         RoleBO roleBO = DependencyResolver.Current.GetService<RoleBO>();
                         RoleBO roleModer = roleBO.LoadAll().FirstOrDefault(r => r.RoleName.Contains("moder"));
-                        if (roleModer == null)
+                        if (roleModer == null)  //проверить и добавить
                         {
                             roleBO = IsRole(roleBO, "moder");
                         }
@@ -258,12 +258,12 @@ namespace OnlineAuction.Controllers
             return new JsonResult { Data = new { success = false, message = "Модель не валидна!" }, JsonRequestBehavior = JsonRequestBehavior.DenyGet };
         }
         //------------------------------------------Registration ---------------------------------------------------------------------
-        //[Authorize(Roles="admin")] //------blocking -----------
+        [Authorize(Roles = "admin")] //------blocking -----------
         public ActionResult Registration()
         {
             return View();
         }
-
+          
         [Authorize(Roles = "admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]

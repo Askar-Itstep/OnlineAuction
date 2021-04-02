@@ -42,13 +42,13 @@ namespace OnlineAuction.Controllers
             return View(syntetic);
         }
 
-        [Authorize(Roles = "moder, client")]
+        [HttpPost]
         //кнопка Index.html->click Details заблокир. (не нужна)-но метод исп. для редактир.!
         //+Edit
         public ActionResult Details(OrderFullMapVM orderFullMap, int? flagDetail)
         {
             if (flagDetail is null)
-            { //для Edit
+            {                   //для Edit
                 if (orderFullMap == null)
                 {
                     return new JsonResult { Data = new { success = false, message = "Error. Object is Null!" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
